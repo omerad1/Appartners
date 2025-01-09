@@ -7,9 +7,10 @@ export default function App() {
   return (
     <LinearGradient
       colors={[
-        "rgba(255, 196, 0, 0.53)",
-        "rgba(255, 255, 255, 0.27)",
-        "rgb(192, 173, 46)",
+        "#FFFFFF", // White
+        "#FFFBCC", // Soft yellow
+        "#BFA374", // Brown
+        "#000000", // Black
       ]}
       style={styles.container}
       start={{ x: 0, y: 0 }}
