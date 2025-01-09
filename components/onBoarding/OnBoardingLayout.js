@@ -1,6 +1,6 @@
 import { StyleSheet, View, Image } from "react-native";
 import React from "react";
-import Title from "./Title";
+import Title from "../Title";
 import StepButton from "./StepButton";
 
 const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
