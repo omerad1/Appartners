@@ -18,7 +18,7 @@ const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
       <View style={styles.buttonContainer}>
         <View style={styles.logoContainer}>
           <Image
-            source={require("../assets/icons/logo.png")}
+            source={require("../../assets/icons/logo.png")}
             style={styles.logo}
           />
         </View>
