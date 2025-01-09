@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import LoginScreen from "./screens/LoginScreen"; // Default export
-
+import StepOne from "./screens/onBoarding/StepOne";
 export default function App() {
   return (
     <LinearGradient
