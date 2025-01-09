@@ -7,6 +7,7 @@ import { useFonts } from "expo-font";
 import StepTwo from "./screens/onBoarding/StepTwo";
 import StepThree from "./screens/onBoarding/StepThree";
 import StepFive from "./screens/onBoarding/StepFive";
+import StepSix from "./screens/onBoarding/StepSix";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -34,7 +35,7 @@ export default function App() {
         end={{ x: 1, y: 1 }}
       >
         {/* Render the rest of your app screens inside the gradient */}
-        <StepFive />
+        <StepSix />
       </LinearGradient>
     </ImageBackground>
   );
