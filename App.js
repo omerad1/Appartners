@@ -3,9 +3,10 @@ import { StyleSheet, View, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 // Example screen imports
+import LoginScreen from "./screens/LoginScreen";
 import StepTwo from "./screens/onBoarding/StepTwo";
 import StepThree from "./screens/onBoarding/StepThree";
-
+import StepFour from "./screens/onBoarding/StepFour";
 export default function App() {
   return (
     <ImageBackground
@@ -25,7 +26,7 @@ export default function App() {
         end={{ x: 1, y: 1 }}
       >
         {/* Render the rest of your app screens inside the gradient */}
-        <StepThree />
+        <StepFour />
       </LinearGradient>
     </ImageBackground>
   );
