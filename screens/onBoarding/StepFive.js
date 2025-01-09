@@ -1,25 +1,21 @@
-import { StyleSheet } from "react-native";
 import React, { useState } from "react";
+import { StyleSheet } from "react-native";
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
-import InputField from "../../components/onBoarding/InputField";
+import TextArea from "../../components/TextArea";
 
 const StepFive = () => {
   const [enteredValue, setEnteredValue] = useState("");
 
-  const handleInputChange = (value) => {
-    setEnteredValue(value);
-  };
-
   return (
     <OnBoardingLayout
-      title={"What would you like others to know about you?"}
+      title={"What Would You Like Others To Know About You?"}
       next={true}
       direction={"StepSix"}
     >
-      <InputField
+      <TextArea
         placeholder={"About me"}
-        type={"default"} // Use "default" for plain text input
-        onChange={handleInputChange}
+        value={enteredValue}
+        onChange={setEnteredValue}
       />
     </OnBoardingLayout>
   );

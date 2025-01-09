@@ -1,12 +1,21 @@
 import React from "react";
 import { StyleSheet, View, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useFonts } from "expo-font";
 
 // Example screen imports
 import StepTwo from "./screens/onBoarding/StepTwo";
 import StepThree from "./screens/onBoarding/StepThree";
+import StepFive from "./screens/onBoarding/StepFive";
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    compote: require("./assets/fonts/compote.otf"),
+  });
+
+  if (!fontsLoaded) {
+    return <View />;
+  }
   return (
     <ImageBackground
       source={require("./assets/background.jpg")}
@@ -25,7 +34,7 @@ export default function App() {
         end={{ x: 1, y: 1 }}
       >
         {/* Render the rest of your app screens inside the gradient */}
-        <StepThree />
+        <StepFive />
       </LinearGradient>
     </ImageBackground>
   );
