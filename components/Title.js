@@ -19,5 +19,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: "#333",
     textAlign: "center",
+    fontFamily: "compote",
   },
 });
