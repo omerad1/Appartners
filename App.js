@@ -4,10 +4,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useFonts } from "expo-font";
 
 // Example screen imports
+import LoginScreen from "./screens/LoginScreen";
 import StepTwo from "./screens/onBoarding/StepTwo";
 import StepThree from "./screens/onBoarding/StepThree";
-import StepFive from "./screens/onBoarding/StepFive";
-import StepSix from "./screens/onBoarding/StepSix";
+import StepFour from "./screens/onBoarding/StepFour";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -35,7 +35,8 @@ export default function App() {
         end={{ x: 1, y: 1 }}
       >
         {/* Render the rest of your app screens inside the gradient */}
-        <StepSix />
+        <StepFour />
+
       </LinearGradient>
     </ImageBackground>
   );

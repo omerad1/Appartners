@@ -1,0 +1,48 @@
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
+import InputField from "../../components/onBoarding/InputField";
+import SimpleDropDown from "../../components/SimpleDropDown";
+import DatePicker from "../../components/DatePicker";
+import dayjs from "dayjs";
+import ProfileImagePicker from "../../components/onBoarding/ProfileImagePicker";
+const StepFour = () => {
+  const [occupation, setOccupation] = useState("");
+  const [gender, setGender] = useState(null);
+  const [birthDay, setBirthDay] = useState(dayjs());
+
+  const genderOptions = [
+    { label: "Male", value: "Male" },
+    { label: "Female", value: "Female" },
+    { label: "Other", value: "Other" },
+  ];
+
+  return (
+    <OnBoardingLayout
+      direction="StepFive"
+      next={true}
+      title={`Let's Start With The Basics`}
+    >
+      <ProfileImagePicker />
+      <SimpleDropDown
+        data={genderOptions}
+        onChange={setGender}
+        placeholder="Gender"
+      />
+      <InputField
+        placeholder="Occupation"
+        type="text"
+        onChange={(occupation) => setOccupation(occupation)}
+      />
+      <DatePicker
+        title={"Select Birth Date"}
+        date={birthDay}
+        setDate={setBirthDay}
+      />
+    </OnBoardingLayout>
+  );
+};
+
+export default StepFour;
+
+const styles = StyleSheet.create({});
