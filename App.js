@@ -12,7 +12,8 @@ import StepThree from "./screens/onBoarding/StepThree";
 import StepFour from "./screens/onBoarding/StepFour";
 import StepFive from "./screens/onBoarding/StepFive";
 import StepSix from "./screens/onBoarding/StepSix";
-
+import StepEight from "./screens/onBoarding/StepEight";
+import SurveyWizard from "./screens/survey/SurveyWizard";
 export default function App() {
   const [fontsLoaded] = useFonts({
     comfortaa: require("./assets/fonts/Comfortaa-Regular.ttf"),
@@ -42,7 +43,7 @@ export default function App() {
         end={{ x: 1, y: 1 }}
       >
         {/* Render the rest of your app screens inside the gradient */}
-        <StepSix />
+        <SurveyWizard />
       </LinearGradient>
     </ImageBackground>
   );

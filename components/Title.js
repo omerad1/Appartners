@@ -13,6 +13,12 @@ export default Title;
 
 const styles = StyleSheet.create({
   container: {},
+  label: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    fontFamily: "comfortaaRegular",
+  },
   title: {
     fontSize: 28,
     marginBottom: 30,
