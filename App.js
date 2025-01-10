@@ -1,4 +1,5 @@
 import React from "react";
+import { StatusBar } from "react-native";
 import { StyleSheet, View, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts } from "expo-font";
@@ -12,6 +13,8 @@ import StepThree from "./screens/onBoarding/StepThree";
 import StepFour from "./screens/onBoarding/StepFour";
 import StepFive from "./screens/onBoarding/StepFive";
 import StepSix from "./screens/onBoarding/StepSix";
+import StepSeven from "./screens/onBoarding/StepSeven";
+import AddApartmentScreen from "./screens/AddApartmentScreen";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -42,7 +45,8 @@ export default function App() {
         end={{ x: 1, y: 1 }}
       >
         {/* Render the rest of your app screens inside the gradient */}
-        <StepSix />
+        <StatusBar />
+        <AddApartmentScreen />
       </LinearGradient>
     </ImageBackground>
   );
