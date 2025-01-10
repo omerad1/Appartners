@@ -10,6 +10,7 @@ const StepFour = () => {
   const [occupation, setOccupation] = useState("");
   const [gender, setGender] = useState(null);
   const [birthDay, setBirthDay] = useState(dayjs());
+  const [profileImage, setProfileImage] = useState(null);
 
   const genderOptions = [
     { label: "Male", value: "Male" },
@@ -23,7 +24,10 @@ const StepFour = () => {
       next={true}
       title={`Let's Start With The Basics`}
     >
-      <ProfileImagePicker />
+      <ProfileImagePicker
+        profileImage={profileImage}
+        setProfileImage={setProfileImage}
+      />
       <SimpleDropDown
         data={genderOptions}
         onChange={setGender}
