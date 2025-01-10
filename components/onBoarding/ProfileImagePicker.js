@@ -1,14 +1,40 @@
-// components/ProfileImagePicker.js
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Install @expo/vector-icons if not already
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 
 const ProfileImagePicker = ({ profileImage, setProfileImage }) => {
-  const handleImagePick = () => {
-    // Simulate selecting an image
-    // In a real app, use libraries like react-native-image-picker or expo-image-picker
-    const dummyImage = "https://via.placeholder.com/150"; // Replace with actual image logic
-    setProfileImage(dummyImage);
+  const handleImagePick = async () => {
+    // Request permission to access the media library
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "You need to grant permission to access the media library."
+      );
+      return;
+    }
+
+    // Launch the image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "Images",
+      allowsEditing: true,
+      aspect: [1, 1], // Ensure the selected image is square
+      quality: 1,
+    });
+    console.log(result);
+    if (!result.canceled) {
+      // Update the profile image state with the selected image URI
+      console.log(result.assets[0].uri);
+      setProfileImage(result.assets[0].uri);
+    }
   };
 
   return (
@@ -16,8 +42,10 @@ const ProfileImagePicker = ({ profileImage, setProfileImage }) => {
       <Text style={styles.label}>Profile Picture</Text>
       <TouchableOpacity style={styles.imagePicker} onPress={handleImagePick}>
         {profileImage ? (
+          // Display the selected image
           <Image source={{ uri: profileImage }} style={styles.image} />
         ) : (
+          // Display a placeholder when no image is selected
           <View style={styles.placeholder}>
             <Ionicons name="camera" size={36} color="#aaa" />
             <Text style={styles.placeholderText}>Upload Image</Text>

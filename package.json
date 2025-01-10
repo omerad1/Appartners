@@ -19,9 +19,11 @@
     "react-native": "0.76.5",
     "react-native-date-picker": "^5.0.8",
     "react-native-dropdown-picker": "^5.4.6",
+    "react-native-fs": "^2.20.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-ui-datepicker": "^2.0.4",
-    "undefined": "@expo/vector-icons/Ionicons"
+    "undefined": "@expo/vector-icons/Ionicons",
+    "expo-image-picker": "~16.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2"
