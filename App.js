@@ -17,6 +17,8 @@ import StepSeven from "./screens/onBoarding/StepSeven";
 import AddApartmentScreen from "./screens/addApartment/AddApartmentScreen";
 import PropertyTagsScreen from "./screens/addApartment/PropertyTagsScreen";
 import PhotosScreen from "./screens/addApartment/PhotosScreen";
+import StepEight from "./screens/onBoarding/StepEight";
+import SurveyWizard from "./screens/survey/SurveyWizard";
 export default function App() {
   const [fontsLoaded] = useFonts({
     comfortaa: require("./assets/fonts/Comfortaa-Regular.ttf"),
@@ -46,8 +48,7 @@ export default function App() {
         end={{ x: 1, y: 1 }}
       >
         {/* Render the rest of your app screens inside the gradient */}
-        <StatusBar />
-        <PhotosScreen />
+        <SurveyWizard />
       </LinearGradient>
     </ImageBackground>
   );
