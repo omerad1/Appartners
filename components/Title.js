@@ -15,10 +15,9 @@ const styles = StyleSheet.create({
   container: {},
   title: {
     fontSize: 28,
-    fontWeight: "bold",
     marginBottom: 30,
     color: "#333",
     textAlign: "center",
-    fontFamily: "compote",
+    fontFamily: "comfortaaBold",
   },
 });

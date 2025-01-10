@@ -2,18 +2,25 @@ import React from "react";
 import { StyleSheet, View, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts } from "expo-font";
+import Title from "./components/Title";
 
 // Example screen imports
+import StepOne from "./screens/onBoarding/StepOne";
 import LoginScreen from "./screens/LoginScreen";
 import StepTwo from "./screens/onBoarding/StepTwo";
 import StepThree from "./screens/onBoarding/StepThree";
 import StepFour from "./screens/onBoarding/StepFour";
+import StepFive from "./screens/onBoarding/StepFive";
+import StepSix from "./screens/onBoarding/StepSix";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    compote: require("./assets/fonts/compote.otf"),
+    comfortaa: require("./assets/fonts/Comfortaa-Regular.ttf"),
+    comfortaaBold: require("./assets/fonts/Comfortaa-Bold.ttf"),
+    comfortaaLight: require("./assets/fonts/Comfortaa-Light.ttf"),
+    comfortaaMedium: require("./assets/fonts/Comfortaa-Medium.ttf"),
+    comfortaaSemiBold: require("./assets/fonts/Comfortaa-SemiBold.ttf"),
   });
-
   if (!fontsLoaded) {
     return <View />;
   }
@@ -35,8 +42,7 @@ export default function App() {
         end={{ x: 1, y: 1 }}
       >
         {/* Render the rest of your app screens inside the gradient */}
-        <StepFour />
-
+        <StepSix />
       </LinearGradient>
     </ImageBackground>
   );
