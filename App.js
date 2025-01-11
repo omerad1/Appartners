@@ -14,8 +14,9 @@ import StepFour from "./screens/onBoarding/StepFour";
 import StepFive from "./screens/onBoarding/StepFive";
 import StepSix from "./screens/onBoarding/StepSix";
 import StepSeven from "./screens/onBoarding/StepSeven";
-import AddApartmentScreen from "./screens/AddApartmentScreen";
-
+import AddApartmentScreen from "./screens/addApartment/AddApartmentScreen";
+import PropertyTagsScreen from "./screens/addApartment/PropertyTagsScreen";
+import PhotosScreen from "./screens/addApartment/PhotosScreen";
 export default function App() {
   const [fontsLoaded] = useFonts({
     comfortaa: require("./assets/fonts/Comfortaa-Regular.ttf"),
@@ -46,7 +47,7 @@ export default function App() {
       >
         {/* Render the rest of your app screens inside the gradient */}
         <StatusBar />
-        <AddApartmentScreen />
+        <PhotosScreen />
       </LinearGradient>
     </ImageBackground>
   );

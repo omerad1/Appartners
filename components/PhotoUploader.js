@@ -2,18 +2,16 @@ import React, { useState } from "react";
 import {
   StyleSheet,
   View,
-  Text,
   TouchableOpacity,
   Image,
   FlatList,
+  Text,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import Title from "./Title";
 
 const PhotoUploader = () => {
   const [photos, setPhotos] = useState([]); // Store selected photos
-  let images = [];
 
   const handleAddPhoto = async () => {
     // Request permission to access media library
@@ -25,9 +23,9 @@ const PhotoUploader = () => {
 
     // Launch the image picker
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: images,
-      allowsMultipleSelection: false, // Change to true if you want multiple photo selection
-      quality: 1, // High quality
+      mediaTypes: ImagePicker.MediaType,
+      allowsMultipleSelection: false,
+      quality: 1,
     });
 
     if (!result.canceled) {
@@ -69,12 +67,11 @@ const PhotoUploader = () => {
     }
   };
 
-  // Start with 6 placeholders and expand as needed
-  const data = [...photos, ...Array(Math.max(6 - photos.length, 0)).fill(null)];
+  // Ensure at least one placeholder is always displayed
+  const data = [...photos, null];
 
   return (
     <View style={styles.container}>
-      <Title style={styles.title}>Photos</Title>
       <FlatList
         data={data}
         keyExtractor={(_, index) => index.toString()}
@@ -92,13 +89,8 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 20,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
   row: {
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     marginBottom: 10,
   },
   placeholder: {
@@ -115,6 +107,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     position: "relative",
+    marginRight: 10, // Space between photos
   },
   photo: {
     width: "100%",
