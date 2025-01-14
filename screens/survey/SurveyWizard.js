@@ -3,24 +3,103 @@ import { StyleSheet, View } from "react-native";
 import SurveyLayout from "../../components/survey/SurveyLayout";
 import StepButton from "../../components/onBoarding/StepButton";
 
-const steps = [];
+const steps = [
+  {
+    title: "What Are You Studying?",
+    input: [
+      {
+        title: "What Is Your Major/Field Of Study?",
+        placeholder: "Enter your major",
+        type: "text",
+      },
+      {
+        title: "Which Year Are You In?",
+        placeholder: "Year",
+        type: "text",
+      },
+    ],
+  },
+  {
+    title: "On Average, How Often Do You Clean Your Living Space?",
+    radioBarOptions: ["Rarely", "Very Often"],
+  },
+  {
+    title:
+      "How Often Do You Have Friends Over, And Do You Mind If Roomates Host Guests?",
+    radioBarOptions: ["Rarely", "Very Often"],
+  },
+  {
+    title:
+      "How Comfortable Are You With Discussing And Resolving Household Issues Openly?",
+    radioBarOptions: [`Not Comfortable At All`, "Extremely Comfortable"],
+  },
+  {
+    title: "What Percentage Of Your Time Do You Spend In Your Room?",
+    radioBarOptions: ["0%", "100%"],
+  },
+  {
+    title:
+      "Do You Prefer Handling Shared Chores By A Schedule Or More Informally?",
+    radioBarOptions: ["Schedule", "Informal"],
+  },
+  {
+    title:
+      "How Important Is Having A Quiet, Study-Friendly Environment To You?",
+    radioBarOptions: ["Not Important", "Extremely Important"],
+  },
+  {
+    title: "How Do You Feel About Pets In The Apartment?",
+    radioBarOptions: ["Strongly Opposed", "I Love Pets!"],
+  },
+  {
+    title: "Do You Prefer To Buy Groceries Together Or Separately?",
+    radioBarOptions: ["Always Separately", "Always Together"],
+  },
+];
 
 const Wizard = () => {
+  // Initialize default answers
+  const defaultAnswers = steps.reduce((acc, step, index) => {
+    if (step.radioBarOptions) {
+      acc[index] = 3; // Default value for scales
+    } else if (step.input) {
+      acc[index] = ""; // Default value for inputs
+    }
+    return acc;
+  }, {});
+
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [answer, setAnswer] = useState("");
+  const [answers, setAnswers] = useState(defaultAnswers);
+
+  const setAnswer = (value) => {
+    setAnswers((prev) => ({ ...prev, [currentStep]: value }));
+  };
+
+  const nextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      alert("Survey Complete! " + JSON.stringify(answers, null, 2));
+    }
+  };
+
+  const skipStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <SurveyLayout
-        step={1}
+        step={currentStep + 1}
         setAnswer={setAnswer}
-        title={"omer"}
-        input={null}
-        radioBarOptions={["omer", "omer"]}
+        title={steps[currentStep].title}
+        input={steps[currentStep].input || null}
+        radioBarOptions={steps[currentStep].radioBarOptions || null}
       />
       <View style={styles.buttonContainer}>
-        {/* {currentStep < steps.length - 1 ? (
+        {currentStep < steps.length - 1 ? (
           <>
             <StepButton next={false} onPress={skipStep} />
             <StepButton next={true} onPress={nextStep} />
@@ -30,7 +109,7 @@ const Wizard = () => {
             next={true}
             onPress={() => alert(JSON.stringify(answers, null, 2))}
           />
-        )} */}
+        )}
       </View>
     </View>
   );
@@ -45,7 +124,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   buttonContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
     marginVertical: 20,
   },

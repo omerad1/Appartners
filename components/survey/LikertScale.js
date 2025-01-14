@@ -8,30 +8,29 @@ const LikertScale = ({ title1, title5, onSelect }) => {
     setSelected(index);
     if (onSelect) {
       onSelect(index + 1);
-      console.log(index + 1);
     }
   };
 
   return (
     <View style={styles.wrapper}>
-      <View style={styles.container}>
-        {/* Radio Buttons */}
-        <View style={styles.radioContainer}>
-          {[...Array(5)].map((_, index) => (
-            <View key={index} style={styles.radioWrapper}>
-              <TouchableOpacity
-                style={[
-                  styles.circle,
-                  selected === index && styles.selectedCircle,
-                ]}
-                onPress={() => handlePress(index)}
-              />
-              {/* Display labels for the first and last options */}
-              {index === 0 && <Text style={styles.label}>{title1}</Text>}
-              {index === 4 && <Text style={styles.label}>{title5}</Text>}
-            </View>
-          ))}
-        </View>
+      <View style={styles.radioContainer}>
+        {[...Array(5)].map((_, index) => (
+          <View key={index} style={styles.radioWrapper}>
+            {/* Radio Button */}
+            <TouchableOpacity
+              style={[
+                styles.circle,
+                selected === index && styles.selectedCircle,
+              ]}
+              onPress={() => handlePress(index)}
+              activeOpacity={0.8}
+            />
+            {/* Labels */}
+            <Text numberOfLines={2} adjustsFontSizeToFit style={styles.label}>
+              {index === 0 ? title1 : index === 4 ? title5 : ""}
+            </Text>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -42,44 +41,47 @@ export default LikertScale;
 const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
-  },
-  container: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgb(0, 0, 0)",
-    padding: 16,
+    alignItems: "center",
+    marginTop: 16,
+    paddingHorizontal: 16,
   },
   radioContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     width: "100%",
   },
   radioWrapper: {
+    flex: 1,
     alignItems: "center",
   },
   circle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 3,
+    borderColor: "#ddd",
+    backgroundColor: "#f5f5f5",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+    transition: "all 0.3s ease",
   },
   selectedCircle: {
-    borderColor: "rgb(75, 67, 0)",
-    backgroundColor: "rgba(75, 67, 0, 0.25)",
+    borderColor: "rgb(255, 225, 0)",
+    backgroundColor: "rgba(129, 90, 18, 0.2)",
+    transform: [{ scale: 1.2 }],
   },
   label: {
     fontSize: 14,
-    color: "#333",
-    borderRadius: 36,
-    borderWidth: 1,
-    padding: 4,
-    borderColor: "rgba(222, 188, 18, 0.21)",
-    marginTop: 4,
+    color: "#444",
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 8,
   },
 });

@@ -3,7 +3,6 @@ import React from "react";
 import { ProgressBar, MD3Colors } from "react-native-paper";
 import Title from "../Title";
 import InputField from "../onBoarding/InputField";
-import StepButton from "../onBoarding/StepButton";
 import LikertScale from "./LikertScale";
 
 // input is an array of objects with placeholder and type and onChange
@@ -24,12 +23,14 @@ const SurveyLayout = ({ step, setAnswer, title, input, radioBarOptions }) => {
       {/* Input Fields */}
       {input &&
         input.map((item, index) => (
-          <InputField
-            key={index}
-            placeholder={item.placeholder}
-            type={item.type}
-            onChange={setAnswer}
-          />
+          <View key={`input-${index}`}>
+            <Text style={styles.subTitle}>{item.title}</Text>
+            <InputField
+              placeholder={item.placeholder}
+              type={item.type}
+              onChange={setAnswer}
+            />
+          </View>
         ))}
 
       {/* Likert Scale */}
@@ -50,12 +51,6 @@ const SurveyLayout = ({ step, setAnswer, title, input, radioBarOptions }) => {
           style={styles.logo}
         />
       </View>
-
-      {/* Buttons */}
-      <View style={styles.buttonContainer}>
-        <StepButton next={false} onPress={() => console.log("Skip pressed")} />
-        <StepButton next={true} onPress={() => console.log("Next pressed")} />
-      </View>
     </View>
   );
 };
@@ -70,6 +65,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   progressBar: {
+    marginBottom: 16,
     marginTop: 40,
     height: 8,
     borderRadius: 4,
@@ -89,6 +85,13 @@ const styles = StyleSheet.create({
     width: 300,
     height: 172,
     resizeMode: "contain",
+  },
+  subTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+
+    textAlign: "center",
+    color: "#333",
   },
   buttonContainer: {
     flexDirection: "column",
