@@ -19,6 +19,7 @@ import PropertyTagsScreen from "./screens/addApartment/PropertyTagsScreen";
 import PhotosScreen from "./screens/addApartment/PhotosScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SafeViewLayout from "./components/layouts/SafeViewLayout";
+import AnimationScreen from "./screens/AnimationScreen";
 export default function App() {
   const [fontsLoaded] = useFonts({
     comfortaa: require("./assets/fonts/Comfortaa-Regular.ttf"),
@@ -50,7 +51,7 @@ export default function App() {
         {/* Render the rest of your app screens inside the gradient */}
         <StatusBar />
         <SafeViewLayout>
-          <StepSeven />
+          <AnimationScreen />
         </SafeViewLayout>
       </LinearGradient>
     </ImageBackground>
