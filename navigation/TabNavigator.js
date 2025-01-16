@@ -7,9 +7,11 @@ import AddApartmentScreen from "../screens/addApartment/AddApartmentScreen";
 import LikesScreen from "../screens/LikesScreen";
 import ChatScreen from "../screens/ChatScreen";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { appartmentView } from "../data/mockData/appartmentView";
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+  console.log(appartmentView);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -59,7 +61,7 @@ export default function TabNavigator() {
     >
       <Tab.Screen
         name="Swipe"
-        component={SwipeScreen}
+        component={SwipeScreen.bind(this, appartmentView)}
         options={{ title: "Swipe" }}
       />
       <Tab.Screen
