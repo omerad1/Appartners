@@ -1,5 +1,5 @@
 // fetchingMock.js
-import apartmentData from "../data/mockData/appartmentView.json"; // Import the JSON file
+import apartmentData from "../data/mockData/appartmentView"; // Import the JSON file
 
 export const fetchApartmentData = async () => {
   // Simulate fetching with a delay

@@ -3,10 +3,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import SwipeScreen from "../screens/SwipeScreen";
 import UserProfileScreen from "../screens/UserProfileScreen";
-import AddApartmentScreen from "../screens/addApartment/AddApartmentScreen";
 import LikesScreen from "../screens/LikesScreen";
 import ChatScreen from "../screens/ChatScreen";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { appartmentView } from "../data/mockData/appartmentView";
+import ApartmentScreen from "../screens/apartmentScreens/ApartmentScreen";
+
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
@@ -59,12 +61,12 @@ export default function TabNavigator() {
     >
       <Tab.Screen
         name="Swipe"
-        component={SwipeScreen}
+        component={SwipeScreen.bind(this, appartmentView)}
         options={{ title: "Swipe" }}
       />
       <Tab.Screen
         name="ListApartment"
-        component={AddApartmentScreen}
+        component={ApartmentScreen}
         options={{ title: "Listings" }}
       />
       <Tab.Screen
