@@ -1,11 +1,11 @@
 import React from "react";
-import { StyleSheet, View, ImageBackground, SafeAreaView } from "react-native";
+import { StyleSheet, View, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts } from "expo-font";
-import TabNavigator from "./navigation/TabNavigator"; // Import the TabNavigator
 import { NavigationContainer } from "@react-navigation/native";
-import LoginScreen from "./screens/LoginScreen";
 import { createStackNavigator } from "@react-navigation/stack";
+import TabNavigator from "./navigation/TabNavigator";
+import LoginScreen from "./screens/LoginScreen";
 import OnBoardingNavigator from "./navigation/OnBoardingNavigator";
 
 const Stack = createStackNavigator();
@@ -53,13 +53,12 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  imageBackground: {
-    flex: 1, // Ensures the background image covers the entire screen
-  },
   container: {
     flex: 1,
   },
-
+  gradient: {
+    flex: 1,
+  },
   loadingScreen: {
     flex: 1,
     justifyContent: "center",
