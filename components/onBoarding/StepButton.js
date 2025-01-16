@@ -1,13 +1,17 @@
 import React from "react";
 import { StyleSheet, Text, Pressable } from "react-native";
-// import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 
 const StepButton = ({ text, next, direction, onPress }) => {
-  //   const navigation = useNavigation();
+  const navigation = useNavigation();
 
   const handlePress = () => {
-    onPress && onPress();
-    // navigation.navigate(direction);
+    if (onPress) {
+      onPress();
+    }
+    if (direction) {
+      navigation.navigate("OnBoarding", { screen: direction });
+    }
   };
 
   // Decide which style to use based on the direction
@@ -15,7 +19,7 @@ const StepButton = ({ text, next, direction, onPress }) => {
 
   return (
     <Pressable style={[styles.buttonBase, buttonStyle]} onPress={handlePress}>
-      <Text style={styles.buttonText}>{next ? "Next" : text}</Text>
+      <Text style={styles.buttonText}>{next ? "Next" : text || "Skip"}</Text>
     </Pressable>
   );
 };

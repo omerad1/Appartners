@@ -33,7 +33,7 @@ export default OnBoardingLayout;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
+    paddingTop: 60,
     paddingHorizontal: 20,
 
     // Center items horizontally

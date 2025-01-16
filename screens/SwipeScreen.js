@@ -98,7 +98,6 @@ const SwipeScreen = (props) => {
     </ScrollView>
   );
 };
-export default SwipeScreen;
 
 const styles = StyleSheet.create({
   scrollView: {
@@ -177,3 +176,4 @@ const styles = StyleSheet.create({
     borderColor: "#039912",
   },
 });
+export default SwipeScreen;

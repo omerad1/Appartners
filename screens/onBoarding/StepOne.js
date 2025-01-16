@@ -10,8 +10,8 @@ const StepOne = () => {
     <OnBoardingLayout
       direction="StepTwo"
       next={true}
-      title={`Welcome!
-    Please Enter Your Details`}
+      title={`Welcome! 
+  Please Enter Your Details`}
     >
       <InputField
         placeholder="Email"

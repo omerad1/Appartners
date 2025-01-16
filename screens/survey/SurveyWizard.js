@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import SurveyLayout from "../../components/survey/SurveyLayout";
 import StepButton from "../../components/onBoarding/StepButton";
-
+import { useNavigation } from "@react-navigation/native";
 const steps = [
   {
     title: "What Are You Studying?",
@@ -58,6 +58,11 @@ const steps = [
 ];
 
 const Wizard = () => {
+  const navigation = useNavigation();
+  const onFinish = () => {
+    alert(JSON.stringify(answers, null, 2));
+    navigation.navigate("MainApp");
+  };
   // Initialize default answers
   const defaultAnswers = steps.reduce((acc, step, index) => {
     if (step.radioBarOptions) {
@@ -79,7 +84,7 @@ const Wizard = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      alert("Survey Complete! " + JSON.stringify(answers, null, 2));
+      onFinish();
     }
   };
 
@@ -101,14 +106,11 @@ const Wizard = () => {
       <View style={styles.buttonContainer}>
         {currentStep < steps.length - 1 ? (
           <>
-            <StepButton next={false} onPress={skipStep} />
-            <StepButton next={true} onPress={nextStep} />
+            <StepButton next={false} text="Skip" onPress={skipStep} />
+            <StepButton next={true} text="Next" onPress={nextStep} />
           </>
         ) : (
-          <StepButton
-            next={true}
-            onPress={() => alert(JSON.stringify(answers, null, 2))}
-          />
+          <StepButton next={true} onPress={onFinish} />
         )}
       </View>
     </View>

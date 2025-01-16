@@ -11,10 +11,10 @@ import Title from "../components/Title";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import Icon from "react-native-vector-icons/Ionicons";
-
+import { useNavigation } from "@react-navigation/native";
 const LoginScreen = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
-
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       {/* Logo */}
@@ -86,15 +86,19 @@ const LoginScreen = () => {
       </TouchableOpacity>
 
       {/* Sign Up Link */}
-      <Text style={styles.signUpText}>
-        Don’t have an account? <Text style={styles.signUpLink}>Sign up</Text>
-      </Text>
+      <Text style={styles.signUpText}>Don’t have an account? </Text>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("OnBoarding", { screen: "StepOne" })}
+      >
+        <Text style={styles.signUpLink}>Sign up</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "transparent",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
