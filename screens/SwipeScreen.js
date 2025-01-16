@@ -11,8 +11,8 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import SearchTags from "../components/SearchTags";
 import UserDisplayer from "../components/UserDisplayer";
 
-const SwipeScreen = ({ jsonProp }) => {
-  const { address, images, aboutApartment, tags, user } = jsonProp.apartment;
+const SwipeScreen = (props) => {
+  const { address, images, aboutApartment, tags, user } = props.apartment;
 
   // Function to resolve local image paths
   const resolveAsset = (imagePath) => {
@@ -35,7 +35,6 @@ const SwipeScreen = ({ jsonProp }) => {
         return null;
     }
   };
-
   return (
     <ScrollView
       style={styles.scrollView}
@@ -97,6 +96,9 @@ const SwipeScreen = ({ jsonProp }) => {
         </TouchableOpacity>
       </View>
     </ScrollView>
+  );
+};
+export default SwipeScreen;
 
 const styles = StyleSheet.create({
   scrollView: {
