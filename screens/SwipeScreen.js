@@ -133,6 +133,8 @@ const styles = StyleSheet.create({
   aboutContainer: {
     alignItems: "center",
     paddingVertical: 20,
+    paddingHorizontal: 15,
+    textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 10,
     shadowColor: "#000",

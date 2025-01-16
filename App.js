@@ -41,7 +41,12 @@ export default function App() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+              cardStyle: { backgroundColor: "transparent" }, // Transparent background
+            }}
+          >
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
             <Stack.Screen name="MainApp" component={TabNavigator} />

@@ -17,13 +17,13 @@ const ChatScreen = () => {
     // Sample messages - replace with your actual data
     {
       id: 1,
-      text: "Hey, how are you?",
+      text: " היי! בנוגע לדירה באברהם אבינו, עדיין רלוונטי?",
       senderId: 1,
       timestamp: new Date().toISOString(),
     },
     {
       id: 2,
-      text: "I'm good, thanks! How about you?",
+      text: "אכן עדיין רלוונטי :) בוא תספר לי על עצמך",
       senderId: 2,
       timestamp: new Date().toISOString(),
     },

@@ -3,6 +3,8 @@ import { StyleSheet, View } from "react-native";
 import SurveyLayout from "../../components/survey/SurveyLayout";
 import StepButton from "../../components/onBoarding/StepButton";
 import { useNavigation } from "@react-navigation/native";
+import { ImageBackground } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 const steps = [
   {
     title: "What Are You Studying?",
@@ -95,25 +97,43 @@ const Wizard = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <SurveyLayout
-        step={currentStep + 1}
-        setAnswer={setAnswer}
-        title={steps[currentStep].title}
-        input={steps[currentStep].input || null}
-        radioBarOptions={steps[currentStep].radioBarOptions || null}
-      />
-      <View style={styles.buttonContainer}>
-        {currentStep < steps.length - 1 ? (
-          <>
-            <StepButton next={false} text="Skip" onPress={skipStep} />
-            <StepButton next={true} text="Next" onPress={nextStep} />
-          </>
-        ) : (
-          <StepButton next={true} onPress={onFinish} />
-        )}
-      </View>
-    </View>
+    <ImageBackground
+      source={require("../../assets/background.jpg")}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <LinearGradient
+        colors={[
+          "rgba(255, 255, 255, 0)",
+          "rgba(251, 251, 251, 0.73)",
+          "rgba(255, 255, 255, 0.6)",
+          "rgba(255, 255, 255, 0.08)",
+        ]}
+        style={{ flex: 1 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={styles.container}>
+          <SurveyLayout
+            step={currentStep + 1}
+            setAnswer={setAnswer}
+            title={steps[currentStep].title}
+            input={steps[currentStep].input || null}
+            radioBarOptions={steps[currentStep].radioBarOptions || null}
+          />
+          <View style={styles.buttonContainer}>
+            {currentStep < steps.length - 1 ? (
+              <>
+                <StepButton next={false} text="Skip" onPress={skipStep} />
+                <StepButton next={true} text="Next" onPress={nextStep} />
+              </>
+            ) : (
+              <StepButton next={true} onPress={onFinish} />
+            )}
+          </View>
+        </View>
+      </LinearGradient>
+    </ImageBackground>
   );
 };
 

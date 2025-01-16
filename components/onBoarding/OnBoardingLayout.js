@@ -1,30 +1,49 @@
-import { StyleSheet, View, Image } from "react-native";
+import { StyleSheet, View, Image, ImageBackground } from "react-native";
 import React from "react";
 import Title from "../Title";
 import StepButton from "./StepButton";
+import { LinearGradient } from "expo-linear-gradient";
 
 const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
   return (
-    <View style={styles.container}>
-      {/* Centered Title */}
-      <View style={styles.titleContainer}>
-        <Title style={styles.title}>{title}</Title>
-      </View>
+    <ImageBackground
+      source={require("../../assets/background.jpg")}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <LinearGradient
+        colors={[
+          "rgba(255, 255, 255, 0)",
+          "rgba(251, 251, 251, 0.73)",
+          "rgba(255, 255, 255, 0.6)",
+          "rgba(255, 255, 255, 0.08)",
+        ]}
+        style={{ flex: 1 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={styles.container}>
+          {/* Centered Title */}
+          <View style={styles.titleContainer}>
+            <Title style={styles.title}>{title}</Title>
+          </View>
 
-      {/* Your custom input(s) or other content */}
-      <View style={styles.childrenContainer}>{children}</View>
+          {/* Your custom input(s) or other content */}
+          <View style={styles.childrenContainer}>{children}</View>
 
-      {/* “Next” or “Prev” button pinned toward bottom */}
-      <View style={styles.buttonContainer}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../assets/icons/logo.png")}
-            style={styles.logo}
-          />
+          {/* “Next” or “Prev” button pinned toward bottom */}
+          <View style={styles.buttonContainer}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require("../../assets/icons/logo.png")}
+                style={styles.logo}
+              />
+            </View>
+            <StepButton direction={direction} next={next} onPress={onPress} />
+          </View>
         </View>
-        <StepButton direction={direction} next={next} onPress={onPress} />
-      </View>
-    </View>
+      </LinearGradient>
+    </ImageBackground>
   );
 };
 
