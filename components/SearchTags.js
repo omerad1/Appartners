@@ -4,7 +4,9 @@ import { Chip } from "react-native-paper";
 
 const SearchTags = ({ tags, selectedTags, onTagToggle }) => {
   const handleTagPress = (tag) => {
-    onTagToggle(tag); // Toggle the tag in the parent component
+    if (onTagToggle) {
+      onTagToggle(tag); // Call the function only if it exists
+    }
   };
 
   return (
@@ -13,7 +15,7 @@ const SearchTags = ({ tags, selectedTags, onTagToggle }) => {
         {tags.map((item) => (
           <Chip
             key={item}
-            mode="outlined" // Keep outlined style for border
+            mode="outlined" // Outlined chip style
             style={[
               styles.chip,
               selectedTags.includes(item)
@@ -26,7 +28,7 @@ const SearchTags = ({ tags, selectedTags, onTagToggle }) => {
                 ? styles.selectedChipText
                 : styles.unselectedChipText,
             ]}
-            onPress={() => handleTagPress(item)}
+            onPress={onTagToggle ? () => handleTagPress(item) : null} // Dynamically handle onPress
           >
             {item}
           </Chip>
@@ -69,7 +71,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#dbeeff", // Keep background white
   },
   selectedChipText: {
-    color: "#ffffff", // Dark grey text for selected state
+    color: "#ffffff", // White text for selected state
   },
   unselectedChipText: {
     color: "#333", // Darker text for unselected state

@@ -3,14 +3,13 @@ import {
   StyleSheet,
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
 import { Searchbar } from "react-native-paper";
-import SearchTags from "../../components/SearchTags"; // Import the SearchTags component
-import { propertyTags } from "../../data/tags/propertyTags"; // Import the property tags array
-import Title from "../../components/Title";
+import SearchTags from "../../components/SearchTags";
+import { propertyTags } from "../../data/tags/propertyTags";
+import AddApartmentLayout from "../../components/layouts/AddApartmentLayout";
 
 const PropertyTagsScreen = () => {
   const [selectedTags, setSelectedTags] = useState([]); // Store selected tags
@@ -54,47 +53,44 @@ const PropertyTagsScreen = () => {
     searchQuery.trim() !== "" || propertyTags.length <= 10;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require("../../assets/icons/logo.png")}
-          style={styles.logo}
+    <AddApartmentLayout
+      title={"Select Property Tags"}
+      direction={"PhotosScreen"}
+      next={true}
+      onPress={() => {}}
+    >
+      <View style={styles.container}>
+        <Searchbar
+          placeholder="Search tags..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+          style={styles.searchBar}
         />
-        <Title style={styles.title}>Select Property Tags</Title>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View>
+            <SearchTags
+              tags={filteredTags}
+              selectedTags={selectedTags}
+              onTagToggle={handleTagToggle}
+            />
+            {!searchQuery.trim() && propertyTags.length > 10 && (
+              <TouchableOpacity
+                style={[
+                  styles.showMoreButton,
+                  isShowMoreDisabled && styles.disabledButton,
+                ]}
+                onPress={handleShowMore}
+                disabled={isShowMoreDisabled}
+              >
+                <Text style={styles.showMoreText}>
+                  {showAll ? "Show Less" : "Show More"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
       </View>
-      <Searchbar
-        placeholder="Search tags..."
-        value={searchQuery}
-        onChangeText={handleSearch}
-        style={styles.searchBar}
-      />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View>
-          <SearchTags
-            tags={filteredTags}
-            selectedTags={selectedTags}
-            onTagToggle={handleTagToggle}
-          />
-          {!searchQuery.trim() && propertyTags.length > 10 && (
-            <TouchableOpacity
-              style={[
-                styles.showMoreButton,
-                isShowMoreDisabled && styles.disabledButton,
-              ]}
-              onPress={handleShowMore}
-              disabled={isShowMoreDisabled}
-            >
-              <Text style={styles.showMoreText}>
-                {showAll ? "Show Less" : "Show More"}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </ScrollView>
-      <TouchableOpacity style={styles.nextButton}>
-        <Text style={styles.nextButtonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
+    </AddApartmentLayout>
   );
 };
 
@@ -103,7 +99,6 @@ export default PropertyTagsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40,
     paddingHorizontal: 5,
   },
   scrollContent: {
@@ -113,16 +108,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-  },
-  logoContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  logo: {
-    width: 80,
-    height: 60,
-    margin: 10,
   },
   searchBar: {
     marginBottom: 10,
@@ -144,21 +129,6 @@ const styles = StyleSheet.create({
   showMoreText: {
     color: "#fff",
     fontSize: 14,
-    fontWeight: "bold",
-  },
-  nextButton: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: "#000000",
-    paddingVertical: 15,
-    borderRadius: 15,
-    alignItems: "center",
-  },
-  nextButtonText: {
-    color: "#fff",
-    fontSize: 16,
     fontWeight: "bold",
   },
 });

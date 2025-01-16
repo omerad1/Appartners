@@ -12,6 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "extra": {
+      "API_URL": "http://10.0.0.13:8081"
+    },
     "ios": {
       "supportsTablet": true
     },

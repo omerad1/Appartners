@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 import TabNavigator from "./navigation/TabNavigator"; // Import the TabNavigator
 import { NavigationContainer } from "@react-navigation/native";
 import LoginScreen from "./screens/LoginScreen";
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     comfortaa: require("./assets/fonts/Comfortaa-Regular.ttf"),

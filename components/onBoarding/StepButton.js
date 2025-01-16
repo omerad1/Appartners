@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, Pressable } from "react-native";
 // import { useNavigation } from "@react-navigation/native";
 
-const StepButton = ({ next, direction, onPress }) => {
+const StepButton = ({ text, next, direction, onPress }) => {
   //   const navigation = useNavigation();
 
   const handlePress = () => {
@@ -15,7 +15,7 @@ const StepButton = ({ next, direction, onPress }) => {
 
   return (
     <Pressable style={[styles.buttonBase, buttonStyle]} onPress={handlePress}>
-      <Text style={styles.buttonText}>{next ? "Next" : "Skip "}</Text>
+      <Text style={styles.buttonText}>{next ? "Next" : text}</Text>
     </Pressable>
   );
 };
