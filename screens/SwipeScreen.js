@@ -35,7 +35,6 @@ const SwipeScreen = (props) => {
         return null;
     }
   };
-
   return (
     <ScrollView
       style={styles.scrollView}
@@ -99,6 +98,7 @@ const SwipeScreen = (props) => {
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
