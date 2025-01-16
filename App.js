@@ -1,24 +1,10 @@
 import React from "react";
-import { StatusBar } from "react-native";
-import { StyleSheet, View, ImageBackground } from "react-native";
+import { StyleSheet, View, ImageBackground, SafeAreaView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts } from "expo-font";
-import Title from "./components/Title";
-
-// Example screen imports
-import StepOne from "./screens/onBoarding/StepOne";
+import TabNavigator from "./navigation/TabNavigator"; // Import the TabNavigator
+import { NavigationContainer } from "@react-navigation/native";
 import LoginScreen from "./screens/LoginScreen";
-import StepTwo from "./screens/onBoarding/StepTwo";
-import StepThree from "./screens/onBoarding/StepThree";
-import StepFour from "./screens/onBoarding/StepFour";
-import StepFive from "./screens/onBoarding/StepFive";
-import StepSix from "./screens/onBoarding/StepSix";
-import StepSeven from "./screens/onBoarding/StepSeven";
-import AddApartmentScreen from "./screens/addApartment/AddApartmentScreen";
-import PropertyTagsScreen from "./screens/addApartment/PropertyTagsScreen";
-import PhotosScreen from "./screens/addApartment/PhotosScreen";
-import StepEight from "./screens/onBoarding/StepEight";
-import SurveyWizard from "./screens/survey/SurveyWizard";
 export default function App() {
   const [fontsLoaded] = useFonts({
     comfortaa: require("./assets/fonts/Comfortaa-Regular.ttf"),
@@ -27,30 +13,33 @@ export default function App() {
     comfortaaMedium: require("./assets/fonts/Comfortaa-Medium.ttf"),
     comfortaaSemiBold: require("./assets/fonts/Comfortaa-SemiBold.ttf"),
   });
+
   if (!fontsLoaded) {
-    return <View />;
+    return <View style={styles.loadingScreen} />;
   }
+
   return (
-    <ImageBackground
-      source={require("./assets/background.jpg")}
-      style={styles.imageBackground}
-      resizeMode="cover" // or "stretch" / "contain" depending on your preference
-    >
-      <LinearGradient
-        colors={[
-          "rgba(255, 255, 255, 0.35)", // 80% opacity white
-          "rgba(255, 251, 204, 0.35)", // 80% opacity soft yellow
-          "rgba(191, 163, 116, 0.35)", // 80% opacity brown
-          "rgba(0, 0, 0, 0.35)", // 80% opacity black
-        ]}
-        style={styles.container}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+    <NavigationContainer>
+      <ImageBackground
+        source={require("./assets/background.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
       >
-        {/* Render the rest of your app screens inside the gradient */}
-        <SurveyWizard />
-      </LinearGradient>
-    </ImageBackground>
+        <LinearGradient
+          colors={[
+            "rgba(255, 255, 255, 0)",
+            "rgba(251, 251, 251, 0.73)",
+            "rgba(255, 255, 255, 0.6)",
+            "rgba(255, 255, 255, 0.08)",
+          ]}
+          style={{ flex: 1 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <TabNavigator />
+        </LinearGradient>
+      </ImageBackground>
+    </NavigationContainer>
   );
 }
 
@@ -60,6 +49,12 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    // any other styling you want
+  },
+
+  loadingScreen: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
 });
