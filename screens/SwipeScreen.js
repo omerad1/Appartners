@@ -97,10 +97,6 @@ const SwipeScreen = ({ jsonProp }) => {
         </TouchableOpacity>
       </View>
     </ScrollView>
-  );
-};
-
-export default SwipeScreen;
 
 const styles = StyleSheet.create({
   scrollView: {
