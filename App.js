@@ -19,6 +19,9 @@ import PropertyTagsScreen from "./screens/addApartment/PropertyTagsScreen";
 import PhotosScreen from "./screens/addApartment/PhotosScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SafeViewLayout from "./components/layouts/SafeViewLayout";
+import SwipeScreen from "./screens/SwipeScreen";
+import jsonData from "./data/mockData/appartmentView.json";
+import SearchTags from "./components/SearchTags";
 export default function App() {
   const [fontsLoaded] = useFonts({
     comfortaa: require("./assets/fonts/Comfortaa-Regular.ttf"),
@@ -49,9 +52,11 @@ export default function App() {
       >
         {/* Render the rest of your app screens inside the gradient */}
         <StatusBar />
-        <SafeViewLayout>
-          <StepSeven />
-        </SafeViewLayout>
+        <View style={styles.container}>
+          <SafeAreaView style={styles.container}>
+            <PropertyTagsScreen />
+          </SafeAreaView>
+        </View>
       </LinearGradient>
     </ImageBackground>
   );

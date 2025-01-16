@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Searchbar } from "react-native-paper";
-import SearchTags from "../../components/SearchTags"; // Import the SearchTags component
-import { propertyTags } from "../../data/tags/propertyTags"; // Import the property tags array
+import SearchTags from "../../components/SearchTags";
+import { propertyTags } from "../../data/tags/propertyTags";
 import AddApartmentLayout from "../../components/layouts/AddApartmentLayout";
+
 const PropertyTagsScreen = () => {
   const [selectedTags, setSelectedTags] = useState([]); // Store selected tags
   const [showAll, setShowAll] = useState(false); // Control showing all tags
