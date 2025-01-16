@@ -5,6 +5,10 @@ import { useFonts } from "expo-font";
 import TabNavigator from "./navigation/TabNavigator"; // Import the TabNavigator
 import { NavigationContainer } from "@react-navigation/native";
 import LoginScreen from "./screens/LoginScreen";
+import { createStackNavigator } from "@react-navigation/stack";
+import OnBoardingNavigator from "./navigation/OnBoardingNavigator";
+
+const Stack = createStackNavigator();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -37,7 +41,11 @@ export default function App() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <TabNavigator />
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
+            <Stack.Screen name="MainApp" component={TabNavigator} />
+          </Stack.Navigator>
         </LinearGradient>
       </ImageBackground>
     </NavigationContainer>

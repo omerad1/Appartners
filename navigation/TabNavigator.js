@@ -12,6 +12,7 @@ import ApartmentScreen from "../screens/apartmentScreens/ApartmentScreen";
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+  console.log(appartmentView);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
