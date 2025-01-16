@@ -29,6 +29,7 @@ const LoginScreen = () => {
         placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
+        autoFocus={true}
       />
 
       {/* Password Input */}
