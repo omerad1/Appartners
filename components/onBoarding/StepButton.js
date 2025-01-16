@@ -10,7 +10,7 @@ const StepButton = ({ text, next, direction, onPress }) => {
       onPress();
     }
     if (direction) {
-      navigation.navigate(direction);
+      navigation.navigate("OnBoarding", { screen: direction });
     }
   };
 
@@ -19,7 +19,7 @@ const StepButton = ({ text, next, direction, onPress }) => {
 
   return (
     <Pressable style={[styles.buttonBase, buttonStyle]} onPress={handlePress}>
-      <Text style={styles.buttonText}>{next ? "Next" : text}</Text>
+      <Text style={styles.buttonText}>{next ? "Next" : text || "Skip"}</Text>
     </Pressable>
   );
 };

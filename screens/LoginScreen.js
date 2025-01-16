@@ -86,18 +86,19 @@ const LoginScreen = () => {
       </TouchableOpacity>
 
       {/* Sign Up Link */}
-      <Text style={styles.signUpText}>
-        Don’t have an account?{" "}
-        <TouchableOpacity onPress={() => navigation.navigate("StepOne")}>
-          <Text>Sign up </Text>
-        </TouchableOpacity>
-      </Text>
+      <Text style={styles.signUpText}>Don’t have an account? </Text>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("OnBoarding", { screen: "StepOne" })}
+      >
+        <Text style={styles.signUpLink}>Sign up</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "transparent",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
