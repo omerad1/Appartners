@@ -19,6 +19,19 @@ const OnBoardingNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
+        headerStyle: {
+          backgroundColor: "transparent",
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTitleStyle: {
+          fontFamily: "comfortaaBold",
+        },
+        headerBackTitleVisible: true,
+        headerBackTitle: "Back",
+        headerTintColor: "black",
+        contentStyle: { ImageBackground: "transparent" },
+        presentation: "card",
       }}
     >
       <Stack.Screen

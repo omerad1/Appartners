@@ -103,6 +103,7 @@ export default SwipeScreen;
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
+    marginTop: 50,
   },
   contentContainer: {
     padding: 20,
@@ -111,6 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
+
     justifyContent: "center",
     backgroundColor: "rgba(185, 185, 185, 0.8)",
     borderRadius: 10,
