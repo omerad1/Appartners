@@ -1,24 +1,14 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  I18nManager,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { Card, Paragraph, IconButton } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Title from "../../components/Title"; // Import your custom Title component
-
-// Enable RTL layout
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
 
 const ApartmentScreen = () => {
   const apartments = [
     {
       id: 1,
-      photo: "https://via.placeholder.com/300", // Replace with actual image URL
+      photo: "../../assets/apt/y2_1pa_010214_20250114110125.jpeg", // Replace with actual image URL
       uploadDate: "2023-01-15",
       address: "רחוב הראשי 123",
       description:
@@ -26,7 +16,15 @@ const ApartmentScreen = () => {
     },
     {
       id: 2,
-      photo: "https://via.placeholder.com/300",
+      photo: "../../assets/apt/y2_1pa_010214_20250114110125.jpeg",
+      uploadDate: "2023-01-10",
+      address: "רחוב אלם 456",
+      description:
+        "דירת 2 חדרי שינה נעימה בלב מרכז העיר. מרחק הליכה לחנויות ומסעדות.",
+    },
+    {
+      id: 3,
+      photo: "../../assets/apt/y2_1pa_010214_20250114110125.jpeg",
       uploadDate: "2023-01-10",
       address: "רחוב אלם 456",
       description:
