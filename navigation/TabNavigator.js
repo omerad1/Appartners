@@ -7,11 +7,13 @@ import LikesScreen from "../screens/LikesScreen";
 import ChatScreen from "../screens/ChatScreen";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { appartmentView } from "../data/mockData/appartmentView";
+
 import ApartmentScreen from "../screens/apartmentScreens/ApartmentScreen";
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+  console.log(appartmentView);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
