@@ -7,22 +7,22 @@ import {
   View,
   Text,
 } from "react-native";
-import InputField from "../../components/onBoarding/InputField";
-import DatePicker from "../../components/DatePicker";
+import InputField from "../../../components/onBoarding/InputField";
+import DatePicker from "../../../components/DatePicker";
 import dayjs from "dayjs";
-import NumberSlider from "../../components/NumberSlider";
-import AddApartmentLayout from "../../components/layouts/AddApartmentLayout";
-
+import NumberSlider from "../../../components/NumberSlider";
+import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
+import { useNavigation } from "@react-navigation/native";
 const AddApartmentScreen = () => {
   const [entryDay, setEntryDay] = useState(dayjs());
+  const navigation = useNavigation();
 
   const handleRoomsChange = (rooms) => {
     console.log("Rooms:", rooms);
   };
 
   const handleNext = () => {
-    console.log("Next pressed");
-    // Navigate to the next screen
+    navigation.navigate("PropertyTagsScreen");
   };
 
   return (

@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import SwipeScreen from "../screens/SwipeScreen";
 import UserProfileScreen from "../screens/UserProfileScreen";
 import LikesScreen from "../screens/LikesScreen";
-import ScreenWrapper from "../components/ScreenWrapper";
 import { appartmentView } from "../data/mockData/appartmentView";
 
 import ApartmentScreen from "../screens/apartmentScreens/ApartmentScreen";
@@ -13,7 +12,6 @@ import AllChatsScreen from "../screens/chatScreens/AllChatsScreen";
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
-  console.log(appartmentView);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

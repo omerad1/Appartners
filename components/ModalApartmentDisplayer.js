@@ -11,7 +11,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import ImageDisplayer from "./ImageDisplayer";
 import SearchTags from "./SearchTags";
 
-const ModalApartmentDisplayer = ({ visible, onClose }) => {
+const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
   // Fictive apartment data
   const dummyData = {
     address: "רחוב הראשי 123",

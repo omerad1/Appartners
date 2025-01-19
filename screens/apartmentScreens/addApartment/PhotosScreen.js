@@ -1,16 +1,20 @@
 import React from "react";
 import { StyleSheet, View, FlatList } from "react-native";
-import PhotoUploader from "../../components/PhotoUploader"; // Import the PhotoUploader component
-import AddApartmentLayout from "../../components/layouts/AddApartmentLayout";
+import PhotoUploader from "../../../components/PhotoUploader"; // Import the PhotoUploader component
+import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
+import { useNavigation } from "@react-navigation/native";
 
 const PhotosScreen = () => {
   const data = [{ key: "content" }]; // Placeholder for non-list content
+  const navigate = useNavigation();
 
   return (
     <AddApartmentLayout
       title={"Upload Photos"}
       next={true}
-      onPress={() => {}}
+      onPress={() => {
+        navigate.navigate("mainApp");
+      }}
       text={"Finish"}
     >
       <View style={styles.container}>

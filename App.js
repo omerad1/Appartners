@@ -7,6 +7,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import TabNavigator from "./navigation/TabNavigator";
 import LoginScreen from "./screens/LoginScreen";
 import OnBoardingNavigator from "./navigation/OnBoardingNavigator";
+import CreateApartmentNavigator from "./navigation/CreateApartmentNavigator";
 
 const Stack = createStackNavigator();
 
@@ -41,12 +42,15 @@ export default function App() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          {/* <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
             <Stack.Screen name="MainApp" component={TabNavigator} />
-          </Stack.Navigator> */}
-          <TabNavigator />
+            <Stack.Screen
+              name="CreateApartment"
+              component={CreateApartmentNavigator}
+            />
+          </Stack.Navigator>
         </LinearGradient>
       </ImageBackground>
     </NavigationContainer>

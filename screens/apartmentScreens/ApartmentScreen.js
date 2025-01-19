@@ -10,26 +10,22 @@ import { Card, Paragraph, IconButton } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Title from "../../components/Title"; // Import your custom Title component
 import { myApartments } from "../../data/mockData/myApartments"; // Import mock data
+import { useNavigation } from "@react-navigation/native";
+import ModalApartmentDisplayer from "../../components/ModalApartmentDisplayer"; // Import the modal
 
 const ApartmentScreen = () => {
   const [apartments, setApartments] = useState(myApartments);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedApartment, setSelectedApartment] = useState(null);
+  const navigation = useNavigation();
 
   const handleAddApartment = () => {
-    console.log("Add Apartment Triggered");
-    // Logic for adding a new apartment (e.g., opening a modal or form)
-    const newApartment = {
-      id: apartments.length + 1,
-      photo: "../../assets/apt/new_apartment.jpeg", // Example path
-      uploadDate: new Date().toISOString().split("T")[0], // Current date
-      address: "כתובת חדשה",
-      description: "תיאור הדירה החדשה",
-    };
-    setApartments([...apartments, newApartment]); // Add the new apartment
+    navigation.navigate("CreateApartment");
   };
 
   const handleDelete = (id) => {
     console.log(`Delete Apartment with ID: ${id}`);
-    setApartments(apartments.filter((apartment) => apartment.id !== id)); // Remove apartment by ID
+    setApartments(apartments.filter((apartment) => apartment.id !== id));
   };
 
   const handleEdit = (id) => {
@@ -38,8 +34,9 @@ const ApartmentScreen = () => {
   };
 
   const handleView = (id) => {
-    console.log(`View Apartment with ID: ${id}`);
-    // Logic for viewing the apartment (e.g., navigating to a detail screen)
+    const apartment = apartments.find((apt) => apt.id === id);
+    setSelectedApartment(apartment);
+    setModalVisible(true);
   };
 
   return (
@@ -52,49 +49,51 @@ const ApartmentScreen = () => {
         {/* Apartment Cards or No Apartments Message */}
         {apartments.length > 0 ? (
           <>
-            {apartments.map((apartment) => (
-              <Card key={apartment.id} style={styles.card}>
-                {/* Card Cover */}
-                <Card.Cover
-                  source={require("../../assets/apt/y2_1pa_010214_20250114110125.jpeg")} // Adjust image logic as needed
-                  style={styles.cardImage}
-                />
+            <View style={styles.cardWrapper}>
+              {apartments.map((apartment) => (
+                <Card key={apartment.id} style={styles.card}>
+                  {/* Card Cover */}
+                  <Card.Cover
+                    source={require("../../assets/apt/y2_1pa_010214_20250114110125.jpeg")} // Adjust image logic as needed
+                    style={styles.cardImage}
+                  />
 
-                {/* Card Content */}
-                <Card.Content>
-                  <Paragraph style={styles.cardAddress}>
-                    {apartment.address}
-                  </Paragraph>
-                  <Paragraph style={styles.dateText}>
-                    תאריך העלאה: {apartment.uploadDate}
-                  </Paragraph>
-                  <Paragraph style={styles.descriptionText}>
-                    {apartment.description.length > 50
-                      ? `${apartment.description.substring(0, 50)}...`
-                      : apartment.description}
-                  </Paragraph>
-                </Card.Content>
+                  {/* Card Content */}
+                  <Card.Content>
+                    <Paragraph style={styles.cardAddress}>
+                      {apartment.address}
+                    </Paragraph>
+                    <Paragraph style={styles.dateText}>
+                      תאריך העלאה: {apartment.uploadDate}
+                    </Paragraph>
+                    <Paragraph style={styles.descriptionText}>
+                      {apartment.description.length > 50
+                        ? `${apartment.description.substring(0, 50)}...`
+                        : apartment.description}
+                    </Paragraph>
+                  </Card.Content>
 
-                {/* Action Buttons */}
-                <Card.Actions style={styles.actions}>
-                  <IconButton
-                    icon="eye"
-                    size={24}
-                    onPress={() => handleView(apartment.id)}
-                  />
-                  <IconButton
-                    icon="pencil"
-                    size={24}
-                    onPress={() => handleEdit(apartment.id)}
-                  />
-                  <IconButton
-                    icon="trash-can"
-                    size={24}
-                    onPress={() => handleDelete(apartment.id)}
-                  />
-                </Card.Actions>
-              </Card>
-            ))}
+                  {/* Action Buttons */}
+                  <Card.Actions style={styles.actions}>
+                    <IconButton
+                      icon="eye"
+                      size={24}
+                      onPress={() => handleView(apartment.id)}
+                    />
+                    <IconButton
+                      icon="pencil"
+                      size={24}
+                      onPress={() => handleEdit(apartment.id)}
+                    />
+                    <IconButton
+                      icon="trash-can"
+                      size={24}
+                      onPress={() => handleDelete(apartment.id)}
+                    />
+                  </Card.Actions>
+                </Card>
+              ))}
+            </View>
 
             {/* Plus Button for Adding Apartments */}
             <TouchableOpacity
@@ -117,6 +116,17 @@ const ApartmentScreen = () => {
           </View>
         )}
       </ScrollView>
+
+      {/* Modal Component */}
+
+      {selectedApartment && (
+        <View style={styles.modalContainer}>
+          <ModalApartmentDisplayer
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -132,14 +142,15 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingBottom: 100, // Ensure space for the floating add button
   },
-  card: {
+  cardWrapper: {
     marginBottom: 15,
     borderRadius: 10,
     overflow: "hidden", // Ensures content stays within rounded corners
     elevation: 4, // Adds shadow on Android
+  },
+  card: {
     flexDirection: "column",
   },
-
   cardImage: {
     height: 150, // Fixed height for consistent layout
   },
@@ -187,8 +198,13 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     paddingHorizontal: 10,
   },
-
   titleContainer: {
     paddingTop: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "visible",
   },
 });

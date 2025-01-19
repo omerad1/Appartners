@@ -10,12 +10,13 @@ import { Searchbar } from "react-native-paper";
 import SearchTags from "../../../components/SearchTags";
 import { propertyTags } from "../../../data/tags/propertyTags";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
-
+import { useNavigation } from "@react-navigation/native";
 const PropertyTagsScreen = () => {
   const [selectedTags, setSelectedTags] = useState([]); // Store selected tags
   const [showAll, setShowAll] = useState(false); // Control showing all tags
   const [searchQuery, setSearchQuery] = useState(""); // Track the search query
   const [filteredTags, setFilteredTags] = useState(propertyTags.slice(0, 10)); // Filtered tags
+  const navigation = useNavigation();
 
   const handleTagToggle = (tag) => {
     if (selectedTags.includes(tag)) {
@@ -57,7 +58,9 @@ const PropertyTagsScreen = () => {
       title={"Select Property Tags"}
       direction={"PhotosScreen"}
       next={true}
-      onPress={() => {}}
+      onPress={() => {
+        navigation.navigate("PhotosScreen");
+      }}
     >
       <View style={styles.container}>
         <Searchbar
