@@ -4,11 +4,11 @@ import { Ionicons } from "@expo/vector-icons";
 import SwipeScreen from "../screens/SwipeScreen";
 import UserProfileScreen from "../screens/UserProfileScreen";
 import LikesScreen from "../screens/LikesScreen";
-import ChatScreen from "../screens/ChatScreen";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { appartmentView } from "../data/mockData/appartmentView";
 
 import ApartmentScreen from "../screens/apartmentScreens/ApartmentScreen";
+import AllChatsScreen from "../screens/chatScreens/AllChatsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -78,7 +78,7 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="Chat"
-        component={ChatScreen}
+        component={AllChatsScreen}
         options={{ title: "Chat" }}
       />
       <Tab.Screen
