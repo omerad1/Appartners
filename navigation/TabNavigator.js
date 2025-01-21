@@ -1,7 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import SwipeScreen from "../screens/SwipeScreen";
+import SwipeScreenWrapper from "../screens/SwipeScreenWrapper";
 import UserProfileScreen from "../screens/UserProfileScreen";
 import LikesScreen from "../screens/LikesScreen";
 import { appartmentView } from "../data/mockData/appartmentView";
@@ -61,7 +61,7 @@ export default function TabNavigator() {
     >
       <Tab.Screen
         name="Swipe"
-        component={SwipeScreen.bind(this, appartmentView)}
+        component={SwipeScreenWrapper}
         options={{ title: "Swipe" }}
       />
       <Tab.Screen

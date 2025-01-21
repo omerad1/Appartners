@@ -1,101 +1,133 @@
-import React from "react";
-import ImageDisplayer from "../components/ImageDisplayer";
+import React, { useRef } from "react";
 import {
-  ScrollView,
   StyleSheet,
-  Text,
   View,
+  ScrollView,
+  Animated,
+  PanResponder,
+  Text,
   TouchableOpacity,
 } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import ImageDisplayer from "../components/ImageDisplayer";
 import SearchTags from "../components/SearchTags";
 import UserDisplayer from "../components/UserDisplayer";
 
 const SwipeScreen = (props) => {
-  const { address, images, aboutApartment, tags, user } = props.apartment;
+  const { onSwipe, apartment } = props; // Prop to notify the parent of swipe action
 
-  // Function to resolve local image paths
-  const resolveAsset = (imagePath) => {
-    switch (imagePath) {
-      case "../assets/apt/y2_1pa_010214_20250114110125.jpeg":
-        return require("../assets/apt/y2_1pa_010214_20250114110125.jpeg");
-      case "../assets/apt/y2_1pa_010353_20250114110124.jpeg":
-        return require("../assets/apt/y2_1pa_010353_20250114110124.jpeg");
-      case "../assets/apt/y2_1pa_010418_20250114110124.jpeg":
-        return require("../assets/apt/y2_1pa_010418_20250114110124.jpeg");
-      case "../assets/icons/avi-avatar.jpg":
-        return require("../assets/icons/avi-avatar.jpg");
-      case "../assets/apt/y2_1pa_010626_20250114110124.jpeg":
-        return require("../assets/apt/y2_1pa_010626_20250114110124.jpeg");
-      case "../assets/apt/y2_1pa_010692_20250114110124.jpeg":
-        return require("../assets/apt/y2_1pa_010692_20250114110124.jpeg");
-      case "../assets/apt/y2_1pa_010920_20250114110124.jpeg":
-        return require("../assets/apt/y2_1pa_010920_20250114110124.jpeg");
-      default:
-        return null;
-    }
+  const { address, images, aboutApartment, tags, user } = apartment;
+
+  const position = useRef(new Animated.ValueXY()).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
+      onPanResponderMove: (_, gesture) => {
+        position.setValue({ x: gesture.dx, y: 0 });
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dx > 120) {
+          // Swipe right for like
+          triggerSwipeAnimation("like");
+        } else if (gesture.dx < -120) {
+          // Swipe left for dislike
+          triggerSwipeAnimation("dislike");
+        } else {
+          // Reset position if swipe is too short
+          Animated.spring(position, {
+            toValue: { x: 0, y: 0 },
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const triggerSwipeAnimation = (direction) => {
+    const x = direction === "like" ? 500 : -500; // Move off-screen
+    Animated.timing(position, {
+      toValue: { x, y: 0 },
+      duration: 250,
+      useNativeDriver: false,
+    }).start(() => {
+      onSwipe(direction); // Notify the parent
+      position.setValue({ x: 0, y: 0 }); // Reset for the next apartment
+    });
   };
+
   return (
-    <ScrollView
-      style={styles.scrollView}
-      contentContainerStyle={styles.contentContainer}
+    <Animated.View
+      {...panResponder.panHandlers}
+      style={[
+        styles.card,
+        {
+          transform: [
+            { translateX: position.x },
+            {
+              rotate: position.x.interpolate({
+                inputRange: [-500, 0, 500],
+                outputRange: ["-10deg", "0deg", "10deg"],
+              }),
+            },
+          ],
+        },
+      ]}
     >
-      {/* Address Header */}
-      <View style={styles.headerContainer}>
-        <MaterialCommunityIcons
-          name="map-marker"
-          size={24}
-          color="black"
-          style={styles.gpsIcon}
-        />
-        <Text style={styles.addressHeader}>{address}</Text>
-      </View>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <View style={styles.headerContainer}>
+          <MaterialCommunityIcons
+            name="map-marker"
+            size={24}
+            color="black"
+            style={styles.gpsIcon}
+          />
+          <Text style={styles.addressHeader}>{address}</Text>
+        </View>
 
-      {/* Image Displayer */}
-      <View style={styles.imageDisplayerContainer}>
-        <ImageDisplayer
-          images={images.map((image) => resolveAsset(image))}
-          isLocal={true}
-        />
-      </View>
+        <View style={styles.imageDisplayerContainer}>
+          <ImageDisplayer images={images} isLocal={true} />
+        </View>
 
-      {/* About Apartment */}
-      <View style={styles.aboutContainer}>
-        <Text style={styles.textHeader}> אודות הדירה </Text>
-        <Text style={styles.text}>{aboutApartment}</Text>
-      </View>
+        <View style={styles.aboutContainer}>
+          <Text style={styles.textHeader}>אודות הדירה</Text>
+          <Text style={styles.text}>{aboutApartment}</Text>
+        </View>
 
-      {/* Tags */}
-      <View style={styles.tagsContainer}>
-        <SearchTags tags={tags} selectedTags={tags} />
-      </View>
+        <View style={styles.tagsContainer}>
+          <SearchTags tags={tags} selectedTags={tags} />
+        </View>
 
-      {/* User Info */}
-      <View style={styles.userContainer}>
-        <UserDisplayer
-          avatarSource={resolveAsset(user.image)}
-          name={user.name}
-          facebookLink={user.link}
-        />
-      </View>
+        <View style={styles.userContainer}>
+          <UserDisplayer
+            avatarSource={user.image}
+            name={user.name}
+            facebookLink={user.link}
+          />
+        </View>
 
-      {/* Like and Dislike Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.dislikeButton]}
-          onPress={() => console.log("Disliked")}
-        >
-          <MaterialCommunityIcons name="heart-broken" size={30} color="red" />
-        </TouchableOpacity>
+        {/* Like and Dislike Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.dislikeButton]}
+            onPress={() => triggerSwipeAnimation("dislike")}
+          >
+            <MaterialCommunityIcons name="heart-broken" size={30} color="red" />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.actionButton, styles.likeButton]}
-          onPress={() => console.log("Liked")}
-        >
-          <MaterialCommunityIcons name="heart" size={30} color="#039912" />
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.likeButton]}
+            onPress={() => triggerSwipeAnimation("like")}
+          >
+            <MaterialCommunityIcons name="heart" size={30} color="#039912" />
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </Animated.View>
   );
 };
 
@@ -105,6 +137,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
+    paddingTop: 40,
   },
   headerContainer: {
     flexDirection: "row",
@@ -136,6 +169,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     marginBottom: 20,
+    paddingHorizontal: 15,
     elevation: 7,
   },
   textHeader: {
@@ -175,5 +209,12 @@ const styles = StyleSheet.create({
   likeButton: {
     borderColor: "#039912",
   },
+  card: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    elevation: 5,
+  },
 });
+
 export default SwipeScreen;

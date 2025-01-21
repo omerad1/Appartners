@@ -24,7 +24,7 @@ const ImageDisplayer = ({ images }) => {
       <View style={styles.imageContainer}>
         <View style={styles.imageWrapper}>
           <Image
-            source={images[currentIndex]}
+            source={{ uri: images[currentIndex] }}
             style={styles.image}
             resizeMode="cover"
           />

@@ -30,7 +30,11 @@ const UserDisplayer = ({ avatarSource, name, facebookLink }) => {
       </View>
 
       {/* Avatar Section */}
-      <Avatar.Image size={80} source={avatarSource} style={styles.avatar} />
+      <Avatar.Image
+        size={80}
+        source={{ uri: avatarSource }}
+        style={styles.avatar}
+      />
     </View>
   );
 };
