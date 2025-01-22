@@ -20,7 +20,9 @@ const ApartmentScreen = () => {
   const navigation = useNavigation();
 
   const handleAddApartment = () => {
-    navigation.navigate("CreateApartment");
+    if (apartments.length <= 3) {
+      navigation.navigate("CreateApartment");
+    }
   };
 
   const handleDelete = (id) => {
@@ -30,7 +32,6 @@ const ApartmentScreen = () => {
 
   const handleEdit = (id) => {
     console.log(`Edit Apartment with ID: ${id}`);
-    // Logic for editing the apartment (e.g., opening a modal or form)
   };
 
   const handleView = (id) => {
@@ -38,6 +39,8 @@ const ApartmentScreen = () => {
     setSelectedApartment(apartment);
     setModalVisible(true);
   };
+
+  const isAddButtonDisabled = apartments.length > 3;
 
   return (
     <View style={styles.container}>
@@ -54,7 +57,7 @@ const ApartmentScreen = () => {
                 <Card key={apartment.id} style={styles.card}>
                   {/* Card Cover */}
                   <Card.Cover
-                    source={require("../../assets/apt/y2_1pa_010214_20250114110125.jpeg")} // Adjust image logic as needed
+                    source={{ uri: apartment.images[0] }} // Adjust image logic as needed
                     style={styles.cardImage}
                   />
 
@@ -67,9 +70,9 @@ const ApartmentScreen = () => {
                       תאריך העלאה: {apartment.uploadDate}
                     </Paragraph>
                     <Paragraph style={styles.descriptionText}>
-                      {apartment.description.length > 50
-                        ? `${apartment.description.substring(0, 50)}...`
-                        : apartment.description}
+                      {apartment.aboutApartment.length > 50
+                        ? `${apartment.aboutApartment.substring(0, 50)}...`
+                        : apartment.aboutApartment}
                     </Paragraph>
                   </Card.Content>
 
@@ -94,36 +97,35 @@ const ApartmentScreen = () => {
                 </Card>
               ))}
             </View>
-
-            {/* Plus Button for Adding Apartments */}
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAddApartment}
-            >
-              <Ionicons name="add" size={40} color="white" />
-            </TouchableOpacity>
           </>
         ) : (
           <View style={styles.noApartmentsContainer}>
             <Text style={styles.noApartmentsText}>לא הועלו דירות עדיין</Text>
-            {/* Plus Button for Adding Apartments */}
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAddApartment}
-            >
-              <Ionicons name="add" size={40} color="white" />
-            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
 
-      {/* Modal Component */}
+      {/* Plus Button for Adding Apartments */}
+      <View style={styles.addButtonContainer}>
+        <TouchableOpacity
+          style={[
+            styles.addButton,
+            isAddButtonDisabled && styles.disabledButton,
+          ]}
+          onPress={handleAddApartment}
+          disabled={isAddButtonDisabled}
+        >
+          <Ionicons name="add" size={40} color="white" />
+        </TouchableOpacity>
+      </View>
 
+      {/* Modal Component */}
       {selectedApartment && (
         <View style={styles.modalContainer}>
           <ModalApartmentDisplayer
             visible={modalVisible}
             onClose={() => setModalVisible(false)}
+            apartment={selectedApartment}
           />
         </View>
       )}
@@ -181,10 +183,14 @@ const styles = StyleSheet.create({
     color: "gray",
     marginBottom: 20,
   },
-  addButton: {
+  addButtonContainer: {
     position: "absolute",
     bottom: 20,
-    right: 20,
+    left: 0,
+    right: 0,
+    alignItems: "center", // Center horizontally
+  },
+  addButton: {
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -192,6 +198,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5, // Adds shadow on Android
+  },
+  disabledButton: {
+    backgroundColor: "gray", // Lighter color to indicate it's disabled
   },
   actions: {
     flexDirection: "row", // RTL alignment for action buttons

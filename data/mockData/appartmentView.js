@@ -19,6 +19,9 @@ export const appartmentView = [
       name: "מונקי די לופי",
       link: "https://www.facebook.com/avi.nusbom",
     },
+    price: 6000,
+    rooms: 3,
+    availableRooms: 2,
   },
   {
     address: "הלל הזקן 25",
@@ -31,7 +34,7 @@ export const appartmentView = [
       "https://img.yad2.co.il/Pic/202501/18/2_2/o/y2_1pa_010657_20250118203142.jpeg?w=384&h=384&c=9",
     ],
     aboutApartment:
-      "דירת 3 חדרים מהממת בלב שכונת מגורים יוקרתית. מטבח מרווח, סלון פתוח ותחושה ביתית ומזמינה. קרובה לגנים ציבוריים, בתי ספר ומרכזי קניות.",
+      "דירת 3 חדרים מהממת בלב שכונת מגורים יוקרתית. מטבח מרווח, סלון פתוח ותחושה ביתית ומזמינה.",
     tags: ["Elevator", "Balcony", "Renovated"],
     user: {
       image:
@@ -39,6 +42,9 @@ export const appartmentView = [
       name: " רורונאה זורו",
       link: "https://www.facebook.com/lea.cohen",
     },
+    price: 4500,
+    rooms: 3,
+    availableRooms: 1,
   },
   {
     address: "רחוב הרצל 18",
@@ -49,7 +55,7 @@ export const appartmentView = [
       "https://www.yad2.co.il/realestate/item/2z2kpfm9?opened-from=feed&component-type=main_feed&spot=standard&location=4#galleryModal-grid-swiper-item-3",
     ],
     aboutApartment:
-      "דירה מיוחדת בסגנון אירופי קלאסי, מעוצבת בסטנדרט גבוה. מתאימה לזוגות ומשפחות קטנות. קרבה לתחבורה ציבורית ולמסעדות בעיר.",
+      "דירה מיוחדת בסגנון אירופי קלאסי, מעוצבת בסטנדרט גבוה. מתאימה לזוגות ומשפחות קטנות.",
     tags: ["Parking", "Pets Allowed", "Storage"],
     user: {
       image:
@@ -57,6 +63,9 @@ export const appartmentView = [
       name: "נאמי",
       link: "https://www.facebook.com/ben.dkl",
     },
+    price: 4000,
+    rooms: 3,
+    availableRooms: 1,
   },
   {
     address: "רחוב הנביאים 9",
@@ -68,7 +77,7 @@ export const appartmentView = [
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_5_09985_20250111104500.jpeg?w=384&h=384&c=9",
     ],
     aboutApartment:
-      "דירת גן נדירה במיקום מצוין. חצר פרטית, מטבח מודרני וקרבה למוסדות תרבות וחינוך. חוויה מושלמת למשפחות.",
+      "דירת גן נדירה במיקום מצוין. חצר פרטית, מטבח מודרני וקרבה למוסדות תרבות וחינוך.",
     tags: ["Garden", "Balcony", "Renovated"],
     user: {
       image:
@@ -76,6 +85,9 @@ export const appartmentView = [
       name: "ניקו רובין",
       link: "https://www.facebook.com/michal.levi",
     },
+    price: 6000,
+    rooms: 4,
+    availableRooms: 3,
   },
   {
     address: "רוטשילד 45",
@@ -84,7 +96,6 @@ export const appartmentView = [
       "https://img.yad2.co.il/Pic/202501/09/2_2/o/y2_5_06255_20250109145756.jpeg?w=384&h=384&c=9",
       "https://img.yad2.co.il/Pic/202501/09/2_2/o/y2_6_04057_20250109145759.jpeg?w=384&h=384&c=9",
       "https://img.yad2.co.il/Pic/202501/09/2_2/o/y2_7_07228_20250109145803.jpeg?w=1080&h=1080&c=9",
-      "https://img.yad2.co.il/Pic/202501/09/2_2/o/y2_10_03154_20250109145846.jpeg?w=1080&h=1080&c=9",
     ],
     aboutApartment:
       "פנטהאוז עם נוף פנורמי לעיר, גג פרטי מרהיב ומרחב עצום. חוויה מפוארת בלב העיר.",
@@ -95,6 +106,9 @@ export const appartmentView = [
       name: "פראנקי",
       link: "https://www.facebook.com/ron.kaplan",
     },
+    price: 7600,
+    rooms: 5,
+    availableRooms: 4,
   },
   {
     address: "דרך השלום 3",
@@ -102,8 +116,6 @@ export const appartmentView = [
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_1_07759_20250111104442.jpeg?w=1080&h=1080&c=9",
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_2_02306_20250111104446.jpeg?w=640&h=640&c=9",
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_3_04919_20250111104451.jpeg?w=640&h=640&c=9",
-      "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_4_09239_20250111104455.jpeg?w=1080&h=1080&c=9",
-      "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_5_09985_20250111104500.jpeg?w=384&h=384&c=9",
     ],
     aboutApartment:
       "דירה נעימה באזור ירוק ושקט. מטבח חדש, סלון פתוח וגינה משותפת. קרובה לפארקים ולתחבורה ציבורית.",
@@ -114,6 +126,9 @@ export const appartmentView = [
       name: "אוסופ",
       link: "https://www.facebook.com/sara.geva",
     },
+    price: 5000,
+    rooms: 3,
+    availableRooms: 2,
   },
   {
     address: "רחוב הזית 12",
@@ -121,10 +136,6 @@ export const appartmentView = [
       "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010826_20250119153240.jpeg?w=1200&h=1200&c=9",
       "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010208_20250119153238.jpeg?w=640&h=640&c=9",
       "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010433_20250119153238.jpeg?w=640&h=640&c=9",
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010455_20250119153239.jpeg?w=1200&h=1200&c=9",
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010306_20250119153239.jpeg?w=384&h=384&c=9",
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010384_20250119153238.jpeg?w=384&h=384&c=9",
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010007_20250119153244.jpeg?w=1200&h=1200&c=9",
     ],
     aboutApartment: "דירת 2 חדרים כפרית באזור מושבים. מרפסת קטנה ונוף פסטורלי.",
     tags: ["Quiet Area", "Balcony", "Pets Allowed"],
@@ -134,14 +145,15 @@ export const appartmentView = [
       name: "טוני טוני צ'ופר",
       link: "https://www.facebook.com/dan.brk",
     },
+    price: 3000,
+    rooms: 2,
+    availableRooms: 1,
   },
   {
     address: "רחוב החורשה 21",
     images: [
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_1_07759_20250111104442.jpeg?w=1080&h=1080&c=9",
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_2_02306_20250111104446.jpeg?w=640&h=640&c=9",
-      "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_3_04919_20250111104451.jpeg?w=640&h=640&c=9",
-      "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_4_09239_20250111104455.jpeg?w=1080&h=1080&c=9",
     ],
     aboutApartment:
       "דירה חדשה עם 3 חדרים, מטבח פתוח וסלון מואר. קרבה למרכזי מסחר ובתי ספר.",
@@ -152,14 +164,15 @@ export const appartmentView = [
       name: "וינסמוק סאנג'י",
       link: "https://www.facebook.com/yael.shahar",
     },
+    price: 6000,
+    rooms: 3,
+    availableRooms: 1,
   },
   {
     address: "שדרות הנשיאים 7",
     images: [
       "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010455_20250119153239.jpeg?w=1200&h=1200&c=9",
       "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010306_20250119153239.jpeg?w=384&h=384&c=9",
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010384_20250119153238.jpeg?w=384&h=384&c=9",
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010007_20250119153244.jpeg?w=1200&h=1200&c=9",
     ],
     aboutApartment:
       "דירה קלאסית באחת השדרות היוקרתיות. עיצוב פנימי ייחודי עם דגש על פרטים קטנים.",
@@ -170,6 +183,9 @@ export const appartmentView = [
       name: "ברוק",
       link: "https://www.facebook.com/omer.shalev",
     },
+    price: 4000,
+    rooms: 3,
+    availableRooms: 2,
   },
   {
     address: "שוק מחנה יהודה 19",
@@ -177,8 +193,6 @@ export const appartmentView = [
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_2_02306_20250111104446.jpeg?w=640&h=640&c=9",
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_3_04919_20250111104451.jpeg?w=640&h=640&c=9",
       "https://img.yad2.co.il/Pic/202501/11/2_2/o/y2_4_09239_20250111104455.jpeg?w=1080&h=1080&c=9",
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010306_20250119153239.jpeg?w=384&h=384&c=9",
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010384_20250119153238.jpeg?w=384&h=384&c=9",
     ],
     aboutApartment:
       "לופט יוקרתי ומרווח ליד השוק. שילוב של מודרני ואותנטי. קרוב למסעדות וחיי לילה.",
@@ -189,5 +203,8 @@ export const appartmentView = [
       name: "ג'ימבי",
       link: "https://www.facebook.com/noa.shmuel",
     },
+    price: 6000,
+    rooms: 4,
+    availableRooms: 3,
   },
 ];
