@@ -40,7 +40,7 @@ const ApartmentScreen = () => {
     setModalVisible(true);
   };
 
-  const isAddButtonDisabled = apartments.length > 3;
+  const isAddButtonDisabled = apartments.length > 2;
 
   return (
     <View style={styles.container}>
@@ -54,47 +54,49 @@ const ApartmentScreen = () => {
           <>
             <View style={styles.cardWrapper}>
               {apartments.map((apartment) => (
-                <Card key={apartment.id} style={styles.card}>
-                  {/* Card Cover */}
-                  <Card.Cover
-                    source={{ uri: apartment.images[0] }} // Adjust image logic as needed
-                    style={styles.cardImage}
-                  />
+                <View key={apartment.id} style={styles.cardContainer}>
+                  <Card style={styles.card}>
+                    {/* Card Cover */}
+                    <Card.Cover
+                      source={{ uri: apartment.images[0] }} // Adjust image logic as needed
+                      style={styles.cardImage}
+                    />
 
-                  {/* Card Content */}
-                  <Card.Content>
-                    <Paragraph style={styles.cardAddress}>
-                      {apartment.address}
-                    </Paragraph>
-                    <Paragraph style={styles.dateText}>
-                      תאריך העלאה: {apartment.uploadDate}
-                    </Paragraph>
-                    <Paragraph style={styles.descriptionText}>
-                      {apartment.aboutApartment.length > 50
-                        ? `${apartment.aboutApartment.substring(0, 50)}...`
-                        : apartment.aboutApartment}
-                    </Paragraph>
-                  </Card.Content>
+                    {/* Card Content */}
+                    <Card.Content>
+                      <Paragraph style={styles.cardAddress}>
+                        {apartment.address}
+                      </Paragraph>
+                      <Paragraph style={styles.dateText}>
+                        תאריך העלאה: {apartment.uploadDate}
+                      </Paragraph>
+                      <Paragraph style={styles.descriptionText}>
+                        {apartment.aboutApartment.length > 50
+                          ? `${apartment.aboutApartment.substring(0, 50)}...`
+                          : apartment.aboutApartment}
+                      </Paragraph>
+                    </Card.Content>
 
-                  {/* Action Buttons */}
-                  <Card.Actions style={styles.actions}>
-                    <IconButton
-                      icon="eye"
-                      size={24}
-                      onPress={() => handleView(apartment.id)}
-                    />
-                    <IconButton
-                      icon="pencil"
-                      size={24}
-                      onPress={() => handleEdit(apartment.id)}
-                    />
-                    <IconButton
-                      icon="trash-can"
-                      size={24}
-                      onPress={() => handleDelete(apartment.id)}
-                    />
-                  </Card.Actions>
-                </Card>
+                    {/* Action Buttons */}
+                    <Card.Actions style={styles.actions}>
+                      <IconButton
+                        icon="eye"
+                        size={24}
+                        onPress={() => handleView(apartment.id)}
+                      />
+                      <IconButton
+                        icon="pencil"
+                        size={24}
+                        onPress={() => handleEdit(apartment.id)}
+                      />
+                      <IconButton
+                        icon="trash-can"
+                        size={24}
+                        onPress={() => handleDelete(apartment.id)}
+                      />
+                    </Card.Actions>
+                  </Card>
+                </View>
               ))}
             </View>
           </>
@@ -103,21 +105,21 @@ const ApartmentScreen = () => {
             <Text style={styles.noApartmentsText}>לא הועלו דירות עדיין</Text>
           </View>
         )}
-      </ScrollView>
 
-      {/* Plus Button for Adding Apartments */}
-      <View style={styles.addButtonContainer}>
-        <TouchableOpacity
-          style={[
-            styles.addButton,
-            isAddButtonDisabled && styles.disabledButton,
-          ]}
-          onPress={handleAddApartment}
-          disabled={isAddButtonDisabled}
-        >
-          <Ionicons name="add" size={40} color="white" />
-        </TouchableOpacity>
-      </View>
+        {/* Plus Button for Adding Apartments */}
+        <View style={styles.addButtonWrapper}>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              isAddButtonDisabled && styles.disabledButton,
+            ]}
+            onPress={handleAddApartment}
+            disabled={isAddButtonDisabled}
+          >
+            <Ionicons name="add" size={40} color="white" />
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       {/* Modal Component */}
       {selectedApartment && (
@@ -142,12 +144,14 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   scrollContainer: {
-    paddingBottom: 100, // Ensure space for the floating add button
+    paddingBottom: 20, // Ensures proper spacing at the bottom
   },
   cardWrapper: {
-    marginBottom: 15,
+    gap: 15, // Adds spacing between cards
+  },
+  cardContainer: {
     borderRadius: 10,
-    overflow: "hidden", // Ensures content stays within rounded corners
+    overflow: "hidden", // Moves overflow style here to avoid shadow issues
     elevation: 4, // Adds shadow on Android
   },
   card: {
@@ -183,11 +187,8 @@ const styles = StyleSheet.create({
     color: "gray",
     marginBottom: 20,
   },
-  addButtonContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 0,
-    right: 0,
+  addButtonWrapper: {
+    marginTop: 20, // Space above the button
     alignItems: "center", // Center horizontally
   },
   addButton: {
