@@ -20,6 +20,8 @@ const ApartmentScreen = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
 
+  const isAddButtonDisabled = apartments.length >= 3; // Disable button if 3 or more apartments
+
   useEffect(() => {
     const fetchApartments = async () => {
       try {
@@ -39,8 +41,9 @@ const ApartmentScreen = () => {
 
     fetchApartments();
   }, []);
+
   const handleAddApartment = () => {
-    if (apartments.length <= 3) {
+    if (!isAddButtonDisabled) {
       navigation.navigate("CreateApartment");
     }
   };
@@ -52,6 +55,7 @@ const ApartmentScreen = () => {
 
   const handleEdit = (id) => {
     console.log(`Edit Apartment with ID: ${id}`);
+    // Logic for editing the apartment
   };
 
   const handleView = (id) => {
@@ -77,60 +81,54 @@ const ApartmentScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Apartment Cards or No Apartments Message */}
         {apartments.length > 0 ? (
-          <>
-            <View style={styles.cardWrapper}>
-              {apartments.map((apartment) => (
-                <Card key={apartment.id} style={styles.card}>
-                  {/* Card Cover */}
-                  <Card.Cover
-                    source={{ uri: apartment.photo }} // Adjust image logic as needed
-                    style={styles.cardImage}
+          <View style={styles.cardWrapper}>
+            {apartments.map((apartment) => (
+              <Card key={apartment.id} style={styles.card}>
+                {/* Card Cover */}
+                <Card.Cover
+                  source={{ uri: apartment.photo }}
+                  style={styles.cardImage}
+                />
+                {/* Card Content */}
+                <Card.Content>
+                  <Paragraph style={styles.cardAddress}>
+                    {apartment.address}
+                  </Paragraph>
+                  <Paragraph style={styles.dateText}>
+                    תאריך העלאה: {apartment.uploadDate}
+                  </Paragraph>
+                  <Paragraph style={styles.descriptionText}>
+                    {apartment.about.length > 50
+                      ? `${apartment.about.substring(0, 50)}...`
+                      : apartment.about}
+                  </Paragraph>
+                </Card.Content>
+                {/* Action Buttons */}
+                <Card.Actions style={styles.actions}>
+                  <IconButton
+                    icon="eye"
+                    size={24}
+                    onPress={() => handleView(apartment.id)}
                   />
-
-                    {/* Card Content */}
-                    <Card.Content>
-                      <Paragraph style={styles.cardAddress}>
-                        {apartment.address}
-                      </Paragraph>
-                      <Paragraph style={styles.dateText}>
-                        תאריך העלאה: {apartment.uploadDate}
-                      </Paragraph>
-                      <Paragraph style={styles.descriptionText}>
-                        {apartment.aboutApartment.length > 50
-                          ? `${apartment.aboutApartment.substring(0, 50)}...`
-                          : apartment.aboutApartment}
-                      </Paragraph>
-                    </Card.Content>
-
-                    {/* Action Buttons */}
-                    <Card.Actions style={styles.actions}>
-                      <IconButton
-                        icon="eye"
-                        size={24}
-                        onPress={() => handleView(apartment.id)}
-                      />
-                      <IconButton
-                        icon="pencil"
-                        size={24}
-                        onPress={() => handleEdit(apartment.id)}
-                      />
-                      <IconButton
-                        icon="trash-can"
-                        size={24}
-                        onPress={() => handleDelete(apartment.id)}
-                      />
-                    </Card.Actions>
-                  </Card>
-                </View>
-              ))}
-            </View>
-          </>
+                  <IconButton
+                    icon="pencil"
+                    size={24}
+                    onPress={() => handleEdit(apartment.id)}
+                  />
+                  <IconButton
+                    icon="trash-can"
+                    size={24}
+                    onPress={() => handleDelete(apartment.id)}
+                  />
+                </Card.Actions>
+              </Card>
+            ))}
+          </View>
         ) : (
           <View style={styles.noApartmentsContainer}>
             <Text style={styles.noApartmentsText}>לא הועלו דירות עדיין</Text>
           </View>
         )}
-
         {/* Plus Button for Adding Apartments */}
         <View style={styles.addButtonWrapper}>
           <TouchableOpacity
@@ -145,16 +143,13 @@ const ApartmentScreen = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
       {/* Modal Component */}
       {selectedApartment && (
-        <View style={styles.modalContainer}>
-          <ModalApartmentDisplayer
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            apartment={selectedApartment}
-          />
-        </View>
+        <ModalApartmentDisplayer
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          apartment={selectedApartment}
+        />
       )}
     </View>
   );
