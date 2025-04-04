@@ -6,7 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { Card, Paragraph, IconButton } from "react-native-paper";
+import {
+  Card,
+  Paragraph,
+  IconButton,
+  ActivityIndicator,
+} from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Title from "../../components/Title"; // Import your custom Title component
 import { useNavigation } from "@react-navigation/native";
@@ -20,20 +25,31 @@ const ApartmentScreen = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
 
-  const isAddButtonDisabled = apartments.length >= 3; // Disable button if 3 or more apartments
-
   useEffect(() => {
     const fetchApartments = async () => {
       try {
         const data = await getUserApartments();
         console.log("Fetched apartments:", data);
-        console.log("Number of apartments:", data.length); // Log the data.length
-        setApartments(data);
+        // Ensure data is an array before setting it
+        if (Array.isArray(data)) {
+          console.log("Number of apartments:", data.length);
+          setApartments(data);
+        } else if (data) {
+          // If data is not an array but exists, convert it to an array
+          const dataArray = [data].filter(Boolean);
+          console.log("Number of apartments:", dataArray.length);
+          setApartments(dataArray);
+        } else {
+          // If data is null or undefined, set empty array
+          console.log("No apartments data received");
+          setApartments([]);
+        }
       } catch (error) {
         console.error(
           "Failed to load apartments:",
           error.response?.data?.detail || error.message
         );
+        setApartments([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
@@ -63,14 +79,7 @@ const ApartmentScreen = () => {
     setSelectedApartment(apartment);
     setModalVisible(true);
   };
-
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text>טוען דירות...</Text>
-      </View>
-    );
-  }
+  let isAddButtonDisabled = null;
 
   return (
     <View style={styles.container}>
@@ -79,11 +88,18 @@ const ApartmentScreen = () => {
         <Title style={styles.title}>הדירות שלי</Title>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Apartment Cards or No Apartments Message */}
-        {apartments.length > 0 ? (
+        {/* Apartment Cards or Loading Indicator */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" />
+          </View>
+        ) : apartments?.length > 0 ? (
           <View style={styles.cardWrapper}>
-            {apartments.map((apartment) => (
-              <Card key={apartment.id} style={styles.card}>
+            {apartments.map((apartment, index) => (
+              <Card
+                key={apartment.id}
+                style={[styles.card, index === 0 && styles.firstCard]}
+              >
                 {/* Card Cover */}
                 <Card.Cover
                   source={{ uri: apartment.photo }}
@@ -92,15 +108,15 @@ const ApartmentScreen = () => {
                 {/* Card Content */}
                 <Card.Content>
                   <Paragraph style={styles.cardAddress}>
-                    {apartment.address}
+                    {apartment.street} {apartment.house_number}
                   </Paragraph>
                   <Paragraph style={styles.dateText}>
-                    תאריך העלאה: {apartment.uploadDate}
+                    תאריך העלאה: {apartment.created_at.split("T")[0]}
                   </Paragraph>
                   <Paragraph style={styles.descriptionText}>
-                    {apartment.about.length > 50
+                    {apartment.about && apartment.about.length > 50
                       ? `${apartment.about.substring(0, 50)}...`
-                      : apartment.about}
+                      : apartment.about || "לא נכתב תיאור"}
                   </Paragraph>
                 </Card.Content>
                 {/* Action Buttons */}
@@ -126,22 +142,22 @@ const ApartmentScreen = () => {
           </View>
         ) : (
           <View style={styles.noApartmentsContainer}>
-            <Text style={styles.noApartmentsText}>לא הועלו דירות עדיין</Text>
+            <Text style={styles.noApartmentsText}>אין לך דירות עדיין</Text>
+            {/* Plus Button for Adding Apartments */}
+            <View style={styles.addButtonWrapper}>
+              <TouchableOpacity
+                style={[
+                  styles.addButton,
+                  isAddButtonDisabled && styles.disabledButton,
+                ]}
+                onPress={handleAddApartment}
+                disabled={isAddButtonDisabled}
+              >
+                <Ionicons name="add" size={40} color="white" />
+              </TouchableOpacity>
+            </View>
           </View>
         )}
-        {/* Plus Button for Adding Apartments */}
-        <View style={styles.addButtonWrapper}>
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              isAddButtonDisabled && styles.disabledButton,
-            ]}
-            onPress={handleAddApartment}
-            disabled={isAddButtonDisabled}
-          >
-            <Ionicons name="add" size={40} color="white" />
-          </TouchableOpacity>
-        </View>
       </ScrollView>
       {/* Modal Component */}
       {selectedApartment && (
@@ -176,6 +192,9 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: "column",
+  },
+  firstCard: {
+    marginTop: 10, // Adds margin to the top card
   },
   cardImage: {
     height: 150, // Fixed height for consistent layout
@@ -236,5 +255,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     overflow: "visible",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 200, // Ensures the loader is visible even when there's no content
   },
 });

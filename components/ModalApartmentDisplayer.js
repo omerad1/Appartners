@@ -11,7 +11,22 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import ImageDisplayer from "./ImageDisplayer";
 import SearchTags from "./SearchTags";
 
-const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
+const ModalApartmentDisplayer = ({ visible, onClose, apartment = {} }) => {
+  const {
+    address = `${apartment.street} ${apartment.house_number}`,
+    images = [
+      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010826_20250119153240.jpeg?w=1200&h=1200&c=9",
+    ],
+    aboutApartment = apartment.about || "אין תיאור",
+    tags = [],
+    feature_details = [],
+  } = apartment;
+
+  // Log feature_details to see its structure
+  console.log("Feature Details:", feature_details);
+
+  const featureTags = feature_details.map((feature) => feature.name);
+
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalContainer}>
@@ -34,23 +49,27 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
                 color="black"
                 style={styles.gpsIcon}
               />
-              <Text style={styles.addressHeader}>{apartment.address}</Text>
+              <Text style={styles.addressHeader}>{address}</Text>
             </View>
 
             {/* Image Displayer */}
             <View style={styles.imageDisplayerContainer}>
-              <ImageDisplayer images={apartment.images} isLocal={false} />
+              <ImageDisplayer images={images} isLocal={false} />
             </View>
 
             {/* About Apartment */}
             <View style={styles.aboutContainer}>
               <Text style={styles.textHeader}>אודות הדירה</Text>
-              <Text style={styles.text}>{apartment.aboutApartment}</Text>
+              <Text style={styles.text}>{aboutApartment}</Text>
             </View>
 
             {/* Tags */}
             <View style={styles.tagsContainer}>
-              <SearchTags tags={apartment.tags} selectedTags={apartment.tags} />
+              <Text style={styles.textHeader}>תגיות</Text>
+              <SearchTags
+                tags={[...tags, ...featureTags]}
+                selectedTags={[...tags, ...featureTags]}
+              />
             </View>
           </ScrollView>
         </View>
