@@ -8,8 +8,10 @@ export const validateUnique = async (email, phone) => {
   return res.data;
 };
 
-export const registerUser = async( details ) => {
-  const res = await api.post(endpoints.register, details)
-  console.log("Validation successful:", res.data);
-  return res.data;
-}
+export const registerUser = async (details) => {
+  const res = await api.post(endpoints.register, details);
+  if (res.status !== 200) {
+    return res.data;
+  }
+  asyncStorage.setItem("authToken", res.data.UserAuth);
+};

@@ -31,12 +31,12 @@ const ApartmentScreen = () => {
         const data = await getUserApartments();
         console.log("Fetched apartments:", data);
         // Ensure data is an array before setting it
-        if (Array.isArray(data)) {
+        if (Array.isArray(data.apartments)) {
           console.log("Number of apartments:", data.length);
-          setApartments(data);
+          setApartments(data.apartments);
         } else if (data) {
           // If data is not an array but exists, convert it to an array
-          const dataArray = [data].filter(Boolean);
+          const dataArray = [data.apartments].filter(Boolean);
           console.log("Number of apartments:", dataArray.length);
           setApartments(dataArray);
         } else {
