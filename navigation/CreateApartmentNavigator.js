@@ -10,25 +10,39 @@ const stack = createStackNavigator();
 const CreateApartmentNavigator = () => {
   return (
     <stack.Navigator
+      initialRouteName="AddApartmentScreen"
       screenOptions={{
         headerShown: true,
+        headerBackTitle: "Back",
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+        presentation: 'card',
       }}
     >
       <stack.Screen
         name="AddApartmentScreen"
         component={AddApartmentScreen}
-        options={{ title: "Apt Details" }}
+        options={{ 
+          title: "Apt Details",
+          headerLeft: (props) => props.canGoBack ? props.defaultHandler : null
+        }}
       />
       <stack.Screen
         name="PropertyTagsScreen"
         component={PropertyTagsScreen}
-        options={{ title: "Property Tags" }}
-      ></stack.Screen>
+        options={{ 
+          title: "Property Tags",
+          headerLeft: (props) => props.canGoBack ? props.defaultHandler : null
+        }}
+      />
       <stack.Screen
         name="PhotosScreen"
         component={PhotosScreen}
-        options={{ title: "Photoes" }}
-      ></stack.Screen>
+        options={{ 
+          title: "Photos",
+          headerLeft: (props) => props.canGoBack ? props.defaultHandler : null
+        }}
+      />
     </stack.Navigator>
   );
 };

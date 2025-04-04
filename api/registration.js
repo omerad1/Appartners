@@ -7,3 +7,9 @@ export const validateUnique = async (email, phone) => {
   console.log("Validation successful:", res.data);
   return res.data;
 };
+
+export const registerUser = async( details ) => {
+  const res = await api.post(endpoints.register, details)
+  console.log("Validation successful:", res.data);
+  return res.data;
+}

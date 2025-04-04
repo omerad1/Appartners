@@ -8,6 +8,8 @@ import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
 import { Snackbar } from "react-native-paper";
 import { validateUnique } from "../../api/registration";
 import { useState } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { updateOnboardingData } from '../../store/redux/slices/onboardingSlice';
 
 // Yup schema for required email & phone
 const schema = yup.object().shape({
@@ -17,14 +19,22 @@ const schema = yup.object().shape({
     .required("Email is required"),
   phoneNumber: yup
     .string()
-    .matches(/^[0-9]{9,10}$/, "Invalid phone number, sjould be 10 digits")
+    .matches(/^[0-9]{9,10}$/, "Invalid phone number, should be 10 digits")
     .required("Phone number is required"),
 });
 
 const StepOne = () => {
+  const dispatch = useDispatch();
+  const { email, phoneNumber } = useSelector(state => state.onboarding);
+  
   const { control, handleSubmit } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      email: email || '',
+      phoneNumber: phoneNumber || '',
+    }
   });
+  
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
@@ -35,17 +45,20 @@ const StepOne = () => {
     try {
       await validateUnique(email, phoneNumber);
       console.log("✅ Email & phone are unique");
+      // Save to Redux store
+      dispatch(updateOnboardingData({ email, phoneNumber }));
       return true;
     } catch (err) {
       const errorMessage =
-        err.response?.data?.email || // Check API response for error message
-        err.response?.data?.phone || // Fallback to phone-specific error
-        "Invalid details."; // Default message
+        err.response?.data?.email ||
+        err.response?.data?.phone ||
+        "Invalid details.";
       setSnackbarMessage(errorMessage);
       setSnackbarVisible(true);
       return false;
     }
   };
+
   const submitAndValidate = () =>
     new Promise((resolve) => {
       handleSubmit(async (data) => {
@@ -53,6 +66,7 @@ const StepOne = () => {
         resolve(result);
       })();
     });
+
   return (
     <>
       <OnBoardingLayout
@@ -68,7 +82,9 @@ const StepOne = () => {
             <InputField
               placeholder="Email"
               type="email"
-              onChange={onChange}
+              onChange={(text) => {
+                onChange(text);
+              }}
               value={value}
               error={error?.message}
             />
@@ -81,7 +97,9 @@ const StepOne = () => {
             <InputField
               placeholder="Phone Number"
               type="tel"
-              onChange={onChange}
+              onChange={(text) => {
+                onChange(text);
+              }}
               value={value}
               error={error?.message}
             />
