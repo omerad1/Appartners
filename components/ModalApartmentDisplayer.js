@@ -12,18 +12,6 @@ import ImageDisplayer from "./ImageDisplayer";
 import SearchTags from "./SearchTags";
 
 const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
-  // Fictive apartment data
-  const dummyData = {
-    address: "רחוב הראשי 123",
-    images: [
-      "https://via.placeholder.com/300", // Replace with actual image URLs
-      "https://via.placeholder.com/300",
-    ],
-    aboutApartment:
-      "דירה יפהפייה עם 3 חדרי שינה, סלון מרווח ואבזור מודרני. מושלם למשפחות ואנשי מקצוע.",
-    tags: ["חנייה", 'ממ"ד', "מעלית", "מרפסת"],
-  };
-
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalContainer}>
@@ -46,23 +34,23 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
                 color="black"
                 style={styles.gpsIcon}
               />
-              <Text style={styles.addressHeader}>{dummyData.address}</Text>
+              <Text style={styles.addressHeader}>{apartment.address}</Text>
             </View>
 
             {/* Image Displayer */}
             <View style={styles.imageDisplayerContainer}>
-              <ImageDisplayer images={dummyData.images} isLocal={false} />
+              <ImageDisplayer images={apartment.images} isLocal={false} />
             </View>
 
             {/* About Apartment */}
             <View style={styles.aboutContainer}>
               <Text style={styles.textHeader}>אודות הדירה</Text>
-              <Text style={styles.text}>{dummyData.aboutApartment}</Text>
+              <Text style={styles.text}>{apartment.aboutApartment}</Text>
             </View>
 
             {/* Tags */}
             <View style={styles.tagsContainer}>
-              <SearchTags tags={dummyData.tags} selectedTags={dummyData.tags} />
+              <SearchTags tags={apartment.tags} selectedTags={apartment.tags} />
             </View>
           </ScrollView>
         </View>

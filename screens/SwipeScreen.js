@@ -16,7 +16,16 @@ import UserDisplayer from "../components/UserDisplayer";
 const SwipeScreen = (props) => {
   const { onSwipe, apartment } = props; // Prop to notify the parent of swipe action
 
-  const { address, images, aboutApartment, tags, user } = apartment;
+  const {
+    address,
+    images,
+    aboutApartment,
+    tags,
+    user,
+    price,
+    rooms,
+    availableRooms,
+  } = apartment;
 
   const position = useRef(new Animated.ValueXY()).current;
 
@@ -79,6 +88,7 @@ const SwipeScreen = (props) => {
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
       >
+        {/* Address Section */}
         <View style={styles.headerContainer}>
           <MaterialCommunityIcons
             name="map-marker"
@@ -89,19 +99,39 @@ const SwipeScreen = (props) => {
           <Text style={styles.addressHeader}>{address}</Text>
         </View>
 
+        {/* Images Section */}
         <View style={styles.imageDisplayerContainer}>
           <ImageDisplayer images={images} isLocal={true} />
         </View>
 
+        {/* About Section */}
         <View style={styles.aboutContainer}>
           <Text style={styles.textHeader}>אודות הדירה</Text>
           <Text style={styles.text}>{aboutApartment}</Text>
         </View>
 
+        {/* Details Section */}
+        <View style={styles.detailsContainer}>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Total Price:</Text>
+            <Text style={styles.detailValue}>₪{price.toLocaleString()}</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Number of Rooms:</Text>
+            <Text style={styles.detailValue}>{rooms}</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Available Rooms:</Text>
+            <Text style={styles.detailValue}>{availableRooms}</Text>
+          </View>
+        </View>
+
+        {/* Tags Section */}
         <View style={styles.tagsContainer}>
           <SearchTags tags={tags} selectedTags={tags} />
         </View>
 
+        {/* User Section */}
         <View style={styles.userContainer}>
           <UserDisplayer
             avatarSource={user.image}
@@ -137,7 +167,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    paddingTop: 40,
+    paddingTop: 20,
   },
   headerContainer: {
     flexDirection: "row",
@@ -182,6 +212,31 @@ const styles = StyleSheet.create({
     fontFamily: "comfortaaRegular",
     textAlign: "right",
     lineHeight: 24,
+  },
+  detailsContainer: {
+    marginBottom: 20,
+    backgroundColor: "rgba(245, 245, 245, 0.9)",
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 7,
+  },
+  detailItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  detailLabel: {
+    fontSize: 16,
+    fontFamily: "comfortaaSemiBold",
+    color: "#555",
+  },
+  detailValue: {
+    fontSize: 16,
+    fontFamily: "comfortaaRegular",
+    color: "#333",
   },
   tagsContainer: {
     marginBottom: 20,

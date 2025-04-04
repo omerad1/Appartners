@@ -40,7 +40,9 @@ const ApartmentScreen = () => {
     fetchApartments();
   }, []);
   const handleAddApartment = () => {
-    navigation.navigate("CreateApartment");
+    if (apartments.length <= 3) {
+      navigation.navigate("CreateApartment");
+    }
   };
 
   const handleDelete = (id) => {
@@ -50,7 +52,6 @@ const ApartmentScreen = () => {
 
   const handleEdit = (id) => {
     console.log(`Edit Apartment with ID: ${id}`);
-    // Logic for editing the apartment (e.g., opening a modal or form)
   };
 
   const handleView = (id) => {
@@ -86,72 +87,72 @@ const ApartmentScreen = () => {
                     style={styles.cardImage}
                   />
 
-                  {/* Card Content */}
-                  <Card.Content>
-                    <Paragraph style={styles.cardAddress}>
-                      {apartment.address}
-                    </Paragraph>
-                    <Paragraph style={styles.dateText}>
-                      תאריך העלאה: {apartment.uploadDate}
-                    </Paragraph>
-                    <Paragraph style={styles.descriptionText}>
-                      {apartment.description.length > 50
-                        ? `${apartment.description.substring(0, 50)}...`
-                        : apartment.description}
-                    </Paragraph>
-                  </Card.Content>
+                    {/* Card Content */}
+                    <Card.Content>
+                      <Paragraph style={styles.cardAddress}>
+                        {apartment.address}
+                      </Paragraph>
+                      <Paragraph style={styles.dateText}>
+                        תאריך העלאה: {apartment.uploadDate}
+                      </Paragraph>
+                      <Paragraph style={styles.descriptionText}>
+                        {apartment.aboutApartment.length > 50
+                          ? `${apartment.aboutApartment.substring(0, 50)}...`
+                          : apartment.aboutApartment}
+                      </Paragraph>
+                    </Card.Content>
 
-                  {/* Action Buttons */}
-                  <Card.Actions style={styles.actions}>
-                    <IconButton
-                      icon="eye"
-                      size={24}
-                      onPress={() => handleView(apartment.id)}
-                    />
-                    <IconButton
-                      icon="pencil"
-                      size={24}
-                      onPress={() => handleEdit(apartment.id)}
-                    />
-                    <IconButton
-                      icon="trash-can"
-                      size={24}
-                      onPress={() => handleDelete(apartment.id)}
-                    />
-                  </Card.Actions>
-                </Card>
+                    {/* Action Buttons */}
+                    <Card.Actions style={styles.actions}>
+                      <IconButton
+                        icon="eye"
+                        size={24}
+                        onPress={() => handleView(apartment.id)}
+                      />
+                      <IconButton
+                        icon="pencil"
+                        size={24}
+                        onPress={() => handleEdit(apartment.id)}
+                      />
+                      <IconButton
+                        icon="trash-can"
+                        size={24}
+                        onPress={() => handleDelete(apartment.id)}
+                      />
+                    </Card.Actions>
+                  </Card>
+                </View>
               ))}
             </View>
-
-            {/* Plus Button for Adding Apartments */}
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAddApartment}
-            >
-              <Ionicons name="add" size={40} color="white" />
-            </TouchableOpacity>
           </>
         ) : (
           <View style={styles.noApartmentsContainer}>
             <Text style={styles.noApartmentsText}>לא הועלו דירות עדיין</Text>
-            {/* Plus Button for Adding Apartments */}
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAddApartment}
-            >
-              <Ionicons name="add" size={40} color="white" />
-            </TouchableOpacity>
           </View>
         )}
+
+        {/* Plus Button for Adding Apartments */}
+        <View style={styles.addButtonWrapper}>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              isAddButtonDisabled && styles.disabledButton,
+            ]}
+            onPress={handleAddApartment}
+            disabled={isAddButtonDisabled}
+          >
+            <Ionicons name="add" size={40} color="white" />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* Modal Component */}
-
       {selectedApartment && (
         <View style={styles.modalContainer}>
           <ModalApartmentDisplayer
             visible={modalVisible}
             onClose={() => setModalVisible(false)}
+            apartment={selectedApartment}
           />
         </View>
       )}
@@ -168,12 +169,14 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   scrollContainer: {
-    paddingBottom: 100, // Ensure space for the floating add button
+    paddingBottom: 20, // Ensures proper spacing at the bottom
   },
   cardWrapper: {
-    marginBottom: 15,
+    gap: 15, // Adds spacing between cards
+  },
+  cardContainer: {
     borderRadius: 10,
-    overflow: "hidden", // Ensures content stays within rounded corners
+    overflow: "hidden", // Moves overflow style here to avoid shadow issues
     elevation: 4, // Adds shadow on Android
   },
   card: {
@@ -209,10 +212,11 @@ const styles = StyleSheet.create({
     color: "gray",
     marginBottom: 20,
   },
+  addButtonWrapper: {
+    marginTop: 20, // Space above the button
+    alignItems: "center", // Center horizontally
+  },
   addButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -220,6 +224,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5, // Adds shadow on Android
+  },
+  disabledButton: {
+    backgroundColor: "gray", // Lighter color to indicate it's disabled
   },
   actions: {
     flexDirection: "row", // RTL alignment for action buttons
