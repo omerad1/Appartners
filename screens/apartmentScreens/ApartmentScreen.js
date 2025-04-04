@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -9,16 +9,36 @@ import {
 import { Card, Paragraph, IconButton } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Title from "../../components/Title"; // Import your custom Title component
-import { myApartments } from "../../data/mockData/myApartments"; // Import mock data
 import { useNavigation } from "@react-navigation/native";
 import ModalApartmentDisplayer from "../../components/ModalApartmentDisplayer"; // Import the modal
+import { getUserApartments } from "../../api/myApartments"; // Import the function to fetch apartmentsapartment"; // Adjust the import path as needed
 
 const ApartmentScreen = () => {
-  const [apartments, setApartments] = useState(myApartments);
+  const [apartments, setApartments] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedApartment, setSelectedApartment] = useState(null);
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchApartments = async () => {
+      try {
+        const data = await getUserApartments();
+        console.log("Fetched apartments:", data);
+        console.log("Number of apartments:", data.length); // Log the data.length
+        setApartments(data);
+      } catch (error) {
+        console.error(
+          "Failed to load apartments:",
+          error.response?.data?.detail || error.message
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApartments();
+  }, []);
   const handleAddApartment = () => {
     navigation.navigate("CreateApartment");
   };
@@ -39,6 +59,14 @@ const ApartmentScreen = () => {
     setModalVisible(true);
   };
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>טוען דירות...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Title */}
@@ -54,7 +82,7 @@ const ApartmentScreen = () => {
                 <Card key={apartment.id} style={styles.card}>
                   {/* Card Cover */}
                   <Card.Cover
-                    source={require("../../assets/apt/y2_1pa_010214_20250114110125.jpeg")} // Adjust image logic as needed
+                    source={{ uri: apartment.photo }} // Adjust image logic as needed
                     style={styles.cardImage}
                   />
 

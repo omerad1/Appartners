@@ -110,11 +110,12 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 240,
     height: 240,
-    borderRadius: "100%",
+    borderRadius: 120,
     borderWidth: 7,
-    resizeMode: "fill",
+    resizeMode: "cover", // Use 'cover' for better image fit
     borderColor: "#d4af37", // Gold-like color for border
   },
+
   editButton: {
     position: "absolute",
     bottom: 10,

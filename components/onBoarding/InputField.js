@@ -1,26 +1,40 @@
 import { StyleSheet, View, TextInput, Text } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const InputField = ({ placeholder, type, onChange, label = false }) => {
-  const [enteredValue, setEnteredValue] = useState("");
+const InputField = ({
+  placeholder,
+  type,
+  onChange,
+  label = false,
+  value, // optional
+  error = null, // optional
+}) => {
+  const [internalValue, setInternalValue] = useState(value || "");
+
+  // Keep internal state in sync with controlled value (if provided)
+  useEffect(() => {
+    if (value !== undefined) {
+      setInternalValue(value);
+    }
+  }, [value]);
 
   const handleChange = (text) => {
-    setEnteredValue(text);
-    onChange(text);
+    setInternalValue(text);
+    onChange?.(text); // call onChange if provided
   };
 
   return (
     <View style={styles.container}>
-      {/* Display label if provided */}
       {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
-        style={styles.input}
+        style={[styles.input, error ? { borderColor: "red" } : null]}
         placeholder={placeholder}
         inputMode={type}
-        value={enteredValue}
+        value={internalValue}
         onChangeText={handleChange}
         placeholderTextColor={"rgba(0, 0, 0, 0.48)"}
       />
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 };

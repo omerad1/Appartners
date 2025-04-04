@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, ImageBackground } from "react-native";
+import { StyleSheet, View, ImageBackground, StatusBar } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
@@ -42,6 +42,7 @@ export default function App() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
+          <StatusBar barStyle="dark-content" />
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />

@@ -6,15 +6,52 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Alert,
 } from "react-native";
 import Title from "../components/Title";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
+import { login } from "../api/auth";
+
 const LoginScreen = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
+
+  // Handle login with the authAPI
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter both email and password");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await login(email, password);
+      console.log("Login successful:", response);
+
+      // Navigate to the main app if login is successful
+      if (response && response.UserAuth) {
+        // You might want to store the token and user data in a state management solution
+        // For now, we'll just navigate to the main app
+        navigation.navigate("MainApp");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      Alert.alert(
+        "Login Failed",
+        error.response?.data?.error ||
+          "Invalid email or password. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Logo */}
@@ -30,6 +67,8 @@ const LoginScreen = () => {
         keyboardType="email-address"
         autoCapitalize="none"
         autoFocus={true}
+        value={email}
+        onChangeText={setEmail}
       />
 
       {/* Password Input */}
@@ -38,6 +77,8 @@ const LoginScreen = () => {
           style={[styles.input, styles.passwordInput]}
           placeholder="Password"
           secureTextEntry={!passwordVisible}
+          value={password}
+          onChangeText={setPassword}
         />
         <TouchableOpacity
           style={styles.eyeIcon}
@@ -51,8 +92,14 @@ const LoginScreen = () => {
         </TouchableOpacity>
       </View>
       {/* Login Button */}
-      <TouchableOpacity style={styles.loginButton}>
-        <Text style={styles.loginButtonText}>Log in</Text>
+      <TouchableOpacity
+        style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+        onPress={handleLogin}
+        disabled={isLoading}
+      >
+        <Text style={styles.loginButtonText}>
+          {isLoading ? "Logging in..." : "Log in"}
+        </Text>
       </TouchableOpacity>
 
       {/* Forgot Password */}
@@ -86,7 +133,7 @@ const LoginScreen = () => {
       </TouchableOpacity>
 
       {/* Sign Up Link */}
-      <Text style={styles.signUpText}>Don’t have an account? </Text>
+      <Text style={styles.signUpText}>Don't have an account? </Text>
       <TouchableOpacity
         onPress={() => navigation.navigate("OnBoarding", { screen: "StepOne" })}
       >
@@ -137,6 +184,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
+  },
+  loginButtonDisabled: {
+    backgroundColor: "#666",
   },
   loginButtonText: {
     color: "#FFF",
@@ -199,7 +249,7 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     position: "absolute",
-    right: 10,
+    right: 15,
     top: 15,
   },
 });

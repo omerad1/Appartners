@@ -5,16 +5,17 @@ import { useNavigation } from "@react-navigation/native";
 const StepButton = ({ text, next, direction, onPress }) => {
   const navigation = useNavigation();
 
-  const handlePress = () => {
+  const handlePress = async () => {
     if (onPress) {
-      onPress();
+      const result = await onPress();
+      console.log("Button pressed, onPress result:", result);
+      if (!result) return; // Prevent navigation if onPress returns false
     }
+
     if (direction) {
       navigation.navigate("OnBoarding", { screen: direction });
     }
   };
-
-  // Decide which style to use based on the direction
   const buttonStyle = next ? styles.nextButton : styles.prevButton;
 
   return (
