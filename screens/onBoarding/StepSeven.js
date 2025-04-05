@@ -44,7 +44,7 @@ const StepSeven = () => {
         gender: onboardingData.gender,
         preferred_city: onboardingData.location,
         about_me: onboardingData.aboutMe,
-        userType: onboardingData.userType,
+        user_type: onboardingData.userType,
         photo: null,
       };
 
