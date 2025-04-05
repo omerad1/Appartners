@@ -1,19 +1,17 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import SwipeScreen from "../screens/SwipeScreen";
+import SwipeScreenWrapper from "../screens/SwipeScreenWrapper";
 import UserProfileScreen from "../screens/UserProfileScreen";
 import LikesScreen from "../screens/LikesScreen";
-import ChatScreen from "../screens/ChatScreen";
-import ScreenWrapper from "../components/ScreenWrapper";
 import { appartmentView } from "../data/mockData/appartmentView";
 
 import ApartmentScreen from "../screens/apartmentScreens/ApartmentScreen";
+import AllChatsScreen from "../screens/chatScreens/AllChatsScreen";
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
-  console.log(appartmentView);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -63,7 +61,7 @@ export default function TabNavigator() {
     >
       <Tab.Screen
         name="Swipe"
-        component={SwipeScreen.bind(this, appartmentView)}
+        component={SwipeScreenWrapper}
         options={{ title: "Swipe" }}
       />
       <Tab.Screen
@@ -78,7 +76,7 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="Chat"
-        component={ChatScreen}
+        component={AllChatsScreen}
         options={{ title: "Chat" }}
       />
       <Tab.Screen

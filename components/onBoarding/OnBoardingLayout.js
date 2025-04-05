@@ -2,9 +2,10 @@ import { StyleSheet, View, Image } from "react-native";
 import React from "react";
 import Title from "../Title";
 import StepButton from "./StepButton";
-
+import KeyboardAwareWrapper from "../KeyboardAwareWrapper";
 const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
   return (
+    <KeyboardAwareWrapper scrollEnabled={false}>
     <View style={styles.container}>
       {/* Centered Title */}
       <View style={styles.titleContainer}>
@@ -25,6 +26,7 @@ const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
         <StepButton direction={direction} next={next} onPress={onPress} />
       </View>
     </View>
+    </KeyboardAwareWrapper>
   );
 };
 

@@ -16,57 +16,57 @@ const Stack = createStackNavigator();
 
 const OnBoardingNavigator = () => {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-      }}
-    >
-      <Stack.Screen
-        name="StepOne"
-        component={StepOne}
-        options={{ title: "Welcome" }}
-      />
-      <Stack.Screen
-        name="StepTwo"
-        component={StepTwo}
-        options={{ title: "Name" }}
-      />
-      <Stack.Screen
-        name="StepThree"
-        component={StepThree}
-        options={{ title: "Location" }}
-      />
-      <Stack.Screen
-        name="StepFour"
-        component={StepFour}
-        options={{ title: "Password" }}
-      />
-      <Stack.Screen
-        name="StepFive"
-        component={StepFive}
-        options={{ title: "About You" }}
-      />
-      <Stack.Screen
-        name="StepSix"
-        component={StepSix}
-        options={{ title: "Preferences" }}
-      />
-      <Stack.Screen
-        name="StepSeven"
-        component={StepSeven}
-        options={{ title: "Photos" }}
-      />
-      <Stack.Screen
-        name="StepEight"
-        component={StepEight}
-        options={{ title: "Final Step" }}
-      />
-      <Stack.Screen
-        name="Survey"
-        component={SurveyWizard}
-        options={{ title: "Survey" }}
-      />
-    </Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: true,
+        }}
+      >
+        <Stack.Screen
+          name="StepOne"
+          component={StepOne}
+          options={{ title: "Welcome" }}
+        />
+        <Stack.Screen
+          name="StepTwo"
+          component={StepTwo}
+          options={{ title: "Name" }}
+        />
+        <Stack.Screen
+          name="StepThree"
+          component={StepThree}
+          options={{ title: "Location" }}
+        />
+        <Stack.Screen
+          name="StepFour"
+          component={StepFour}
+          options={{ title: "Details" }}
+        />
+        <Stack.Screen
+          name="StepFive"
+          component={StepFive}
+          options={{ title: "About You" }}
+        />
+        <Stack.Screen
+          name="StepSix"
+          component={StepSix}
+          options={{ title: "Password" }}
+        />
+        <Stack.Screen
+          name="StepSeven"
+          component={StepSeven}
+          options={{ title: "purpose" }}
+        />
+        <Stack.Screen
+          name="StepEight"
+          component={StepEight}
+          options={{ title: "Final Step" }}
+        />
+        <Stack.Screen
+          name="Survey"
+          component={SurveyWizard}
+          options={{ title: "Survey" }}
+        />
+      </Stack.Navigator>
   );
 };
 

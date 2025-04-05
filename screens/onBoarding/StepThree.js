@@ -1,25 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
+  View,
   TextInput,
   FlatList,
   TouchableOpacity,
   Text,
-  View,
 } from "react-native";
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
 import { israelCities } from "../../data/cities/cities";
+import { useDispatch, useSelector } from 'react-redux';
+import { updateOnboardingData } from '../../store/redux/slices/onboardingSlice';
 
 const StepThree = () => {
-  const [city, setCity] = useState("");
+  const dispatch = useDispatch();
+  const { location } = useSelector(state => state.onboarding);
+  const [city, setCity] = useState(location || "");
   const [filteredCities, setFilteredCities] = useState([]);
 
   const handleSearch = (text) => {
     setCity(text);
-    if (text) {
-      const filtered = israelCities.filter((item) => {
-        return item.toLowerCase().startsWith(text.toLowerCase());
-      });
+    if (text.length > 0) {
+      const filtered = israelCities.filter((city) =>
+        city.toLowerCase().includes(text.toLowerCase())
+      );
       setFilteredCities(filtered);
     } else {
       setFilteredCities([]);
@@ -29,6 +33,16 @@ const StepThree = () => {
   const handleSelect = (selectedCity) => {
     setCity(selectedCity);
     setFilteredCities([]);
+    dispatch(updateOnboardingData({ location: selectedCity }));
+  };
+
+  const handleNext = () => {
+    if (!city) {
+      // Show error if no city selected
+      return false;
+    }
+    dispatch(updateOnboardingData({ location: city }));
+    return true;
   };
 
   return (
@@ -36,6 +50,7 @@ const StepThree = () => {
       direction="StepFour"
       next={true}
       title="In Which Location Would You Like To Start Your Search?"
+      onPress={handleNext}
     >
       <View style={styles.container}>
         <TextInput
@@ -65,13 +80,10 @@ const StepThree = () => {
   );
 };
 
-export default StepThree;
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    marginVertical: 20,
-    marginHorizontal: 16,
+    position: "relative",
+    width: "100%",
   },
   input: {
     height: 50,
@@ -81,32 +93,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
     backgroundColor: "#fff",
-    boxShadow: "7px 7px 5px 2px rgba(0, 0, 0, 0.1)",
   },
   dropdown: {
-    position: "absolute", // Make the dropdown independent of the container
-    top: 60, // Adjust this to position below the input field
+    position: "absolute",
+    top: 55,
     left: 0,
     right: 0,
-    borderWidth: 2,
-    borderColor: "#ccc",
+    backgroundColor: "#fff",
     borderRadius: 10,
     maxHeight: 200,
-    backgroundColor: "#fff",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
     zIndex: 1000,
+    elevation: 5,
   },
   item: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    borderRadius: 5,
-    flex: 1,
   },
   itemText: {
     fontSize: 16,
-    color: "#333",
   },
 });
+
+export default StepThree;

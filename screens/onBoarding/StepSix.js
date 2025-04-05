@@ -5,21 +5,58 @@ import {
   TextInput,
   TouchableOpacity,
   Text,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
+import { useDispatch, useSelector } from 'react-redux';
+import { updateOnboardingData } from '../../store/redux/slices/onboardingSlice';
 
 const StepSix = () => {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const dispatch = useDispatch();
+  const { password: savedPassword } = useSelector(state => state.onboarding);
+
+  const [password, setPassword] = useState(savedPassword || "");
+  const [confirmPassword, setConfirmPassword] = useState(savedPassword || "");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+
+  const handlePasswordChange = (value) => {
+    setPassword(value);
+    if (value === confirmPassword) {
+      dispatch(updateOnboardingData({ password: value }));
+    }
+  };
+
+  const handleConfirmPasswordChange = (value) => {
+    setConfirmPassword(value);
+    if (value === password) {
+      dispatch(updateOnboardingData({ password: value }));
+    }
+  };
+
+  const handleNext = () => {
+    if (!password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill in both password fields');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return false;
+    }
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return false;
+    }
+    return true;
+  };
 
   return (
     <OnBoardingLayout
       title={"Set Your Password"}
       next={true}
       direction={"StepSeven"}
+      onPress={handleNext}
     >
       <View style={styles.inputContainer}>
         {/* Password Field */}
@@ -29,7 +66,7 @@ const StepSix = () => {
             placeholder="Password"
             secureTextEntry={!passwordVisible}
             value={password}
-            onChangeText={setPassword}
+            onChangeText={handlePasswordChange}
           />
           <TouchableOpacity
             style={styles.eyeIcon}
@@ -50,7 +87,7 @@ const StepSix = () => {
             placeholder="Confirm Password"
             secureTextEntry={!confirmPasswordVisible}
             value={confirmPassword}
-            onChangeText={setConfirmPassword}
+            onChangeText={handleConfirmPasswordChange}
           />
           <TouchableOpacity
             style={styles.eyeIcon}
@@ -67,8 +104,6 @@ const StepSix = () => {
     </OnBoardingLayout>
   );
 };
-
-export default StepSix;
 
 const styles = StyleSheet.create({
   inputContainer: {
@@ -93,7 +128,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   passwordInput: {
-    paddingRight: 45, // Add padding for the eye icon
+    paddingRight: 45,
   },
   eyeIcon: {
     position: "absolute",
@@ -101,3 +136,5 @@ const styles = StyleSheet.create({
     top: 15,
   },
 });
+
+export default StepSix;

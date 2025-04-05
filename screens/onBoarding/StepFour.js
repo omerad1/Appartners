@@ -7,11 +7,17 @@ import DatePicker from "../../components/DatePicker";
 import dayjs from "dayjs";
 import ProfileImagePicker from "../../components/onBoarding/ProfileImagePicker";
 import { ScrollView } from "react-native-gesture-handler";
+import { useDispatch, useSelector } from 'react-redux';
+import { updateOnboardingData } from '../../store/redux/slices/onboardingSlice';
+
 const StepFour = () => {
-  const [occupation, setOccupation] = useState("");
-  const [gender, setGender] = useState(null);
-  const [birthDay, setBirthDay] = useState(dayjs());
-  const [profileImage, setProfileImage] = useState(null);
+  const dispatch = useDispatch();
+  const { occupation, gender, birthDate, profileImage: savedProfileImage } = useSelector(state => state.onboarding);
+
+  const [localOccupation, setLocalOccupation] = useState(occupation || "");
+  const [localGender, setLocalGender] = useState(gender || null);
+  const [localBirthDay, setLocalBirthDay] = useState(birthDate ? dayjs(birthDate) : dayjs());
+  const [localProfileImage, setLocalProfileImage] = useState(savedProfileImage || null);
 
   const genderOptions = [
     { label: "Male", value: "Male" },
@@ -19,37 +25,72 @@ const StepFour = () => {
     { label: "Other", value: "Other" },
   ];
 
+  const handleGenderChange = (value) => {
+    setLocalGender(value);
+    dispatch(updateOnboardingData({ gender: value }));
+  };
+
+  const handleOccupationChange = (value) => {
+    setLocalOccupation(value);
+    dispatch(updateOnboardingData({ occupation: value }));
+  };
+
+  const handleBirthDateChange = (date) => {
+    setLocalBirthDay(date);
+    dispatch(updateOnboardingData({ birthDate: date.format('YYYY-MM-DD') }));
+  };
+
+  const handleProfileImageChange = (image) => {
+    setLocalProfileImage(image);
+    dispatch(updateOnboardingData({ profileImage: image }));
+  };
+
+  const handleNext = () => {
+    if (!localGender || !localOccupation || !localBirthDay || !localProfileImage) {
+      // Show error if required fields are missing
+      return false;
+    }
+    return true;
+  };
+
   return (
     <ScrollView style={styles.container}>
       <OnBoardingLayout
         direction="StepFive"
         next={true}
         title={`Let's Start With The Basics`}
+        onPress={handleNext}
       >
         <ProfileImagePicker
-          profileImage={profileImage}
-          setProfileImage={setProfileImage}
+          profileImage={localProfileImage}
+          setProfileImage={handleProfileImageChange}
         />
         <SimpleDropDown
           data={genderOptions}
-          onChange={setGender}
+          onChange={handleGenderChange}
+          value={localGender}
           placeholder="Gender"
         />
         <InputField
           placeholder="Occupation"
           type="text"
-          onChange={(occupation) => setOccupation(occupation)}
+          value={localOccupation}
+          onChange={handleOccupationChange}
         />
         <DatePicker
           title={"Select Birth Date"}
-          date={birthDay}
-          setDate={setBirthDay}
+          date={localBirthDay}
+          setDate={handleBirthDateChange}
         />
       </OnBoardingLayout>
     </ScrollView>
   );
 };
 
-export default StepFour;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  }
+});
 
-const styles = StyleSheet.create({});
+export default StepFour;
