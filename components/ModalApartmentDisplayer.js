@@ -11,16 +11,38 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import ImageDisplayer from "./ImageDisplayer";
 import SearchTags from "./SearchTags";
 
-const ModalApartmentDisplayer = ({ visible, onClose, apartment = {} }) => {
-  const {
-    address = `${apartment.street} ${apartment.house_number}`,
-    images = [
-      "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010826_20250119153240.jpeg?w=1200&h=1200&c=9",
-    ],
-    aboutApartment = apartment.about || "אין תיאור",
-    tags = [],
-    feature_details = [],
-  } = apartment;
+const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
+  // If apartment is null or undefined, provide default empty object
+  if (!apartment) {
+    return (
+      <Modal visible={visible} animationType="slide" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <MaterialCommunityIcons name="close" size={30} color="#000" />
+            </TouchableOpacity>
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No apartment data available</Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
+  // Extract properties with safe defaults
+  const address = apartment.address || 
+    (apartment.street && apartment.house_number ? 
+      `${apartment.street} ${apartment.house_number}` : 
+      'No address available');
+  
+  const images = apartment.images || [
+    "https://img.yad2.co.il/Pic/202501/19/2_2/o/y2_1pa_010826_20250119153240.jpeg?w=1200&h=1200&c=9",
+  ];
+  
+  const aboutApartment = apartment.aboutApartment || apartment.about || "אין תיאור";
+  const tags = apartment.tags || [];
+  const feature_details = apartment.feature_details || [];
 
   // Log feature_details to see its structure
   console.log("Feature Details:", feature_details);
@@ -136,6 +158,16 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     marginBottom: 20,
     elevation: 7,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#888',
+    textAlign: 'center',
   },
   textHeader: {
     fontSize: 24,
