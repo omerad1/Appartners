@@ -1,6 +1,5 @@
 import React from "react";
-import { StyleSheet, View, ImageBackground, StatusBar } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { StyleSheet, View, StatusBar, ImageBackground } from "react-native";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -28,46 +27,45 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <ImageBackground
-          source={require("./assets/background.jpg")}
-          style={{ flex: 1 }}
-          resizeMode="cover"
-        >
-          <LinearGradient
-            colors={[
-              "rgba(255, 255, 255, 0)",
-              "rgba(251, 251, 251, 0.73)",
-              "rgba(255, 255, 255, 0.6)",
-              "rgba(255, 255, 255, 0.08)",
-            ]}
-            style={{ flex: 1 }}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+      <ImageBackground 
+        source={require("./assets/background.jpg")} 
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay} />
+        <NavigationContainer>
+          <StatusBar barStyle="dark-content" />
+          <Stack.Navigator 
+            screenOptions={{ 
+              headerShown: false,
+              cardStyle: { backgroundColor: 'transparent' },
+              animationEnabled: true,
+            }}
           >
-            <StatusBar barStyle="dark-content" />
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="Login" component={LoginScreen} />
-              <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
-              <Stack.Screen name="MainApp" component={TabNavigator} />
-              <Stack.Screen
-                name="CreateApartment"
-                component={CreateApartmentNavigator}
-              />
-            </Stack.Navigator>
-          </LinearGradient>
-        </ImageBackground>
-      </NavigationContainer>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
+            <Stack.Screen name="MainApp" component={TabNavigator} />
+            <Stack.Screen
+              name="CreateApartment"
+              component={CreateApartmentNavigator}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ImageBackground>
     </Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
+    width: '100%',
+    height: '100%',
   },
-  gradient: {
-    flex: 1,
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'white',
+    opacity: 0.3,
   },
   loadingScreen: {
     flex: 1,

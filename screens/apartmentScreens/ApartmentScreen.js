@@ -31,12 +31,16 @@ const ApartmentScreen = () => {
         const data = await getUserApartments();
         console.log("Fetched apartments:", data);
         // Ensure data is an array before setting it
-        if (Array.isArray(data.apartments)) {
+        if (Array.isArray(data)) {
           console.log("Number of apartments:", data.length);
+          setApartments(data);
+        } else if (data && data.apartments) {
+          // If data has an apartments property that's an array
+          console.log("Number of apartments:", data.apartments.length);
           setApartments(data.apartments);
         } else if (data) {
-          // If data is not an array but exists, convert it to an array
-          const dataArray = [data.apartments].filter(Boolean);
+          // If data is not null but is a single object, convert it to an array
+          const dataArray = [data].filter(Boolean);
           console.log("Number of apartments:", dataArray.length);
           setApartments(dataArray);
         } else {
@@ -50,7 +54,9 @@ const ApartmentScreen = () => {
           error.response?.data?.detail || error.message
         );
         setApartments([]); // Set empty array on error
+        
       } finally {
+        setApartments([]);        
         setLoading(false);
       }
     };
@@ -60,7 +66,7 @@ const ApartmentScreen = () => {
 
   const handleAddApartment = () => {
     if (!isAddButtonDisabled) {
-      navigation.navigate("CreateApartment");
+      navigation.navigate('CreateApartment');
     }
   };
 

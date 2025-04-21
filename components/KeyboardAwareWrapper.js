@@ -18,12 +18,13 @@ const KeyboardAwareWrapper = ({
       contentContainerStyle={[styles.scrollContent, style]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="none"
+      style={styles.transparentBackground}
     >
       {children}
     </ScrollView>
   ) : (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={[styles.container, style]}>{children}</View>
+      <View style={[styles.container, style, styles.transparentBackground]}>{children}</View>
     </TouchableWithoutFeedback>
   );
 
@@ -40,6 +41,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+  },
+  transparentBackground: {
+    backgroundColor: 'transparent',
   },
 });
 

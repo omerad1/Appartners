@@ -13,16 +13,42 @@ import dayjs from "dayjs";
 import NumberSlider from "../../../components/NumberSlider";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation } from "@react-navigation/native";
+
 const AddApartmentScreen = () => {
   const [entryDay, setEntryDay] = useState(dayjs());
+  const [formData, setFormData] = useState({
+    city: '',
+    area: '',
+    street: '',
+    buildingNumber: '',
+    apartmentNumber: '',
+    floor: '',
+    apartmentType: '',
+    rooms: 1,
+    availableRooms: 1,
+    totalPrice: '',
+  });
   const navigation = useNavigation();
 
   const handleRoomsChange = (rooms) => {
+    setFormData(prev => ({ ...prev, rooms }));
     console.log("Rooms:", rooms);
   };
 
+  const handleAvailableRoomsChange = (availableRooms) => {
+    setFormData(prev => ({ ...prev, availableRooms }));
+    console.log("Available Rooms:", availableRooms);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleNext = () => {
+    console.log("Form data:", formData);
+    // Navigate to the next screen in the CreateApartmentNavigator
     navigation.navigate("PropertyTagsScreen");
+    return true; // Return true to allow navigation
   };
 
   return (
@@ -37,50 +63,66 @@ const AddApartmentScreen = () => {
           next="Next"
           onPress={handleNext}
         >
-          <View>
+          <View style={styles.formContainer}>
             <InputField
               placeholder="Enter City"
               type="text"
-              onChange={() => {}}
+              onChange={(text) => handleInputChange('city', text)}
               label="City"
+              value={formData.city}
             />
             <InputField
               placeholder="Enter Area"
               type="text"
-              onChange={() => {}}
+              onChange={(text) => handleInputChange('area', text)}
               label="Area"
+              value={formData.area}
             />
             <InputField
               placeholder="Enter Street"
               type="text"
-              onChange={() => {}}
+              onChange={(text) => handleInputChange('street', text)}
               label="Street"
+              value={formData.street}
             />
             <View style={styles.addressContainer}>
-              <InputField
-                placeholder="Enter No."
-                type="numeric"
-                onChange={() => {}}
-                label="Building"
-              />
-              <InputField
-                placeholder="Enter No."
-                type="numeric"
-                onChange={() => {}}
-                label="Apt."
-              />
-              <InputField
-                placeholder="Enter No."
-                type="numeric"
-                onChange={() => {}}
-                label="Floor"
-              />
+              <View style={styles.addressInputWrapper}>
+                <InputField
+                  placeholder="Enter No."
+                  type="numeric"
+                  onChange={(text) => handleInputChange('buildingNumber', text)}
+                  label="Building"
+                  value={formData.buildingNumber}
+                  containerStyle={styles.addressInput}
+                />
+              </View>
+              <View style={styles.addressInputWrapper}>
+                <InputField
+                  placeholder="Enter No."
+                  type="numeric"
+                  onChange={(text) => handleInputChange('apartmentNumber', text)}
+                  label="Apt."
+                  value={formData.apartmentNumber}
+                  containerStyle={styles.addressInput}
+                />
+              </View>
+              <View style={styles.addressInputWrapper}>
+                <InputField
+                  placeholder="Enter No."
+                  type="numeric"
+                  onChange={(text) => handleInputChange('floor', text)}
+                  label="Floor"
+                  value={formData.floor}
+                  containerStyle={styles.addressInput}
+                />
+              </View>
             </View>
             <InputField
               placeholder="Enter Apartment Type"
               type="text"
-              onChange={() => {}}
+              onChange={(text) => handleInputChange('apartmentType', text)}
               label="Apartment Type"
+              value={formData.apartmentType}
             />
             <View style={styles.sliderRow}>
               <View style={styles.sliderContainer}>
@@ -89,7 +131,7 @@ const AddApartmentScreen = () => {
                   min={1}
                   max={10}
                   step={1}
-                  initialValue={1}
+                  initialValue={formData.rooms}
                   onValueChange={handleRoomsChange}
                 />
               </View>
@@ -99,18 +141,19 @@ const AddApartmentScreen = () => {
                   min={1}
                   max={10}
                   step={1}
-                  initialValue={1}
-                  onValueChange={handleRoomsChange}
+                  initialValue={formData.availableRooms}
+                  onValueChange={handleAvailableRoomsChange}
                 />
               </View>
             </View>
             <InputField
               placeholder="Enter Total Price"
               type="numeric"
-              onChange={() => {}}
+              onChange={(text) => handleInputChange('totalPrice', text)}
               label="Total Price"
+              value={formData.totalPrice}
             />
-            <View>
+            <View style={styles.datePickerContainer}>
               <DatePicker
                 title="Select Entry Date"
                 date={entryDay}
@@ -131,14 +174,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    flexGrow: 1,
+  },
+  formContainer: {
+    width: '100%',
   },
   addressContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    width: '100%',
     marginBottom: 5,
+  },
+  addressInputWrapper: {
+    flex: 1,
+    paddingHorizontal: 3,
+  },
+  addressInput: {
+    width: '100%',
   },
   sliderRow: {
     flexDirection: "row",
@@ -146,15 +198,19 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   sliderContainer: {
-    flexDirection: "row",
+    flex: 1,
+    flexDirection: "column",
     alignItems: "center",
-    marginHorizontal: 10,
+    marginHorizontal: 5,
   },
   label: {
-    marginRight: 10,
-    fontSize: 18,
+    marginBottom: 5,
+    fontSize: 16,
     fontFamily: "comfortaaSemiBold",
     color: "#333",
-    marginLeft: 5,
+    textAlign: "center",
+  },
+  datePickerContainer: {
+    marginTop: 10,
   },
 });

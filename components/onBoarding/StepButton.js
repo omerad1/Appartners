@@ -9,11 +9,20 @@ const StepButton = ({ text, next, direction, onPress }) => {
     if (onPress) {
       const result = await onPress();
       console.log("Button pressed, onPress result:", result);
-      if (!result) return; // Prevent navigation if onPress returns false
+      if (result === false) return; // Only prevent navigation if onPress explicitly returns false
     }
 
     if (direction) {
-      navigation.navigate("OnBoarding", { screen: direction });
+      // Check if we're in the CreateApartmentNavigator
+      const routeName = navigation.getState().routes[navigation.getState().index].name;
+      if (routeName === 'CreateApartment' || routeName === 'AddApartmentScreen' || 
+          routeName === 'PropertyTagsScreen' || routeName === 'PhotosScreen') {
+        // We're in the CreateApartmentNavigator, navigate directly
+        navigation.navigate(direction);
+      } else {
+        // We're in the OnBoarding flow
+        navigation.navigate("OnBoarding", { screen: direction });
+      }
     }
   };
   const buttonStyle = next ? styles.nextButton : styles.prevButton;

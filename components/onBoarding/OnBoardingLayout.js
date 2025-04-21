@@ -3,29 +3,30 @@ import React from "react";
 import Title from "../Title";
 import StepButton from "./StepButton";
 import KeyboardAwareWrapper from "../KeyboardAwareWrapper";
+
 const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
   return (
-    <KeyboardAwareWrapper scrollEnabled={false}>
-    <View style={styles.container}>
-      {/* Centered Title */}
-      <View style={styles.titleContainer}>
-        <Title style={styles.title}>{title}</Title>
-      </View>
-
-      {/* Your custom input(s) or other content */}
-      <View style={styles.childrenContainer}>{children}</View>
-
-      {/* “Next” or “Prev” button pinned toward bottom */}
-      <View style={styles.buttonContainer}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../assets/icons/logo.png")}
-            style={styles.logo}
-          />
+    <KeyboardAwareWrapper scrollEnabled={false} style={styles.keyboardWrapper}>
+      <View style={styles.container}>
+        {/* Centered Title */}
+        <View style={styles.titleContainer}>
+          <Title style={styles.title}>{title}</Title>
         </View>
-        <StepButton direction={direction} next={next} onPress={onPress} />
+
+        {/* Your custom input(s) or other content */}
+        <View style={styles.childrenContainer}>{children}</View>
+
+        {/* "Next" or "Prev" button pinned toward bottom */}
+        <View style={styles.buttonContainer}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/icons/logo.png")}
+              style={styles.logo}
+            />
+          </View>
+          <StepButton direction={direction} next={next} onPress={onPress} />
+        </View>
       </View>
-    </View>
     </KeyboardAwareWrapper>
   );
 };
@@ -33,16 +34,17 @@ const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
 export default OnBoardingLayout;
 
 const styles = StyleSheet.create({
+  keyboardWrapper: {
+    backgroundColor: 'transparent',
+  },
   container: {
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 20,
-
-    // Center items horizontally
     alignItems: "center",
+    backgroundColor: 'transparent',
   },
   titleContainer: {
-    // Constrain width so text can wrap nicely
     width: "80%",
     alignSelf: "center",
     marginBottom: 24,
@@ -60,7 +62,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   buttonContainer: {
-    // Push the content above up and place this at the bottom
     marginTop: "auto",
     marginBottom: 32,
     width: "100%",

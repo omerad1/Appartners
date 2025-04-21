@@ -1,6 +1,6 @@
-import { StyleSheet } from "react-native";
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
+import { StyleSheet } from "react-native";
 import AddApartmentScreen from "../screens/apartmentScreens/addApartment/AddApartmentScreen";
 import PropertyTagsScreen from "../screens/apartmentScreens/addApartment/PropertyTagsScreen";
 import PhotosScreen from "../screens/apartmentScreens/addApartment/PhotosScreen";
@@ -13,35 +13,53 @@ const CreateApartmentNavigator = () => {
       initialRouteName="AddApartmentScreen"
       screenOptions={{
         headerShown: true,
-        headerBackTitle: "Back",
-        gestureEnabled: true,
-        gestureDirection: 'horizontal',
-        presentation: 'card',
+        headerStyle: {
+          backgroundColor: 'transparent',
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
+        },
+        headerTitleStyle: {
+          fontFamily: 'comfortaaSemiBold',
+        },
+        headerTintColor: '#333',
+        cardStyle: { backgroundColor: 'transparent' },
+        animationEnabled: true,
+        gestureEnabled: false,
+        transitionSpec: {
+          open: { animation: 'timing', config: { duration: 250 } },
+          close: { animation: 'timing', config: { duration: 250 } },
+        },
+        cardStyleInterpolator: ({ current, next, layouts }) => {
+          return {
+            cardStyle: {
+              transform: [
+                {
+                  translateX: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [layouts.screen.width, 0],
+                  }),
+                },
+              ],
+            },
+          };
+        },
       }}
     >
       <stack.Screen
         name="AddApartmentScreen"
         component={AddApartmentScreen}
-        options={{ 
-          title: "Apt Details",
-          headerLeft: (props) => props.canGoBack ? props.defaultHandler : null
-        }}
+        options={{ title: "Apt Details" }}
       />
       <stack.Screen
         name="PropertyTagsScreen"
         component={PropertyTagsScreen}
-        options={{ 
-          title: "Property Tags",
-          headerLeft: (props) => props.canGoBack ? props.defaultHandler : null
-        }}
+        options={{ title: "Property Tags" }}
       />
       <stack.Screen
         name="PhotosScreen"
         component={PhotosScreen}
-        options={{ 
-          title: "Photos",
-          headerLeft: (props) => props.canGoBack ? props.defaultHandler : null
-        }}
+        options={{ title: "Photos" }}
       />
     </stack.Navigator>
   );

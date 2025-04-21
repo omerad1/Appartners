@@ -23,11 +23,13 @@ export default AddApartmentLayout;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Ensures proper layout inside SafeAreaView
+    flex: 1,
+    paddingHorizontal: 20,
   },
   logoContainer: {
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 20,
   },
   logo: {
     width: 80,
@@ -37,7 +39,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    width: '100%',
   },
 });
