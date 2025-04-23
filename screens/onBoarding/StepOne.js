@@ -8,8 +8,8 @@ import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
 import { Snackbar } from "react-native-paper";
 import { validateUnique } from "../../api/registration";
 import { useState } from "react";
-import { useDispatch, useSelector } from 'react-redux';
-import { updateOnboardingData } from '../../store/redux/slices/onboardingSlice';
+import { useDispatch, useSelector } from "react-redux";
+import { updateOnboardingData } from "../../store/redux/slices/onboardingSlice";
 
 // Yup schema for required email & phone
 const schema = yup.object().shape({
@@ -25,16 +25,16 @@ const schema = yup.object().shape({
 
 const StepOne = () => {
   const dispatch = useDispatch();
-  const { email, phoneNumber } = useSelector(state => state.onboarding);
-  
+  const { email, phoneNumber } = useSelector((state) => state.onboarding);
+
   const { control, handleSubmit } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      email: email || '',
-      phoneNumber: phoneNumber || '',
-    }
+      email: email || "",
+      phoneNumber: phoneNumber || "",
+    },
   });
-  
+
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
@@ -44,7 +44,7 @@ const StepOne = () => {
 
     try {
       await validateUnique(email, phoneNumber);
-      console.log("✅ Email & phone are unique");
+      console.log("Email & phone are unique");
       // Save to Redux store
       dispatch(updateOnboardingData({ email, phoneNumber }));
       return true;
