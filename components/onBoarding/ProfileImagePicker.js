@@ -24,16 +24,26 @@ const ProfileImagePicker = ({ profileImage, setProfileImage }) => {
 
     // Launch the image picker
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "Images",
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1], // Ensure the selected image is square
-      quality: 1,
+      quality: 0.8,
     });
-    console.log(result);
+    
     if (!result.canceled) {
-      // Update the profile image state with the selected image URI
-      console.log(result.assets[0].uri);
-      setProfileImage(result.assets[0].uri);
+      const selectedAsset = result.assets[0];
+      console.log("Selected image:", selectedAsset);
+      
+      // Create the image object with all necessary information for FormData
+      const imageInfo = {
+        uri: selectedAsset.uri,
+        type: selectedAsset.type || 'image/jpeg', // Default to jpeg if type is not provided
+        name: selectedAsset.fileName || `profile-image-${Date.now()}.jpg`, // Generate a name if not provided
+        size: selectedAsset.fileSize,
+      };
+      
+      // Pass the image info object to the parent component
+      setProfileImage(imageInfo);
     }
   };
 
@@ -43,7 +53,7 @@ const ProfileImagePicker = ({ profileImage, setProfileImage }) => {
       <TouchableOpacity style={styles.imagePicker} onPress={handleImagePick}>
         {profileImage ? (
           // Display the selected image
-          <Image source={{ uri: profileImage }} style={styles.image} />
+          <Image source={{ uri: profileImage.uri || profileImage }} style={styles.image} />
         ) : (
           // Display a placeholder when no image is selected
           <View style={styles.placeholder}>
