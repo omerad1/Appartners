@@ -266,7 +266,6 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    backgroundColor: "#fff",
     borderRadius: 10,
     elevation: 5,
   },

@@ -11,7 +11,7 @@ const api_base_tom_comp =
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: api_base_tom_comp,
+  baseURL: API_BASE_URL_Production,
   timeout: 10000, // 10 seconds timeout
   headers: {
     "Content-Type": "application/json",
