@@ -15,6 +15,11 @@ export const getUserFilters = async () => {
 
 export const postUserFilters = async (filtersData) => {
     try {
+        // Extract city ID if city is an object
+        const cityValue = filtersData.city ? 
+            (typeof filtersData.city === 'object' ? filtersData.city.id : filtersData.city) : 
+            null;
+            
         // Convert from app format to API format if needed
         const apiFormatData = {
             move_in_date: filtersData.moveInDate,
@@ -23,7 +28,7 @@ export const postUserFilters = async (filtersData) => {
                 max_price: filtersData.priceRange?.max || null
             },
             number_of_roommates: filtersData.number_of_roommates || [],
-            city: filtersData.city || null,
+            city: cityValue, // Send only the ID to the backend
             features: filtersData.features || [],
             max_floor: filtersData.max_floor || null,
             area: filtersData.area || null

@@ -1,4 +1,5 @@
 import { getUserFilters, postUserFilters } from '../../api/filters';
+import { getPreferencesPayload } from '../../api/appDataPayload';
 import { setLoading, setError, setPreferences, updatePreferences } from './user';
 
 // Thunk action to fetch user preferences
@@ -9,6 +10,27 @@ export const fetchUserPreferences = () => async (dispatch) => {
     // Fetch filters from the server
     const serverFilters = await getUserFilters();
     
+    // If we have a city ID, try to get the city object with name
+    let cityData = serverFilters.city;
+    
+    if (serverFilters.city) {
+      try {
+        // Get the city data from the preferences payload
+        const payloadData = await getPreferencesPayload();
+        if (payloadData.cities && Array.isArray(payloadData.cities)) {
+          // Find the city by ID
+          const cityObject = payloadData.cities.find(city => city.id === serverFilters.city);
+          if (cityObject) {
+            // If found, use the city object with both ID and name
+            cityData = cityObject;
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch city data:', err);
+        // If there's an error, we'll just use the city ID
+      }
+    }
+    
     // Map server filter format to application filter format
     const mappedFilters = {
       moveInDate: serverFilters.move_in_date,
@@ -17,7 +39,7 @@ export const fetchUserPreferences = () => async (dispatch) => {
         max: serverFilters.price_range?.max_price || 10000
       },
       number_of_roommates: serverFilters.number_of_roommates || [],
-      city: serverFilters.city,
+      city: cityData, // This will be either the city object or just the ID
       features: serverFilters.features || [],
       max_floor: serverFilters.max_floor,
       area: serverFilters.area

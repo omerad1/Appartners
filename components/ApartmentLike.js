@@ -3,7 +3,7 @@ import { View, Image, Text, StyleSheet, TouchableOpacity, Dimensions, I18nManage
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
-const cardWidth = width - 32; // Full width minus padding
+const cardWidth = width - 40; // Adjusted for better centering
 
 const ApartmentLike = ({ apartment, onPress }) => {
   // Extract up to 2 random tags if they exist
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     width: cardWidth,
     height: 300,
     borderRadius: 12,
-    marginHorizontal: 16,
+    marginHorizontal: 20, // Adjusted for equal margins on both sides
     marginVertical: 8,
     overflow: 'hidden',
     elevation: 4,
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    alignSelf: 'center', // Added to center the card
   },
   image: {
     width: '100%',

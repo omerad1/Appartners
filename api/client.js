@@ -7,7 +7,7 @@ const API_BASE_URL_Production =
   "https://appartners-backend-production.up.railway.app";
 
 const api_base_tom_comp =
-  "https://f242-2a06-c701-97ff-ea00-d17e-b4bb-1c92-44f3.ngrok-free.app";
+  "https://ad5c-2a06-c701-97ff-ea00-38ce-76d6-801e-b300.ngrok-free.app";
 
 // Create an axios instance with default config
 const api = axios.create({
