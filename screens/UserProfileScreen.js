@@ -80,6 +80,7 @@ export default function UserProfileScreen() {
               />
               <Text style={styles.progressText}>85% COMPLETE</Text>
             </View>
+          </View>
         {/* Bottom Section */}
         <View style={styles.bottomSection}>
           <TouchableOpacity 
@@ -123,6 +124,7 @@ export default function UserProfileScreen() {
         />
       </View>
     </SafeAreaView>
+    </BackgroundImage>
   );
 }
 
