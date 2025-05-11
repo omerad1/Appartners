@@ -29,7 +29,6 @@ const ApartmentScreen = () => {
     const fetchApartments = async () => {
       try {
         const data = await getUserApartments();
-        console.log("Fetched apartments:", data);
         // Ensure data is an array before setting it
         if (Array.isArray(data)) {
           console.log("Number of apartments:", data.length);
@@ -63,7 +62,7 @@ const ApartmentScreen = () => {
 
   const handleAddApartment = () => {
     if (!isAddButtonDisabled) {
-      navigation.navigate('CreateApartment');
+      navigation.navigate("CreateApartment");
     }
   };
 

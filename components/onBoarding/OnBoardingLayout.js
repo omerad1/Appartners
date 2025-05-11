@@ -3,31 +3,36 @@ import React from "react";
 import Title from "../Title";
 import StepButton from "./StepButton";
 import KeyboardAwareWrapper from "../KeyboardAwareWrapper";
-
+import BackgroundImage from "../BackgroundImage";
 const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
   return (
-    <KeyboardAwareWrapper scrollEnabled={false} style={styles.keyboardWrapper}>
-      <View style={styles.container}>
-        {/* Centered Title */}
-        <View style={styles.titleContainer}>
-          <Title style={styles.title}>{title}</Title>
-        </View>
-
-        {/* Your custom input(s) or other content */}
-        <View style={styles.childrenContainer}>{children}</View>
-
-        {/* "Next" or "Prev" button pinned toward bottom */}
-        <View style={styles.buttonContainer}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../assets/icons/logo.png")}
-              style={styles.logo}
-            />
+    <BackgroundImage>
+      <KeyboardAwareWrapper
+        scrollEnabled={false}
+        style={styles.keyboardWrapper}
+      >
+        <View style={styles.container}>
+          {/* Centered Title */}
+          <View style={styles.titleContainer}>
+            <Title style={styles.title}>{title}</Title>
           </View>
-          <StepButton direction={direction} next={next} onPress={onPress} />
+
+          {/* Your custom input(s) or other content */}
+          <View style={styles.childrenContainer}>{children}</View>
+
+          {/* "Next" or "Prev" button pinned toward bottom */}
+          <View style={styles.buttonContainer}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require("../../assets/icons/logo.png")}
+                style={styles.logo}
+              />
+            </View>
+            <StepButton direction={direction} next={next} onPress={onPress} />
+          </View>
         </View>
-      </View>
-    </KeyboardAwareWrapper>
+      </KeyboardAwareWrapper>
+    </BackgroundImage>
   );
 };
 
@@ -35,14 +40,14 @@ export default OnBoardingLayout;
 
 const styles = StyleSheet.create({
   keyboardWrapper: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   container: {
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 20,
     alignItems: "center",
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   titleContainer: {
     width: "80%",

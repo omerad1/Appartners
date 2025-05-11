@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { ProgressBar, Colors } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import BackgroundImage from "../components/BackgroundImage";
 import FilterScreen from "./FilterScreen";
 import { useSelector, useDispatch } from "react-redux";
 import { saveUserPreferences, fetchUserPreferences } from "../store/redux/userThunks";
@@ -43,46 +44,42 @@ export default function UserProfileScreen() {
     }
   };
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity>
-            <View style={styles.settingsIcon}>
-              <Ionicons name="settings" size={30} color="black" />
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Profile Section */}
-        <View style={styles.profileContainer}>
-          {/* Profile Picture */}
-          <View style={styles.profileImageWrapper}>
-            <Image
-              source={require("../assets/icons/crime.png")} // Replace with actual profile image
-              style={styles.profileImage}
-            />
-            <TouchableOpacity style={styles.editButton}>
-              <View style={styles.editIcon}>
-                <Ionicons name="pencil" size={35} color="black" />
+    <BackgroundImage>
+      <SafeAreaView style={styles.safeContainer}>
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity>
+              <View style={styles.settingsIcon}>
+                <Ionicons name="settings" size={30} color="black" />
               </View>
             </TouchableOpacity>
           </View>
 
-          {/* Progress Bar */}
-          <View style={styles.progressBarContainer}>
-            <ProgressBar
-              progress={0.85}
-              color="#FFA500" // Hex code for orange color
-              style={styles.progressBar}
-            />
-            <Text style={styles.progressText}>85% COMPLETE</Text>
-          </View>
+          {/* Profile Section */}
+          <View style={styles.profileContainer}>
+            {/* Profile Picture */}
+            <View style={styles.profileImageWrapper}>
+              <Image
+                source={require("../assets/icons/crime.png")} // Replace with actual profile image
+                style={styles.profileImage}
+              />
+              <TouchableOpacity style={styles.editButton}>
+                <View style={styles.editIcon}>
+                  <Ionicons name="pencil" size={35} color="black" />
+                </View>
+              </TouchableOpacity>
+            </View>
 
-          {/* Profile Name */}
-          <Text style={styles.profileName}>Crime, 28</Text>
-        </View>
-
+            {/* Progress Bar */}
+            <View style={styles.progressBarContainer}>
+              <ProgressBar
+                progress={0.85}
+                color="#FFA500" // Hex code for orange color
+                style={styles.progressBar}
+              />
+              <Text style={styles.progressText}>85% COMPLETE</Text>
+            </View>
         {/* Bottom Section */}
         <View style={styles.bottomSection}>
           <TouchableOpacity 

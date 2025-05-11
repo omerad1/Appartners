@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { login as apiLogin } from "../api/auth";
 import InputField from "../components/onBoarding/InputField";
+import BackgroundImage from "../components/BackgroundImage";
 import { useDispatch } from "react-redux";
 import { login } from "../store/redux/user";
 import { fetchUserPreferences } from "../store/redux/userThunks";
@@ -28,13 +29,13 @@ const LoginScreen = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Please enter a valid email";
     }
-    
+
     if (!password) {
       newErrors.password = "Password is required";
     }
@@ -83,86 +84,98 @@ const LoginScreen = () => {
   };
 
   return (
-    <KeyboardAwareWrapper scrollEnabled={false}>
-      <View style={styles.container}>
-        {/* Logo */}
-        <Image source={require("../assets/icons/logo.png")} style={styles.logo} />
-
-        {/* Welcome Text */}
-        <Title>Welcome Back!</Title>
-
-        {/* Email Input */}
-        <InputField
-          placeholder="Email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoFocus={true}
-          value={email}
-          onChange={setEmail}
-          error={errors.email}
-        />
-
-        {/* Password Input */}
-        <InputField
-          placeholder="Password"
-          secureTextEntry={true}
-          value={password}
-          onChange={setPassword}
-          error={errors.password}
-        />
-
-        {/* Login Button */}
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text style={styles.loginButtonText}>
-            {isLoading ? "Logging in..." : "Log in"}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Forgot Password */}
-        <TouchableOpacity>
-          <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-        </TouchableOpacity>
-
-        {/* OR Separator */}
-        <Text style={styles.orText}>or</Text>
-
-        {/* Continue with Google */}
-        <TouchableOpacity style={styles.socialButton}>
+    <BackgroundImage>
+      <KeyboardAwareWrapper scrollEnabled={false}>
+        <View style={styles.container}>
+          {/* Logo */}
           <Image
-            source={require("../assets/icons/google.png")}
-            style={styles.socialIcon}
+            source={require("../assets/icons/logo.png")}
+            style={styles.logo}
           />
-          <Text style={styles.socialButtonText}>Continue with Google</Text>
-        </TouchableOpacity>
 
-        {/* Continue with Facebook */}
-        <TouchableOpacity style={[styles.socialButton, styles.facebookButton]}>
-          <Ionicons
-            name="logo-facebook"
-            size={22}
-            color="white"
-            style={styles.socialIcon}
+          {/* Welcome Text */}
+          <Title>Welcome Back!</Title>
+
+          {/* Email Input */}
+          <InputField
+            placeholder="Email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoFocus={true}
+            value={email}
+            onChange={setEmail}
+            error={errors.email}
           />
-          <Text style={[styles.socialButtonText, { color: "white" }]}>
-            Continue with Facebook
-          </Text>
-        </TouchableOpacity>
 
-        {/* Sign Up Link */}
-        <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Don't have an account? </Text>
+          {/* Password Input */}
+          <InputField
+            placeholder="Password"
+            secureTextEntry={true}
+            value={password}
+            onChange={setPassword}
+            error={errors.password}
+          />
+
+          {/* Login Button */}
           <TouchableOpacity
-            onPress={() => navigation.navigate("OnBoarding", { screen: "StepOne" })}
+            style={[
+              styles.loginButton,
+              isLoading && styles.loginButtonDisabled,
+            ]}
+            onPress={handleLogin}
+            disabled={isLoading}
           >
-            <Text style={styles.signUpLink}>Sign up</Text>
+            <Text style={styles.loginButtonText}>
+              {isLoading ? "Logging in..." : "Log in"}
+            </Text>
           </TouchableOpacity>
+
+          {/* Forgot Password */}
+          <TouchableOpacity>
+            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+          </TouchableOpacity>
+
+          {/* OR Separator */}
+          <Text style={styles.orText}>or</Text>
+
+          {/* Continue with Google */}
+          <TouchableOpacity style={styles.socialButton}>
+            <Image
+              source={require("../assets/icons/google.png")}
+              style={styles.socialIcon}
+            />
+            <Text style={styles.socialButtonText}>Continue with Google</Text>
+          </TouchableOpacity>
+
+          {/* Continue with Facebook */}
+          <TouchableOpacity
+            style={[styles.socialButton, styles.facebookButton]}
+          >
+            <Ionicons
+              name="logo-facebook"
+              size={22}
+              color="white"
+              style={styles.socialIcon}
+            />
+            <Text style={[styles.socialButtonText, { color: "white" }]}>
+              Continue with Facebook
+            </Text>
+          </TouchableOpacity>
+
+          {/* Sign Up Link */}
+          <View style={styles.signUpContainer}>
+            <Text style={styles.signUpText}>Don't have an account? </Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("OnBoarding", { screen: "StepOne" })
+              }
+            >
+              <Text style={styles.signUpLink}>Sign up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </KeyboardAwareWrapper>
+      </KeyboardAwareWrapper>
+    </BackgroundImage>
   );
 };
 
@@ -235,9 +248,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   signUpContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   signUpText: {
     fontSize: 14,

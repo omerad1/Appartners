@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Appartners API
-  description: "API documentation for the Appartners application, which helps users find apartments and roommates."
+  description: "API documentation for the Appartners application, which helps users  apartments and roommates."
   version: 1.0.0
 servers:
 - url: http://localhost:8000/api/v1

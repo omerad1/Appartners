@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Avatar, Text, Badge, IconButton } from "react-native-paper";
 import Title from "../../components/Title"; // Import your custom Title component
-
+import BackgroundImage from "../../components/BackgroundImage";
 const AllChatsScreen = () => {
   // Fictive chat data in Hebrew
   const [messages, setMessages] = useState([
@@ -80,65 +80,67 @@ const AllChatsScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Icon and Title */}
-      <View style={styles.iconAndTitle}>
-        <Image
-          source={require("../../assets/icons/logo.png")}
-          style={styles.logo}
-        />
-        <Title>צ'אטים</Title>
+    <BackgroundImage>
+      <View style={styles.container}>
+        {/* Icon and Title */}
+        <View style={styles.iconAndTitle}>
+          <Image
+            source={require("../../assets/icons/logo.png")}
+            style={styles.logo}
+          />
+          <Title>צ'אטים</Title>
+        </View>
+
+        {/* Transparent Chat Container */}
+        <View style={styles.chatContainer}>
+          {/* Chat List or No Active Chats Message */}
+          {messages.length === 0 ? (
+            <View style={styles.noChatsContainer}>
+              <Text style={styles.noChatsText}>אין צ'אטים פעילים</Text>
+            </View>
+          ) : (
+            <ScrollView>
+              {messages.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.messageItem}
+                  onPress={() => console.log(`Opening chat with ${item.name}`)}
+                  onLongPress={() => onLongPressChat(item.id, item.name)}
+                >
+                  {/* Avatar */}
+                  <Avatar.Image
+                    size={50}
+                    source={{ uri: item.image }}
+                    style={styles.messageAvatar}
+                  />
+
+                  {/* Chat Content */}
+                  <View style={styles.messageContent}>
+                    <Text style={styles.messageName}>{item.name}</Text>
+                    <Text style={styles.messageText} numberOfLines={1}>
+                      {item.text}
+                    </Text>
+                  </View>
+
+                  {/* Unread Badge */}
+                  {item.isUnread && <Badge style={styles.unreadBadge} />}
+
+                  {/* House Icon */}
+                  <IconButton
+                    icon="home-outline"
+                    size={24}
+                    onPress={() =>
+                      console.log(`Viewing apartment of ${item.name}`)
+                    }
+                    style={styles.houseIcon}
+                  />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+        </View>
       </View>
-
-      {/* Transparent Chat Container */}
-      <View style={styles.chatContainer}>
-        {/* Chat List or No Active Chats Message */}
-        {messages.length === 0 ? (
-          <View style={styles.noChatsContainer}>
-            <Text style={styles.noChatsText}>אין צ'אטים פעילים</Text>
-          </View>
-        ) : (
-          <ScrollView>
-            {messages.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.messageItem}
-                onPress={() => console.log(`Opening chat with ${item.name}`)}
-                onLongPress={() => onLongPressChat(item.id, item.name)}
-              >
-                {/* Avatar */}
-                <Avatar.Image
-                  size={50}
-                  source={{ uri: item.image }}
-                  style={styles.messageAvatar}
-                />
-
-                {/* Chat Content */}
-                <View style={styles.messageContent}>
-                  <Text style={styles.messageName}>{item.name}</Text>
-                  <Text style={styles.messageText} numberOfLines={1}>
-                    {item.text}
-                  </Text>
-                </View>
-
-                {/* Unread Badge */}
-                {item.isUnread && <Badge style={styles.unreadBadge} />}
-
-                {/* House Icon */}
-                <IconButton
-                  icon="home-outline"
-                  size={24}
-                  onPress={() =>
-                    console.log(`Viewing apartment of ${item.name}`)
-                  }
-                  style={styles.houseIcon}
-                />
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
-      </View>
-    </View>
+    </BackgroundImage>
   );
 };
 
