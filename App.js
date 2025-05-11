@@ -38,7 +38,6 @@ export default function App() {
           <Stack.Navigator 
             screenOptions={{ 
               headerShown: false,
-              cardStyle: { backgroundColor: 'transparent' },
               animationEnabled: true,
             }}
           >

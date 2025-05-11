@@ -26,51 +26,7 @@ const sequentialTransition = {
       config: { duration: 400 },
     },
   },
-  cardStyleInterpolator: ({ current, next, layouts }) => {
-    // For the current (outgoing) screen
-    const currentOpacity = current.progress.interpolate({
-      inputRange: [0, 0.5, 0.9, 1],
-      outputRange: [0, 0, 0, 1],
-      extrapolate: 'clamp',
-    });
-    
-    const currentTranslateX = current.progress.interpolate({
-      inputRange: [0, 0.4, 1],
-      outputRange: [-layouts.screen.width, -layouts.screen.width, 0],
-      extrapolate: 'clamp',
-    });
 
-    // For the next (incoming) screen
-    const nextOpacity = next ? 
-      next.progress.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [0, 0, 1],
-        extrapolate: 'clamp',
-      }) : 0;
-    
-    const nextTranslateX = next ?
-      next.progress.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [layouts.screen.width, layouts.screen.width, 0],
-        extrapolate: 'clamp',
-      }) : 0;
-
-    return {
-      cardStyle: {
-        opacity: currentOpacity,
-        transform: [{ translateX: currentTranslateX }],
-        zIndex: 0,
-      },
-      overlayStyle: {
-        opacity: 0,
-      },
-      nextCardStyle: next ? {
-        opacity: nextOpacity,
-        transform: [{ translateX: nextTranslateX }],
-        zIndex: 1,
-      } : undefined,
-    };
-  },
 };
 
 const OnBoardingNavigator = () => {
@@ -90,7 +46,6 @@ const OnBoardingNavigator = () => {
           fontFamily: 'comfortaaSemiBold',
         },
         headerTintColor: '#333',
-        cardStyle: { backgroundColor: 'transparent' },
         animationEnabled: true,
         gestureEnabled: false,
       }}

@@ -4,6 +4,7 @@ const endpoints = {
   validateUnique: "/api/v1/authenticate/validate-unique/",
   myApartments: "/api/v1/apartments/my/",
   profile: "/api/v1/user/profile/",
+  GET_APARTMENTS: "/api/v1/apartments/recommendations/",
 };
 
 export default endpoints;

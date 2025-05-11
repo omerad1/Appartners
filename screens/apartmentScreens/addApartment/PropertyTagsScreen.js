@@ -11,6 +11,7 @@ import SearchTags from "../../../components/SearchTags";
 import { propertyTags } from "../../../data/tags/propertyTags";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation } from "@react-navigation/native";
+import BackgroundImage from "../../../components/BackgroundImage";
 const PropertyTagsScreen = () => {
   const [selectedTags, setSelectedTags] = useState([]); // Store selected tags
   const [showAll, setShowAll] = useState(false); // Control showing all tags
@@ -54,46 +55,48 @@ const PropertyTagsScreen = () => {
     searchQuery.trim() !== "" || propertyTags.length <= 10;
 
   return (
-    <AddApartmentLayout
-      title={"Select Property Tags"}
-      direction={"PhotosScreen"}
-      next={true}
-      onPress={() => {
-        navigation.navigate("PhotosScreen");
-      }}
-    >
-      <View style={styles.container}>
-        <Searchbar
-          placeholder="Search tags..."
-          value={searchQuery}
-          onChangeText={handleSearch}
-          style={styles.searchBar}
-        />
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View>
-            <SearchTags
-              tags={filteredTags}
-              selectedTags={selectedTags}
-              onTagToggle={handleTagToggle}
-            />
-            {!searchQuery.trim() && propertyTags.length > 10 && (
-              <TouchableOpacity
-                style={[
-                  styles.showMoreButton,
-                  isShowMoreDisabled && styles.disabledButton,
-                ]}
-                onPress={handleShowMore}
-                disabled={isShowMoreDisabled}
-              >
-                <Text style={styles.showMoreText}>
-                  {showAll ? "Show Less" : "Show More"}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </ScrollView>
-      </View>
-    </AddApartmentLayout>
+    <BackgroundImage>
+      <AddApartmentLayout
+        title={"Select Property Tags"}
+        direction={"PhotosScreen"}
+        next={true}
+        onPress={() => {
+          navigation.navigate("PhotosScreen");
+        }}
+      >
+        <View style={styles.container}>
+          <Searchbar
+            placeholder="Search tags..."
+            value={searchQuery}
+            onChangeText={handleSearch}
+            style={styles.searchBar}
+          />
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View>
+              <SearchTags
+                tags={filteredTags}
+                selectedTags={selectedTags}
+                onTagToggle={handleTagToggle}
+              />
+              {!searchQuery.trim() && propertyTags.length > 10 && (
+                <TouchableOpacity
+                  style={[
+                    styles.showMoreButton,
+                    isShowMoreDisabled && styles.disabledButton,
+                  ]}
+                  onPress={handleShowMore}
+                  disabled={isShowMoreDisabled}
+                >
+                  <Text style={styles.showMoreText}>
+                    {showAll ? "Show Less" : "Show More"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </ScrollView>
+        </View>
+      </AddApartmentLayout>
+    </BackgroundImage>
   );
 };
 

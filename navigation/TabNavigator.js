@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import SwipeScreenWrapper from "../screens/SwipeScreenWrapper";
 import UserProfileScreen from "../screens/UserProfileScreen";
 import LikesScreen from "../screens/LikesScreen";
-import { appartmentView } from "../data/mockData/appartmentView";
 
 import ApartmentScreen from "../screens/apartmentScreens/ApartmentScreen";
 import AllChatsScreen from "../screens/chatScreens/AllChatsScreen";

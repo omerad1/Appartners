@@ -4,54 +4,57 @@ import { ProgressBar, MD3Colors } from "react-native-paper";
 import Title from "../Title";
 import InputField from "../onBoarding/InputField";
 import LikertScale from "./LikertScale";
+import BackgroundImage from "../BackgroundImage";
 
 // input is an array of objects with placeholder and type and onChange
 // radioBarOptions is an array of 2 objects with labels for the first and last radio buttons
 const SurveyLayout = ({ step, setAnswer, title, input, radioBarOptions }) => {
   return (
-    <View style={styles.container}>
-      {/* Progress Bar */}
-      <ProgressBar
-        style={styles.progressBar}
-        progress={step / 10}
-        color={MD3Colors.primary10}
-      />
+    <BackgroundImage>
+      <View style={styles.container}>
+        {/* Progress Bar */}
+        <ProgressBar
+          style={styles.progressBar}
+          progress={step / 10}
+          color={MD3Colors.primary10}
+        />
 
-      {/* Title */}
-      <Title>{title}</Title>
+        {/* Title */}
+        <Title>{title}</Title>
 
-      {/* Input Fields */}
-      {input &&
-        input.map((item, index) => (
-          <View key={`input-${index}`}>
-            <Text style={styles.subTitle}>{item.title}</Text>
-            <InputField
-              placeholder={item.placeholder}
-              type={item.type}
-              onChange={setAnswer}
+        {/* Input Fields */}
+        {input &&
+          input.map((item, index) => (
+            <View key={`input-${index}`}>
+              <Text style={styles.subTitle}>{item.title}</Text>
+              <InputField
+                placeholder={item.placeholder}
+                type={item.type}
+                onChange={setAnswer}
+              />
+            </View>
+          ))}
+
+        {/* Likert Scale */}
+        {radioBarOptions && (
+          <View style={styles.likertContainer}>
+            <LikertScale
+              title1={radioBarOptions[0]}
+              title5={radioBarOptions[1]}
+              onSelect={setAnswer}
             />
           </View>
-        ))}
+        )}
 
-      {/* Likert Scale */}
-      {radioBarOptions && (
-        <View style={styles.likertContainer}>
-          <LikertScale
-            title1={radioBarOptions[0]}
-            title5={radioBarOptions[1]}
-            onSelect={setAnswer}
+        {/* Logo */}
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../../assets/icons/logo.png")}
+            style={styles.logo}
           />
         </View>
-      )}
-
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Image
-          source={require("../../assets/icons/logo.png")}
-          style={styles.logo}
-        />
       </View>
-    </View>
+    </BackgroundImage>
   );
 };
 

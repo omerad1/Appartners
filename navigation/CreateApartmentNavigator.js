@@ -23,27 +23,13 @@ const CreateApartmentNavigator = () => {
           fontFamily: 'comfortaaSemiBold',
         },
         headerTintColor: '#333',
-        cardStyle: { backgroundColor: 'transparent' },
         animationEnabled: true,
         gestureEnabled: false,
         transitionSpec: {
           open: { animation: 'timing', config: { duration: 250 } },
           close: { animation: 'timing', config: { duration: 250 } },
         },
-        cardStyleInterpolator: ({ current, next, layouts }) => {
-          return {
-            cardStyle: {
-              transform: [
-                {
-                  translateX: current.progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [layouts.screen.width, 0],
-                  }),
-                },
-              ],
-            },
-          };
-        },
+
       }}
     >
       <stack.Screen
