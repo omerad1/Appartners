@@ -6,23 +6,27 @@ import {
   FlatList,
   TouchableOpacity,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
-import { israelCities } from "../../data/cities/cities";
 import { useDispatch, useSelector } from 'react-redux';
 import { updateOnboardingData } from '../../store/redux/slices/onboardingSlice';
+import { usePreferencesPayload } from '../../context/PreferencesPayloadContext';
 
 const StepThree = () => {
   const dispatch = useDispatch();
   const { location } = useSelector(state => state.onboarding);
   const [city, setCity] = useState(location || "");
   const [filteredCities, setFilteredCities] = useState([]);
+  
+  // Get cities data from context
+  const { cities, isLoading, error } = usePreferencesPayload();
 
   const handleSearch = (text) => {
     setCity(text);
     if (text.length > 0) {
-      const filtered = israelCities.filter((city) =>
-        city.toLowerCase().includes(text.toLowerCase())
+      const filtered = cities.filter((city) =>
+        city.name.toLowerCase().includes(text.toLowerCase())
       );
       setFilteredCities(filtered);
     } else {
@@ -31,9 +35,9 @@ const StepThree = () => {
   };
 
   const handleSelect = (selectedCity) => {
-    setCity(selectedCity);
+    setCity(selectedCity.name);
     setFilteredCities([]);
-    dispatch(updateOnboardingData({ location: selectedCity }));
+    dispatch(updateOnboardingData({ location: selectedCity.name, cityId: selectedCity.id }));
   };
 
   const handleNext = () => {
@@ -60,16 +64,24 @@ const StepThree = () => {
           onChangeText={handleSearch}
           placeholderTextColor="rgba(0, 0, 0, 0.48)"
         />
-        {filteredCities.length > 0 && (
+        {isLoading ? (
+          <View style={[styles.dropdown, styles.loadingContainer]}>
+            <ActivityIndicator size="small" color="#000" />
+          </View>
+        ) : error ? (
+          <View style={[styles.dropdown, styles.errorContainer]}>
+            <Text style={styles.errorText}>Error loading cities</Text>
+          </View>
+        ) : filteredCities.length > 0 && (
           <FlatList
             data={filteredCities}
-            keyExtractor={(item) => item}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.item}
                 onPress={() => handleSelect(item)}
               >
-                <Text style={styles.itemText}>{item}</Text>
+                <Text style={styles.itemText}>{item.name}</Text>
               </TouchableOpacity>
             )}
             style={styles.dropdown}
@@ -81,6 +93,18 @@ const StepThree = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorContainer: {
+    padding: 15,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+  },
   container: {
     position: "relative",
     width: "100%",

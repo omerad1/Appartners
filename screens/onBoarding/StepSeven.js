@@ -45,23 +45,36 @@ const StepSeven = () => {
         preferred_city: onboardingData.location,
         about_me: onboardingData.aboutMe,
         user_type: onboardingData.userType,
-        photo: null,
+        photo: onboardingData.photo,
       };
 
       // Send registration request
       const response = await registerUser(registrationData);
 
-      if (response) {
+      if (response && !response.error) {
         return true; // Continue to next step
       } else {
-        Alert.alert("Error", "Registration failed. Please try again.");
+        console.log("❌ Registration failed:", response);
+        // Display the detailed error message from the server
+        const errorMessage = response.message 
+          ? typeof response.message === 'object' 
+            ? JSON.stringify(response.message) 
+            : response.message
+          : "Registration failed. Please try again.";
+        
+        Alert.alert("Registration Error", errorMessage);
         return false;
       }
     } catch (error) {
-      Alert.alert(
-        "Error",
-        error.message || "Registration failed. Please try again."
-      );
+      console.log("❌ Registration failed:", error);
+      // Extract error message if available
+      const errorMessage = error.response?.data 
+        ? typeof error.response.data === 'object'
+          ? JSON.stringify(error.response.data)
+          : error.response.data
+        : error.message || "Registration failed. Please try again.";
+      
+      Alert.alert("Registration Error", errorMessage);
       return false;
     }
   };

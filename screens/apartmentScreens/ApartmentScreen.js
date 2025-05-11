@@ -52,9 +52,7 @@ const ApartmentScreen = () => {
           "Failed to load apartments:",
           error.response?.data?.detail || error.message
         );
-        setApartments([]); // Set empty array on error
       } finally {
-        setApartments([]);
         setLoading(false);
       }
     };
@@ -106,13 +104,17 @@ const ApartmentScreen = () => {
               >
                 {/* Card Cover */}
                 <Card.Cover
-                  source={{ uri: apartment.photo }}
+                  source={{ 
+                    uri: apartment.photo_urls && apartment.photo_urls.length > 0 
+                      ? apartment.photo_urls[0] 
+                      : 'https://via.placeholder.com/300x200?text=No+Image'
+                  }}
                   style={styles.cardImage}
                 />
                 {/* Card Content */}
                 <Card.Content>
                   <Paragraph style={styles.cardAddress}>
-                    {apartment.street} {apartment.house_number}
+                    {apartment.street} {apartment.house_number || ''}
                   </Paragraph>
                   <Paragraph style={styles.dateText}>
                     תאריך העלאה: {apartment.created_at.split("T")[0]}
@@ -168,7 +170,17 @@ const ApartmentScreen = () => {
         <ModalApartmentDisplayer
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
-          apartment={selectedApartment}
+          apartment={{
+            ...selectedApartment,
+            address: `${selectedApartment.street || ''} ${selectedApartment.house_number || ''}`,
+            images: selectedApartment.photo_urls || [],
+            aboutApartment: selectedApartment.about || '',
+            tags: selectedApartment.feature_details?.map(feature => feature.name) || [],
+            price: selectedApartment.total_price,
+            rooms: selectedApartment.number_of_rooms,
+            availableRooms: selectedApartment.number_of_available_rooms,
+            entryDate: selectedApartment.available_entry_date
+          }}
         />
       )}
     </View>

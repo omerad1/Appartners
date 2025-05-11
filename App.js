@@ -9,6 +9,7 @@ import TabNavigator from "./navigation/TabNavigator";
 import LoginScreen from "./screens/LoginScreen";
 import OnBoardingNavigator from "./navigation/OnBoardingNavigator";
 import CreateApartmentNavigator from "./navigation/CreateApartmentNavigator";
+import { PreferencesPayloadProvider } from "./context/PreferencesPayloadContext";
 
 const Stack = createStackNavigator();
 
@@ -27,30 +28,33 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <ImageBackground 
-        source={require("./assets/background.jpg")} 
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <View style={styles.overlay} />
-        <NavigationContainer>
-          <StatusBar barStyle="dark-content" />
-          <Stack.Navigator 
-            screenOptions={{ 
-              headerShown: false,
-              animationEnabled: true,
-            }}
-          >
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
-            <Stack.Screen name="MainApp" component={TabNavigator} />
-            <Stack.Screen
-              name="CreateApartment"
-              component={CreateApartmentNavigator}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ImageBackground>
+      <PreferencesPayloadProvider>
+        <ImageBackground 
+          source={require("./assets/background.jpg")} 
+          style={styles.background}
+          resizeMode="cover"
+        >
+          <View style={styles.overlay} />
+          <NavigationContainer>
+            <StatusBar barStyle="dark-content" />
+            <Stack.Navigator 
+              screenOptions={{ 
+                headerShown: false,
+                //cardStyle: { backgroundColor: 'transparent' },
+                animationEnabled: true,
+              }}
+            >
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
+              <Stack.Screen name="MainApp" component={TabNavigator} />
+              <Stack.Screen
+                name="CreateApartment"
+                component={CreateApartmentNavigator}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ImageBackground>
+      </PreferencesPayloadProvider>
     </Provider>
   );
 }
