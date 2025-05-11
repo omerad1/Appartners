@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getPreferencesPayload } from '../api/appDataPayload';
+import { getPreferencesPayload, getQuestions } from '../api/appDataPayload';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Create the context
 const PreferencesPayloadContext = createContext();
@@ -11,6 +12,7 @@ const PreferencesPayloadContext = createContext();
 export const PreferencesPayloadProvider = ({ children }) => {
   const [cities, setCities] = useState([]);
   const [tags, setTags] = useState([]);
+  const [questions, setQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -35,11 +37,51 @@ export const PreferencesPayloadProvider = ({ children }) => {
     
     fetchPayload();
   }, []);
+
+  // Fetch questions data and store locally
+  useEffect(() => {
+    const fetchAndStoreQuestions = async () => {
+      try {
+        // First try to get questions from AsyncStorage
+        const storedQuestions = await AsyncStorage.getItem('appQuestions');
+        
+        if (storedQuestions) {
+          // If questions exist in storage, use them
+          setQuestions(JSON.parse(storedQuestions));
+          console.log("fetched questions", storedQuestions, null, 2);
+          console.log('Loaded questions from local storage');
+        } else {
+          // If not in storage, fetch from API
+          const questionsData = await getQuestions();
+          setQuestions(questionsData);
+          
+          // Store in AsyncStorage for future use
+          await AsyncStorage.setItem('appQuestions', JSON.stringify(questionsData));
+          console.log('Fetched and stored questions in local storage');
+        }
+      } catch (err) {
+        console.error('Failed to load or store questions:', err);
+        // Try to load from AsyncStorage as fallback if API fails
+        try {
+          const fallbackQuestions = await AsyncStorage.getItem('appQuestions');
+          if (fallbackQuestions) {
+            setQuestions(JSON.parse(fallbackQuestions));
+            console.log('Loaded questions from local storage after API failure');
+          }
+        } catch (storageErr) {
+          console.error('Failed to load questions from storage:', storageErr);
+        }
+      }
+    };
+    
+    fetchAndStoreQuestions();
+  }, []);
   
   // The value that will be provided to consumers of this context
   const value = {
     cities,
     tags,
+    questions,
     isLoading,
     error,
     // Add a refresh method in case we need to reload the data
@@ -48,7 +90,7 @@ export const PreferencesPayloadProvider = ({ children }) => {
         setIsLoading(true);
         const data = await getPreferencesPayload();
         setCities(data.cities || []);
-        setTags(data.tags || []);
+        setTags(data.apartment_features || []);
         setError(null);
         return data;
       } catch (err) {
@@ -56,6 +98,21 @@ export const PreferencesPayloadProvider = ({ children }) => {
         throw err;
       } finally {
         setIsLoading(false);
+      }
+    },
+    // Method to force refresh questions from API
+    refreshQuestions: async () => {
+      try {
+        const questionsData = await getQuestions();
+        setQuestions(questionsData);
+        
+        // Update in AsyncStorage
+        await AsyncStorage.setItem('appQuestions', JSON.stringify(questionsData));
+        console.log('Manually refreshed questions and updated local storage');
+        return questionsData;
+      } catch (err) {
+        console.error('Failed to refresh questions:', err);
+        throw err;
       }
     }
   };

@@ -12,9 +12,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import FilterScreen from "./FilterScreen";
 import { useSelector, useDispatch } from "react-redux";
 import { saveUserPreferences, fetchUserPreferences } from "../store/redux/userThunks";
+import QuestionnaireModal from "../components/QuestionnaireModal";
 
 export default function UserProfileScreen() {
   const [preferencesVisible, setPreferencesVisible] = useState(false);
+  const [questionnaireVisible, setQuestionnaireVisible] = useState(false);
   const dispatch = useDispatch();
   
   // Get preferences from Redux store
@@ -90,10 +92,13 @@ export default function UserProfileScreen() {
             <Ionicons name="options-outline" size={30} color="white" />
             <Text style={styles.cardText}>Preferences</Text>
           </TouchableOpacity>
-          <View style={styles.cardPlaceholder}>
-            <Ionicons name="accessibility-outline" size={30} color="white" />
-            <Text style={styles.cardText}>Roommates</Text>
-          </View>
+          <TouchableOpacity 
+            style={styles.cardPlaceholder}
+            onPress={() => setQuestionnaireVisible(true)}
+          >
+            <Ionicons name="help-circle-outline" size={30} color="white" />
+            <Text style={styles.cardText}>Questionnaire</Text>
+          </TouchableOpacity>
           <View style={styles.cardPlaceholder}>
             <Ionicons name="home-outline" size={30} color="white" />
             <Text style={styles.cardText}>Apartments</Text>
@@ -112,6 +117,12 @@ export default function UserProfileScreen() {
           onClose={() => setPreferencesVisible(false)}
           onApply={handleApplyPreferences}
           initialPreferences={preferences}
+        />
+        
+        {/* Questionnaire Modal */}
+        <QuestionnaireModal
+          visible={questionnaireVisible}
+          onClose={() => setQuestionnaireVisible(false)}
         />
       </View>
     </SafeAreaView>
