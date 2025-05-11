@@ -42,7 +42,10 @@ const StepFour = () => {
 
   const handleProfileImageChange = (image) => {
     setLocalProfileImage(image);
-    dispatch(updateOnboardingData({ profileImage: image }));
+    dispatch(updateOnboardingData({ 
+      profileImage: image,
+      photo: image
+    }));
   };
 
   const handleNext = () => {

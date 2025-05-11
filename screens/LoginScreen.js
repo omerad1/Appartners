@@ -12,8 +12,11 @@ import Title from "../components/Title";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { login } from "../api/auth";
+import { login as apiLogin } from "../api/auth";
 import InputField from "../components/onBoarding/InputField";
+import { useDispatch } from "react-redux";
+import { login } from "../store/redux/user";
+import { fetchUserPreferences } from "../store/redux/userThunks";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +24,7 @@ const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const validateForm = () => {
     const newErrors = {};
@@ -46,10 +50,24 @@ const LoginScreen = () => {
 
     setIsLoading(true);
     try {
-      const response = await login(email, password);
+      // Call the API login function
+      const response = await apiLogin(email, password);
       console.log("Login successful:", response);
 
       if (response && response.UserAuth) {
+        // Store user data in Redux
+        dispatch(login(response.UserAuth));
+        
+        // Fetch user preferences and store in Redux
+        try {
+          await dispatch(fetchUserPreferences());
+          console.log("User preferences loaded");
+        } catch (prefError) {
+          console.error("Error loading preferences:", prefError);
+          // Continue with navigation even if preferences fail to load
+        }
+        
+        // Navigate to main app
         navigation.navigate("MainApp");
       }
     } catch (error) {

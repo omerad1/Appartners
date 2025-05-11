@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 
@@ -7,11 +7,21 @@ const PriceRangePicker = ({
   maxPrice = 10000,
   step = 100,
   onChange,
+  initialRange = null,
 }) => {
-  const [priceRange, setPriceRange] = useState({
-    min: minPrice,
-    max: maxPrice,
-  });
+  const [priceRange, setPriceRange] = useState(
+    initialRange || {
+      min: minPrice,
+      max: maxPrice,
+    }
+  );
+  
+  // Update priceRange if initialRange changes
+  useEffect(() => {
+    if (initialRange) {
+      setPriceRange(initialRange);
+    }
+  }, [initialRange]);
 
   const handleMinChange = (value) => {
     const updatedRange = {
@@ -33,40 +43,47 @@ const PriceRangePicker = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Price Range</Text>
       <View style={styles.priceDisplay}>
         <Text style={styles.priceText}>
-          ₪{priceRange.min.toLocaleString()} - ₪
-          {priceRange.max.toLocaleString()}
+          ₪{Math.round(priceRange.min).toLocaleString()} - ₪
+          {Math.round(priceRange.max).toLocaleString()}
         </Text>
       </View>
-      <View>
+      <View style={styles.slidersContainer}>
         {/* Min Price Slider */}
-        <Text style={styles.sliderLabel}>Min Price</Text>
+        <View style={styles.sliderRow}>
+          <Text style={styles.sliderLabel}>Min Price</Text>
+          <Text style={styles.sliderValue}>₪{Math.round(priceRange.min).toLocaleString()}</Text>
+        </View>
         <Slider
           style={styles.slider}
           minimumValue={minPrice}
           maximumValue={maxPrice}
           value={priceRange.min}
           onValueChange={handleMinChange}
-          minimumTrackTintColor="#506ef2"
-          maximumTrackTintColor="#ccc"
-          thumbTintColor="#506ef2"
+          minimumTrackTintColor="#333"
+          maximumTrackTintColor="#ddd"
+          thumbTintColor="#000"
           step={step}
+          tapToSeek={true}
         />
 
         {/* Max Price Slider */}
-        <Text style={styles.sliderLabel}>Max Price</Text>
+        <View style={styles.sliderRow}>
+          <Text style={styles.sliderLabel}>Max Price</Text>
+          <Text style={styles.sliderValue}>₪{Math.round(priceRange.max).toLocaleString()}</Text>
+        </View>
         <Slider
           style={styles.slider}
           minimumValue={minPrice}
           maximumValue={maxPrice}
           value={priceRange.max}
           onValueChange={handleMaxChange}
-          minimumTrackTintColor="#506ef2"
-          maximumTrackTintColor="#ccc"
-          thumbTintColor="#506ef2"
+          minimumTrackTintColor="#333"
+          maximumTrackTintColor="#ddd"
+          thumbTintColor="#000"
           step={step}
+          tapToSeek={true}
         />
       </View>
     </View>
@@ -77,41 +94,49 @@ export default PriceRangePicker;
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 20,
-    paddingHorizontal: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.83)",
+    marginVertical: 10,
+    paddingHorizontal: 5,
     borderRadius: 10,
     paddingVertical: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 7,
   },
-  label: {
-    fontSize: 18,
-    fontFamily: "comfortaaSemiBold",
-    color: "rgba(0, 0, 0, 0.7)",
-    textAlign: "center",
-    marginBottom: 10,
+  slidersContainer: {
+    marginTop: 15,
   },
   priceDisplay: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: 20,
+    backgroundColor: "#f5f5f5",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
   },
   priceText: {
-    fontSize: 16,
-    fontFamily: "comfortaaRegular",
-    color: "rgba(0, 0, 0, 0.8)",
+    fontSize: 18,
+    fontFamily: "comfortaaSemiBold",
+    color: "#000",
+  },
+  sliderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
   },
   slider: {
     width: "100%",
     height: 40,
+    marginBottom: 15,
   },
   sliderLabel: {
     fontSize: 14,
     fontFamily: "comfortaaRegular",
-    color: "rgba(0, 0, 0, 0.7)",
-    marginTop: 10,
+    color: "#333",
+  },
+  sliderValue: {
+    fontSize: 14,
+    fontFamily: "comfortaaSemiBold",
+    color: "#000",
   },
 });

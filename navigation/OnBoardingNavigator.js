@@ -90,7 +90,7 @@ const OnBoardingNavigator = () => {
           fontFamily: 'comfortaaSemiBold',
         },
         headerTintColor: '#333',
-        cardStyle: { backgroundColor: 'transparent' },
+        // cardStyle: { backgroundColor: 'transparent' },
         animationEnabled: true,
         gestureEnabled: false,
       }}

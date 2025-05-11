@@ -125,6 +125,7 @@ const ApartmentsILiked = ({ apartments, loading, error, onApartmentPress }) => {
       )}
       contentContainerStyle={styles.apartmentList}
       showsVerticalScrollIndicator={false}
+      centerContent={true}
     />
   );
 };
@@ -367,6 +368,7 @@ const styles = StyleSheet.create({
   },
   apartmentList: {
     padding: 10,
+    alignItems: 'center', // Center items horizontally
   },
   placeholderContainer: {
     flex: 1,

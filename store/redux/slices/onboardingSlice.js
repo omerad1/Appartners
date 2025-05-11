@@ -10,7 +10,7 @@ const initialState = {
   location: "",
   aboutMe: "",
   preferences: {},
-  photos: [],
+  photo: [],
 };
 
 const onboardingSlice = createSlice({

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,39 @@ import {
 } from "react-native";
 import { ProgressBar, Colors } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import FilterScreen from "./FilterScreen";
+import { useSelector, useDispatch } from "react-redux";
+import { saveUserPreferences, fetchUserPreferences } from "../store/redux/userThunks";
+import QuestionnaireModal from "../components/QuestionnaireModal";
 
 export default function UserProfileScreen() {
+  const [preferencesVisible, setPreferencesVisible] = useState(false);
+  const [questionnaireVisible, setQuestionnaireVisible] = useState(false);
+  const dispatch = useDispatch();
+  
+  // Get preferences from Redux store
+  const preferences = useSelector(state => state.user.preferences);
+  const isLoading = useSelector(state => state.user.isLoading);
+  const error = useSelector(state => state.user.error);
+  
+  // Fetch preferences when component mounts if they're not already loaded
+  useEffect(() => {
+    if (!preferences) {
+      dispatch(fetchUserPreferences())
+        .catch(err => console.error("Failed to load preferences:", err));
+    }
+  }, [dispatch, preferences]);
+  
+  // Handle applying new preferences
+  const handleApplyPreferences = async (newPreferences) => {
+    try {
+      // Save new preferences to Redux store
+      await dispatch(saveUserPreferences(newPreferences));
+      console.log("Preferences updated successfully");
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+    }
+  };
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
@@ -54,14 +85,23 @@ export default function UserProfileScreen() {
 
         {/* Bottom Section */}
         <View style={styles.bottomSection}>
+          <TouchableOpacity 
+            style={styles.cardPlaceholder}
+            onPress={() => setPreferencesVisible(true)}
+          >
+            <Ionicons name="options-outline" size={30} color="white" />
+            <Text style={styles.cardText}>Preferences</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.cardPlaceholder}
+            onPress={() => setQuestionnaireVisible(true)}
+          >
+            <Ionicons name="help-circle-outline" size={30} color="white" />
+            <Text style={styles.cardText}>Questionnaire</Text>
+          </TouchableOpacity>
           <View style={styles.cardPlaceholder}>
-            <Ionicons name="add-circle" size={30} color="white" />
-          </View>
-          <View style={styles.cardPlaceholder}>
-            <Ionicons name="accessibility-outline" size={30} color="white" />
-          </View>
-          <View style={styles.cardPlaceholder}>
-            <Ionicons name="aperture-sharp" size={30} color="white" />
+            <Ionicons name="home-outline" size={30} color="white" />
+            <Text style={styles.cardText}>Apartments</Text>
           </View>
         </View>
         <View style={styles.bottomSection}>
@@ -70,6 +110,20 @@ export default function UserProfileScreen() {
             style={styles.logo}
           />
         </View>
+        
+        {/* Preferences Drawer */}
+        <FilterScreen 
+          visible={preferencesVisible}
+          onClose={() => setPreferencesVisible(false)}
+          onApply={handleApplyPreferences}
+          initialPreferences={preferences}
+        />
+        
+        {/* Questionnaire Modal */}
+        <QuestionnaireModal
+          visible={questionnaireVisible}
+          onClose={() => setQuestionnaireVisible(false)}
+        />
       </View>
     </SafeAreaView>
   );
@@ -171,5 +225,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 2,
+    padding: 5,
+  },
+  cardText: {
+    color: "white",
+    fontSize: 10,
+    marginTop: 5,
+    textAlign: "center",
+    fontFamily: "comfortaaRegular",
   },
 });
