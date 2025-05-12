@@ -2,6 +2,7 @@
 import api from "./client";
 import endpoints from "./endpoints";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { saveUserDataToStorage } from "./user";
 
 export const login = async (email, password) => {
   try {
@@ -11,6 +12,16 @@ export const login = async (email, password) => {
     // Check if UserAuth exists before storing it
     if (res.data && res.data.UserAuth) {
       await AsyncStorage.setItem("authToken", res.data.UserAuth);
+      
+      // Save user data if available
+      if (res.data.user) {
+        console.log('Saving user data to AsyncStorage:', res.data.user);
+        await saveUserDataToStorage(res.data.user);
+        
+        // Also save raw user data for debugging
+        await AsyncStorage.setItem("userData", JSON.stringify(res.data.user));
+        console.log('User data saved to AsyncStorage');
+      }
     } else {
       console.warn("Warning: UserAuth token not found in response", res.data);
     }

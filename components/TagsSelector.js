@@ -20,9 +20,48 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
   const [searchText, setSearchText] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [filteredTags, setFilteredTags] = useState([]);
+  const [normalizedSelectedTags, setNormalizedSelectedTags] = useState([]);
   
   // Get tags data from context
   const { tags, isLoading, error } = usePreferencesPayload();
+  
+  // Normalize selected tags to ensure they're all IDs
+  // This handles backward compatibility with existing data
+  useEffect(() => {
+    if (!tags || tags.length === 0 || !selectedTags || selectedTags.length === 0) {
+      setNormalizedSelectedTags([]);
+      return;
+    }
+    
+    console.log('Normalizing selected tags:', selectedTags);
+    
+    // Convert any tag names to IDs
+    const normalized = selectedTags.map(tag => {
+      // If it's already an ID that exists in our tags array, keep it
+      if (tags.some(t => t.id === tag)) {
+        return tag;
+      }
+      
+      // If it's a name, find the corresponding ID
+      const matchingTag = tags.find(t => t.name === tag);
+      if (matchingTag) {
+        console.log(`Converting tag name '${tag}' to ID '${matchingTag.id}'`);
+        return matchingTag.id;
+      }
+      
+      // If we can't find a match, keep the original value
+      console.log(`Could not find matching tag for '${tag}'`);
+      return tag;
+    });
+    
+    setNormalizedSelectedTags(normalized);
+    
+    // If we made any conversions, update the parent
+    if (JSON.stringify(normalized) !== JSON.stringify(selectedTags)) {
+      console.log('Updating parent with normalized tags');
+      onTagsChange(normalized);
+    }
+  }, [selectedTags, tags]);
   
   // Filter tags based on search text
   useEffect(() => {
@@ -49,36 +88,54 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
   
   // Toggle tag selection
   const handleToggleTag = (tag) => {
-    if (selectedTags.includes(tag.name)) {
+    console.log('Toggle tag:', tag);
+    if (normalizedSelectedTags.includes(tag.id)) {
       // Remove tag if already selected
-      onTagsChange(selectedTags.filter(t => t !== tag.name));
+      onTagsChange(normalizedSelectedTags.filter(id => id !== tag.id));
     } else {
       // Add tag if not selected
-      onTagsChange([...selectedTags, tag.name]);
+      onTagsChange([...normalizedSelectedTags, tag.id]);
     }
   };
   
   // Remove a selected tag
-  const handleRemoveTag = (tagName) => {
-    onTagsChange(selectedTags.filter(t => t !== tagName));
+  const handleRemoveTag = (tagId) => {
+    console.log('Remove tag ID:', tagId);
+    onTagsChange(normalizedSelectedTags.filter(id => id !== tagId));
+  };
+  
+  // Helper function to get tag name from ID
+  const getTagNameById = (tagId) => {
+    // First try to find the tag by ID
+    const tag = tags.find(t => t.id === tagId);
+    if (tag) return tag.name;
+    
+    // If not found by ID, try to find by name (for backward compatibility)
+    // This handles the case where tagId might actually be a name
+    const tagByName = tags.find(t => t.name === tagId);
+    if (tagByName) return tagByName.name;
+    
+    // If all else fails
+    console.log(`Could not find tag name for ID: ${tagId}`);
+    return 'Unknown';
   };
   
   // Render selected tags as a grid without FlatList
   const renderSelectedTags = () => {
     // Group tags into rows of 3
     const rows = [];
-    for (let i = 0; i < selectedTags.length; i += 3) {
-      const row = selectedTags.slice(i, i + 3);
+    for (let i = 0; i < normalizedSelectedTags.length; i += 3) {
+      const row = normalizedSelectedTags.slice(i, i + 3);
       rows.push(row);
     }
     
     return rows.map((row, rowIndex) => (
       <View key={`row-${rowIndex}`} style={styles.tagsFlexContainer}>
-        {row.map(tagName => (
-          <View key={tagName} style={styles.selectedTag}>
-            <Text style={styles.selectedTagText}>{tagName}</Text>
+        {row.map(tagId => (
+          <View key={tagId} style={styles.selectedTag}>
+            <Text style={styles.selectedTagText}>{getTagNameById(tagId)}</Text>
             <TouchableOpacity
-              onPress={() => handleRemoveTag(tagName)}
+              onPress={() => handleRemoveTag(tagId)}
               style={styles.removeTagButton}
             >
               <Ionicons name="close" size={16} color="#fff" />
@@ -92,7 +149,7 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
   return (
     <View style={styles.container}>
       {/* Selected Tags Display */}
-      {selectedTags.length > 0 && (
+      {normalizedSelectedTags.length > 0 && (
         <View style={styles.selectedTagsWrapper}>
           <Text style={styles.selectedTagsTitle}>Selected Features:</Text>
           <ScrollView 
@@ -141,17 +198,17 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
                 key={item.id.toString()}
                 style={[
                   styles.tagItem,
-                  selectedTags.includes(item.name) && styles.tagItemSelected
+                  normalizedSelectedTags.includes(item.id) && styles.tagItemSelected
                 ]}
                 onPress={() => handleToggleTag(item)}
               >
                 <Text style={[
                   styles.tagText,
-                  selectedTags.includes(item.name) && styles.tagTextSelected
+                  normalizedSelectedTags.includes(item.id) && styles.tagTextSelected
                 ]}>
                   {item.name}
                 </Text>
-                {selectedTags.includes(item.name) && (
+                {normalizedSelectedTags.includes(item.id) && (
                   <Ionicons name="checkmark" size={18} color="#fff" />
                 )}
               </TouchableOpacity>

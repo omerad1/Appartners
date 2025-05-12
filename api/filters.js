@@ -15,11 +15,17 @@ export const getUserFilters = async () => {
 
 export const postUserFilters = async (filtersData) => {
     try {
-        // Extract city ID if city is an object
-        const cityValue = filtersData.city ? 
-            (typeof filtersData.city === 'object' ? filtersData.city.id : filtersData.city) : 
-            null;
+        // Extract city ID if it's an object with an ID
+        const cityId = filtersData.city && typeof filtersData.city === 'object' && filtersData.city.id
+            ? filtersData.city.id  // Use the ID from the city object
+            : (filtersData.city || null);  // Use the city value as is or null if not present
             
+        console.log("City object:", filtersData.city);
+        console.log("Extracted city ID:", cityId);
+        
+        // Ensure features are IDs (they should already be IDs from the TagsSelector)
+        console.log("Features/tags:", filtersData.features);
+        
         // Convert from app format to API format if needed
         const apiFormatData = {
             move_in_date: filtersData.moveInDate,
@@ -28,12 +34,12 @@ export const postUserFilters = async (filtersData) => {
                 max_price: filtersData.priceRange?.max || null
             },
             number_of_roommates: filtersData.number_of_roommates || [],
-            city: cityValue, // Send only the ID to the backend
-            features: filtersData.features || [],
+            city: cityId, // Send only the ID to the backend
+            features: filtersData.features || [], // These should already be IDs
             max_floor: filtersData.max_floor || null,
             area: filtersData.area || null
         };
-        
+        console.log("API format data:", apiFormatData);
         // Make the POST request to save filters
         const res = await api.post(endpoints.filters, apiFormatData);
         console.log("🏠 Saved user filters", res.data);

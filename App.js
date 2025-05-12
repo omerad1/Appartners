@@ -3,7 +3,8 @@ import { StyleSheet, View, StatusBar, ImageBackground } from "react-native";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Provider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as PaperProvider } from 'react-native-paper';
 import store from './store/redux/store';
 import TabNavigator from "./navigation/TabNavigator";
 import LoginScreen from "./screens/LoginScreen";
@@ -27,35 +28,37 @@ export default function App() {
   }
 
   return (
-    <Provider store={store}>
-      <PreferencesPayloadProvider>
-        <ImageBackground 
-          source={require("./assets/background.jpg")} 
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.overlay} />
-          <NavigationContainer>
-            <StatusBar barStyle="dark-content" />
-            <Stack.Navigator 
-              screenOptions={{ 
-                headerShown: false,
-                //cardStyle: { backgroundColor: 'transparent' },
-                animationEnabled: true,
-              }}
-            >
-              <Stack.Screen name="Login" component={LoginScreen} />
-              <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
-              <Stack.Screen name="MainApp" component={TabNavigator} />
-              <Stack.Screen
-                name="CreateApartment"
-                component={CreateApartmentNavigator}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </ImageBackground>
-      </PreferencesPayloadProvider>
-    </Provider>
+    <PreferencesPayloadProvider>
+      <ReduxProvider store={store}>
+        <PaperProvider>
+          <ImageBackground 
+            source={require("./assets/background.jpg")} 
+            style={styles.background}
+            resizeMode="cover"
+          >
+            <View style={styles.overlay} />
+            <NavigationContainer>
+              <StatusBar barStyle="dark-content" />
+              <Stack.Navigator 
+                screenOptions={{ 
+                  headerShown: false,
+                  //cardStyle: { backgroundColor: 'transparent' },
+                  animationEnabled: true,
+                }}
+              >
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
+                <Stack.Screen name="MainApp" component={TabNavigator} />
+                <Stack.Screen
+                  name="CreateApartment"
+                  component={CreateApartmentNavigator}
+                />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </ImageBackground>
+        </PaperProvider>
+      </ReduxProvider>
+    </PreferencesPayloadProvider>
   );
 }
 

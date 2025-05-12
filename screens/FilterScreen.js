@@ -38,8 +38,22 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   const [moveInDate, setMoveInDate] = useState(initialPreferences.moveInDate || null);
   const [priceRange, setPriceRange] = useState(initialPreferences.priceRange || defaultPriceRange);
   const [selectedRoommates, setSelectedRoommates] = useState(initialPreferences.number_of_roommates || []); 
-  const [city, setCity] = useState(initialPreferences.city || "");
-  const [selectedFeatures, setSelectedFeatures] = useState(initialPreferences.features || []); 
+  
+  // For city, we need to ensure it's properly initialized as an object
+  // If it comes from the backend as just an ID or name, we'll need to convert it
+  const [city, setCity] = useState(() => {
+    // Log what we're receiving for debugging
+    console.log('Initial city value:', initialPreferences.city);
+    return initialPreferences.city || "";
+  });
+  
+  // For features/tags, we need to ensure we're using IDs instead of names
+  const [selectedFeatures, setSelectedFeatures] = useState(() => {
+    console.log('Initial features value:', initialPreferences.features);
+    // Make sure we're using an array of feature IDs
+    return initialPreferences.features || [];
+  }); 
+  
   const [maxFloor, setMaxFloor] = useState(initialPreferences.max_floor ? String(initialPreferences.max_floor) : "");
   const [area, setArea] = useState(initialPreferences.area || "");
   
@@ -104,7 +118,7 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
       moveInDate,
       priceRange,
       number_of_roommates: selectedRoommates,
-      city,
+      city, // Keep the entire city object in the state
       features: selectedFeatures,
       max_floor: maxFloor && !isNaN(parsedMaxFloor) ? parsedMaxFloor : null,
       area: area || null,
@@ -138,7 +152,10 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
           >
             <CitySearchInput
               value={city}
-              onChange={setCity}
+              onChange={(selectedCity) => {
+                console.log('Selected city in FilterScreen:', selectedCity);
+                setCity(selectedCity);
+              }}
             />
           </FilterSection>
           <FilterSection

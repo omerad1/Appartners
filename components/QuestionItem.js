@@ -1,17 +1,26 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, TextInput } from 'react-native';
 import QuestionScale from './survey/QuestionScale';
 
 const QuestionItem = ({ question, index, initialValue, onSelect, disabled = false }) => {
+
   const renderQuestionContent = () => {
     switch (question.question_type) {
       case 'text':
+        // For text questions, display the saved answer or placeholder
         return (
           <View style={styles.textInputPlaceholder}>
-            <Text style={styles.placeholderText}>{question.placeholder}</Text>
+            {initialValue ? (
+              // If there's a saved answer, display it
+              <Text style={styles.savedAnswerText}>{initialValue}</Text>
+            ) : (
+              // Otherwise show the placeholder
+              <Text style={styles.placeholderText}>{question.placeholder}</Text>
+            )}
           </View>
         );
       case 'radio':
+        // For radio/scale questions, use the QuestionScale component
         return (
           <QuestionScale 
             minLabel={question.options?.min} 
@@ -70,6 +79,10 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#999',
     fontFamily: 'comfortaaRegular',
+  },
+  savedAnswerText: {
+    color: '#333',
+    fontFamily: 'comfortaaMedium',
   },
 });
 

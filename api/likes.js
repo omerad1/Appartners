@@ -1,21 +1,6 @@
 import api from './client';
 import endpoints from './endpoints';
 
-
-
-
-
-
-
-
-
-//// will work in the future with the data from the server!!!
-
-
-
-
-
-
 // Fetch apartments that the user has liked
 export const getLikedApartments = async () => {
   try {

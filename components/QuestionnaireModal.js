@@ -34,12 +34,38 @@ const QuestionnaireModal = ({ visible, onClose }) => {
       setIsLoadingAnswers(true);
       const answers = await getUserAnswers();
       
+
       // Convert array of answers to a map for easier lookup
       const answersMap = {};
+      
+      // Process each answer and map it to the corresponding question ID
       answers.forEach(answer => {
-        answersMap[answer.question_id] = answer.answer;
+        // Extract the question ID - handle both formats (nested object or direct ID)
+        let questionId;
+        if (answer.question && typeof answer.question === 'object') {
+          questionId = answer.question.id;
+        } else {
+          questionId = answer.question_id || answer.question;
+        }
+        
+        // Determine which field contains the answer value
+        let answerValue;
+        if (answer.numeric_response !== undefined && answer.numeric_response !== null) {
+          answerValue = answer.numeric_response;
+        } else if (answer.text_response !== undefined && answer.text_response !== null) {
+          answerValue = answer.text_response;
+        } else if (answer.answer !== undefined && answer.answer !== null) {
+          answerValue = answer.answer;
+        }
+        
+        // Store the answer in the map if we have both a question ID and a value
+        if (questionId !== undefined && answerValue !== undefined) {
+
+          answersMap[questionId] = answerValue;
+        }
       });
       
+
       setUserAnswers(answersMap);
     } catch (error) {
       console.error('Failed to fetch user answers:', error);
