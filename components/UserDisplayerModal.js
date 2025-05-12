@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, Image, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike }) => {
+const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showActions = true }) => {
   if (!user) return null;
 
-  const { name, profile_image, bio, age, university } = user;
+  const { name, profile_image, bio, age, university, occupation } = user;
 
   return (
     <Modal
@@ -16,14 +16,14 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike }) => {
     >
       <SafeAreaView style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          {/* Header with close button */}
+          {/* Header with close button*/}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <MaterialCommunityIcons name="close" size={28} color="#000" />
           </TouchableOpacity>
 
           {/* User Image */}
           <Image 
-            source={typeof profile_image === 'string' ? { uri: profile_image } : profile_image}
+            source={profile_image ? { uri: profile_image } : require("../assets/icons/crime.png")}
             style={styles.userImage}
             resizeMode="cover"
           />
@@ -31,7 +31,14 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike }) => {
           {/* User Info Overlay */}
           <View style={styles.userInfoOverlay}>
             <View style={styles.userInfoContent}>
-              <Text style={styles.userName}>{name}{age ? `, ${age}` : ''}</Text>
+              <Text style={styles.userName}>{age ? `${age}, ` : ''}{name}</Text>
+              
+              {/* Occupation */}
+              {occupation && (
+                <Text style={styles.occupationText}>{occupation}</Text>
+              )}
+              
+              {/* University */}
               {university && (
                 <View style={styles.universityContainer}>
                   <Text style={styles.universityText}>{university}</Text>
@@ -47,15 +54,17 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike }) => {
             <Text style={styles.bioText}>{bio || 'No bio available'}</Text>
           </ScrollView>
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.dislikeButton} onPress={onDislike}>
-              <MaterialCommunityIcons name="close" size={32} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.likeButton} onPress={onLike}>
-              <MaterialCommunityIcons name="check" size={32} color="#fff" />
-            </TouchableOpacity>
-          </View>
+          {/* Action Buttons - only show if showActions is true */}
+          {showActions && (
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={styles.dislikeButton} onPress={onDislike}>
+                <MaterialCommunityIcons name="close" size={32} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.likeButton} onPress={onLike}>
+                <MaterialCommunityIcons name="check" size={32} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </SafeAreaView>
     </Modal>
@@ -77,7 +86,7 @@ const styles = StyleSheet.create({
   closeButton: {
     position: 'absolute',
     top: 16,
-    right: 16,
+    left: 16, // Changed from right to left for RTL layout
     zIndex: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 20,
@@ -105,8 +114,15 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 8,
+    marginBottom: 4,
     textAlign: 'right', 
+  },
+  occupationText: {
+    fontSize: 16,
+    color: '#fff',
+    marginBottom: 8,
+    textAlign: 'right',
+    fontStyle: 'italic',
   },
   universityContainer: {
     flexDirection: 'row',

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   SafeAreaView,
+  Platform,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -14,6 +15,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Portal } from 'react-native-paper'; // Import Portal from react-native-paper
 
 const { height } = Dimensions.get('window');
 
@@ -65,53 +67,56 @@ const DrawerModal = ({ visible, onClose, title, children, onSave, saveButtonTitl
     return null;
   }
 
+  // Wrap the entire modal in a Portal component
   return (
-    <View style={styles.container}>
-      {/* Backdrop */}
-      <Animated.View
-        style={[styles.backdrop, backdropStyle]}
-        onTouchEnd={triggerClose}
-      />
-      
-      {/* Drawer */}
-      <Animated.View style={[styles.drawer, drawerStyle]}>
-        <SafeAreaView style={styles.safeArea}>
-          {/* Header with X button and title */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={triggerClose}
-            >
-              <Ionicons name="close-outline" size={26} color="#333" />
-            </TouchableOpacity>
-            <View style={styles.titleContainer}>
-              <Text style={styles.headerTitle}>{title}</Text>
-            </View>
-            <View style={styles.headerRight} />
-          </View>
-          
-          {/* Divider */}
-          <View style={styles.divider} />
-          
-          {/* Content */}
-          <View style={styles.contentContainer}>
-            {children}
-          </View>
-          
-          {/* Footer with button */}
-          {onSave && (
-            <View style={styles.footer}>
+    <Portal>
+      <View style={styles.container}>
+        {/* Backdrop */}
+        <Animated.View
+          style={[styles.backdrop, backdropStyle]}
+          onTouchEnd={triggerClose}
+        />
+        
+        {/* Drawer */}
+        <Animated.View style={[styles.drawer, drawerStyle]}>
+          <SafeAreaView style={styles.safeArea}>
+            {/* Header with X button and title */}
+            <View style={styles.header}>
               <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSaveChanges}
+                style={styles.closeButton}
+                onPress={triggerClose}
               >
-                <Text style={styles.saveButtonText}>{saveButtonTitle}</Text>
+                <Ionicons name="close-outline" size={26} color="#333" />
               </TouchableOpacity>
+              <View style={styles.titleContainer}>
+                <Text style={styles.headerTitle}>{title}</Text>
+              </View>
+              <View style={styles.headerRight} />
             </View>
-          )}
-        </SafeAreaView>
-      </Animated.View>
-    </View>
+            
+            {/* Divider */}
+            <View style={styles.divider} />
+            
+            {/* Content */}
+            <View style={styles.contentContainer}>
+              {children}
+            </View>
+            
+            {/* Footer with button */}
+            {onSave && (
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSaveChanges}
+                >
+                  <Text style={styles.saveButtonText}>{saveButtonTitle}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </SafeAreaView>
+        </Animated.View>
+      </View>
+    </Portal>
   );
 };
 
@@ -123,10 +128,11 @@ const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 1001, // Ensure backdrop is above navigation
   },
   drawer: {
     backgroundColor: '#fff',
-    height: height * 0.85, // 85% of screen height to avoid collision
+    height: height *0.95, // Use full screen height
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -135,7 +141,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.27,
     shadowRadius: 4.65,
-    elevation: 6,
+    elevation: 9999, // Very high elevation to ensure it's above everything
+    zIndex: 9999, // Very high z-index to ensure it's above everything
   },
   safeArea: {
     flex: 1,

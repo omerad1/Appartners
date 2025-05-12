@@ -4,7 +4,9 @@ const initialState = {
   currentUser: null,
   preferences: null,
   isLoading: false,
-  error: null
+  error: null,
+  isProfileUpdating: false,
+  profileUpdateError: null
 };
 
 export const userSlice = createSlice({
@@ -32,6 +34,18 @@ export const userSlice = createSlice({
     },
     setError: (state, action) => {
       state.error = action.payload;
+    },
+    updateUserProfile: (state, action) => {
+      state.currentUser = {
+        ...state.currentUser,
+        ...action.payload
+      };
+    },
+    setProfileUpdating: (state, action) => {
+      state.isProfileUpdating = action.payload;
+    },
+    setProfileUpdateError: (state, action) => {
+      state.profileUpdateError = action.payload;
     }
   },
 });
@@ -43,7 +57,10 @@ export const {
   setPreferences, 
   updatePreferences, 
   setLoading, 
-  setError 
+  setError,
+  updateUserProfile,
+  setProfileUpdating,
+  setProfileUpdateError
 } = userSlice.actions;
 
 // Export the reducer

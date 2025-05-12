@@ -6,11 +6,11 @@ const API_BASE_URL = "http://10.0.0.3:8000/";
 const API_BASE_URL_Production =
   "https://appartners-backend-production.up.railway.app";
 
-const api_base_tom_comp ="https://ad5c-2a06-c701-97ff-ea00-38ce-76d6-801e-b300.ngrok-free.app";
+const api_base_tom_comp ="https://dfdb-13-134-10-39.ngrok-free.app";
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: API_BASE_URL_Production,
+  baseURL: api_base_tom_comp,
   timeout: 10000, // 10 seconds timeout
   headers: {
     "Content-Type": "application/json",

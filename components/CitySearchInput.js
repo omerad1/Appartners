@@ -16,9 +16,36 @@ import Ionicons from "@expo/vector-icons/Ionicons";
  * Uses the PreferencesPayload context to access available cities
  */
 const CitySearchInput = ({ value, onChange }) => {
+  // Log the incoming value to debug
+  console.log('CitySearchInput received value:', value);
+  
+  // Initialize searchText based on value (object or string)
   const [searchText, setSearchText] = useState(value && typeof value === 'object' ? value.name : value || '');
   const [showResults, setShowResults] = useState(false);
   const [filteredCities, setFilteredCities] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(value && typeof value === 'object' ? value : null);
+  
+  // If value changes externally, update the internal state
+  useEffect(() => {
+    if (value) {
+      console.log('Value changed in CitySearchInput:', value);
+      if (typeof value === 'object' && value.name) {
+        setSearchText(value.name);
+        setSelectedCity(value);
+      } else if (typeof value === 'string') {
+        setSearchText(value);
+        // Try to find a matching city object
+        const matchingCity = cities.find(city => 
+          city.name && city.name.toLowerCase() === value.toLowerCase());
+        if (matchingCity) {
+          console.log('Found matching city object:', matchingCity);
+          setSelectedCity(matchingCity);
+          // Update the parent with the full city object
+          onChange(matchingCity);
+        }
+      }
+    }
+  }, [value]);
   
   // Get cities data from context
   const { cities, isLoading, error } = usePreferencesPayload();
@@ -46,15 +73,21 @@ const CitySearchInput = ({ value, onChange }) => {
   // Handle city selection
   const handleSelectCity = (city) => {
     setSearchText(city.name);
+    setSelectedCity(city); // Store the selected city object
     onChange(city); // Pass the entire city object with id, name, and area
     setShowResults(false);
+    console.log('Selected city object:', city); // Log the selected city object
   };
   
   // Handle text input
   const handleChangeText = (text) => {
     setSearchText(text);
-    // Only pass the text as a temporary value until a city is selected
-    onChange(text);
+    // When text changes, we're no longer using a selected city
+    if (selectedCity) {
+      setSelectedCity(null);
+      // Only clear the parent's value if we had a city selected before
+      onChange(null);
+    }
     setShowResults(true);
   };
   
@@ -74,7 +107,8 @@ const CitySearchInput = ({ value, onChange }) => {
             style={styles.clearButton} 
             onPress={() => {
               setSearchText('');
-              onChange(''); // Clear the selected city
+              setSelectedCity(null); // Clear the selected city object
+              onChange(null); // Pass null to parent to clear the city
               setShowResults(false);
             }}
           >

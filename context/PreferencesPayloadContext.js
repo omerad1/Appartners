@@ -48,7 +48,6 @@ export const PreferencesPayloadProvider = ({ children }) => {
         if (storedQuestions) {
           // If questions exist in storage, use them
           setQuestions(JSON.parse(storedQuestions));
-          console.log("fetched questions", storedQuestions, null, 2);
           console.log('Loaded questions from local storage');
         } else {
           // If not in storage, fetch from API

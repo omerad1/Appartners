@@ -12,20 +12,25 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import BackgroundImage from "../components/BackgroundImage";
 import FilterScreen from "./FilterScreen";
 import { useSelector, useDispatch } from "react-redux";
-import { saveUserPreferences, fetchUserPreferences } from "../store/redux/userThunks";
+import { saveUserPreferences, fetchUserPreferences, loadUserData } from "../store/redux/userThunks";
 import QuestionnaireModal from "../components/QuestionnaireModal";
+import EditProfileModal from "../components/EditProfileModal";
+import UserDisplayerModal from "../components/UserDisplayerModal";
 
 export default function UserProfileScreen() {
   const [preferencesVisible, setPreferencesVisible] = useState(false);
   const [questionnaireVisible, setQuestionnaireVisible] = useState(false);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
+  const [previewProfileVisible, setPreviewProfileVisible] = useState(false);
   const dispatch = useDispatch();
   
-  // Get preferences from Redux store
+  // Get preferences and user data from Redux store
   const preferences = useSelector(state => state.user.preferences);
+  const currentUser = useSelector(state => state.user.currentUser);
   const isLoading = useSelector(state => state.user.isLoading);
   const error = useSelector(state => state.user.error);
   
-  // Fetch preferences when component mounts if they're not already loaded
+  // Fetch preferences and user data when component mounts if they're not already loaded
   useEffect(() => {
     if (!preferences) {
       dispatch(fetchUserPreferences())
@@ -33,15 +38,70 @@ export default function UserProfileScreen() {
     }
   }, [dispatch, preferences]);
   
+  // Load user data from AsyncStorage
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+
+        await dispatch(loadUserData());
+
+      } catch (err) {
+        console.error("Failed to load user data:", err);
+      }
+    };
+    
+    loadData();
+  }, [dispatch]);
+  
   // Handle applying new preferences
   const handleApplyPreferences = async (newPreferences) => {
     try {
       // Save new preferences to Redux store
       await dispatch(saveUserPreferences(newPreferences));
-      console.log("Preferences updated successfully");
+
     } catch (error) {
       console.error("Error updating preferences:", error);
     }
+  };
+  
+  // Dummy handlers for preview profile actions
+  const handleLikeProfile = () => {
+
+    setPreviewProfileVisible(false);
+  };
+  
+  const handleDislikeProfile = () => {
+
+    setPreviewProfileVisible(false);
+  };
+  
+  // Format user data for the UserDisplayerModal
+  const formatUserForPreview = () => {
+    if (!currentUser) return null;
+    
+    // Calculate age from birth_date
+    let age = null;
+    if (currentUser.birth_date) {
+      const birthDate = new Date(currentUser.birth_date);
+      const today = new Date();
+      age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      // Adjust age if birthday hasn't occurred yet this year
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+    }
+    
+
+    return {
+      name: `${currentUser.first_name} ${currentUser.last_name}`,
+      profile_image: currentUser.photo_url || null, // Pass null if no photo URL exists
+      bio: currentUser.about_me || 'No bio available',
+      age: age, // Use calculated age
+      university: currentUser.university || null,
+      occupation: currentUser.occupation || null // Add occupation field
+    };
   };
   return (
     <BackgroundImage>
@@ -61,15 +121,27 @@ export default function UserProfileScreen() {
             {/* Profile Picture */}
             <View style={styles.profileImageWrapper}>
               <Image
-                source={require("../assets/icons/crime.png")} // Replace with actual profile image
+                source={currentUser?.photo_url ? { uri: currentUser.photo_url } : require("../assets/icons/crime.png")}
                 style={styles.profileImage}
               />
-              <TouchableOpacity style={styles.editButton}>
+              <TouchableOpacity 
+                style={styles.editButton}
+                onPress={() => setEditProfileVisible(true)}
+              >
                 <View style={styles.editIcon}>
                   <Ionicons name="pencil" size={35} color="black" />
                 </View>
               </TouchableOpacity>
             </View>
+            
+            {/* User Name and Info */}
+            {currentUser && (
+              <View style={styles.userInfoContainer}>
+                <Text style={styles.userName}>
+                  {currentUser.first_name} {currentUser.last_name}
+                </Text>
+              </View>
+            )}
 
             {/* Progress Bar */}
             <View style={styles.progressBarContainer}>
@@ -97,10 +169,13 @@ export default function UserProfileScreen() {
             <Ionicons name="help-circle-outline" size={30} color="white" />
             <Text style={styles.cardText}>Questionnaire</Text>
           </TouchableOpacity>
-          <View style={styles.cardPlaceholder}>
-            <Ionicons name="home-outline" size={30} color="white" />
-            <Text style={styles.cardText}>Apartments</Text>
-          </View>
+          <TouchableOpacity 
+            style={styles.cardPlaceholder}
+            onPress={() => setPreviewProfileVisible(true)}
+          >
+            <Ionicons name="eye-outline" size={30} color="white" />
+            <Text style={styles.cardText}>Preview Profile</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.bottomSection}>
           <Image
@@ -117,10 +192,26 @@ export default function UserProfileScreen() {
           initialPreferences={preferences}
         />
         
+        {/* Preview Profile Modal */}
+        <UserDisplayerModal
+          visible={previewProfileVisible}
+          onClose={() => setPreviewProfileVisible(false)}
+          user={formatUserForPreview()}
+          onLike={handleLikeProfile}
+          onDislike={handleDislikeProfile}
+          showActions={false} // Hide action buttons when viewing own profile
+        />
+        
         {/* Questionnaire Modal */}
         <QuestionnaireModal
           visible={questionnaireVisible}
           onClose={() => setQuestionnaireVisible(false)}
+        />
+        
+        {/* Edit Profile Modal */}
+        <EditProfileModal
+          visible={editProfileVisible}
+          onClose={() => setEditProfileVisible(false)}
         />
       </View>
     </SafeAreaView>
@@ -205,6 +296,31 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 10,
+  },
+  userInfoContainer: {
+    alignItems: "center",
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    fontFamily: "comfortaaSemiBold",
+    textAlign: "center",
+  },
+  userOccupation: {
+    fontSize: 16,
+    color: "#555",
+    marginTop: 5,
+    fontFamily: "comfortaaRegular",
+    textAlign: "center",
+  },
+  userLocation: {
+    fontSize: 14,
+    color: "#777",
+    marginTop: 5,
+    fontFamily: "comfortaaRegular",
+    textAlign: "center",
   },
   bottomSection: {
     flex: 1,

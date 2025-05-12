@@ -1,3 +1,4 @@
+
 const endpoints = {
   login: "/api/v1/authenticate/login/",
   register: "/api/v1/authenticate/register/",
@@ -8,7 +9,8 @@ const endpoints = {
   filters: "/api/v1/users/preferences/",
   preferencesPayload: "/api/v1/users/preferences/payload/",
   questions: "/api/v1/questionnaire/",
-  answers: "/api/v1/questionnaire/responses/"
+  answers: "/api/v1/questionnaire/responses/",
+  updateUserProfile: "/api/v1/users/update-details/"
 };
 
 export default endpoints;
