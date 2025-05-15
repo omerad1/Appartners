@@ -69,13 +69,29 @@ export const submitMultipleAnswers = async (answers) => {
     }
     
     // Format the payload according to the API schema
+    // For question ID 1, use text_response
+    // For all other questions, use numeric_response
     const payload = {
-      responses: validAnswers.map(item => ({
-        question: item.questionId,
-        numeric_response: item.answer
-      }))
+      responses: validAnswers.map(item => {
+        // Check if it's question ID 1
+        if (item.questionId === 1 || item.questionId === 2) {
+          console.log(`Question ID 1 sending text_response: ${item.answer}`);
+          return {
+            question: item.questionId,
+            text_response: String(item.answer) // Ensure it's a string
+          };
+        } else {
+          // For all other questions, use numeric_response
+          console.log(`Question ID ${item.questionId} sending numeric_response: ${item.answer}`);
+          return {
+            question: item.questionId,
+            numeric_response: Number(item.answer) // Ensure it's a number
+          };
+        }
+      })
     };
     
+    console.log('Submitting answers payload:', JSON.stringify(payload, null, 2));
     const res = await api.post(endpoints.answers, payload);
     console.log("Submitted multiple answers:", res.data);
     return res.data;

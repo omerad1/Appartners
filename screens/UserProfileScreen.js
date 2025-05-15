@@ -13,6 +13,7 @@ import BackgroundImage from "../components/BackgroundImage";
 import FilterScreen from "./FilterScreen";
 import { useSelector, useDispatch } from "react-redux";
 import { saveUserPreferences, fetchUserPreferences, loadUserData } from "../store/redux/userThunks";
+import { getUserDataFromStorage } from "../api/user";
 import QuestionnaireModal from "../components/QuestionnaireModal";
 import EditProfileModal from "../components/EditProfileModal";
 import UserDisplayerModal from "../components/UserDisplayerModal";
@@ -22,6 +23,8 @@ export default function UserProfileScreen() {
   const [questionnaireVisible, setQuestionnaireVisible] = useState(false);
   const [editProfileVisible, setEditProfileVisible] = useState(false);
   const [previewProfileVisible, setPreviewProfileVisible] = useState(false);
+  // Add a state to force rerenders when profile is updated
+  const [profileUpdateCounter, setProfileUpdateCounter] = useState(0);
   const dispatch = useDispatch();
   
   // Get preferences and user data from Redux store
@@ -42,16 +45,39 @@ export default function UserProfileScreen() {
   useEffect(() => {
     const loadData = async () => {
       try {
-
         await dispatch(loadUserData());
-
       } catch (err) {
         console.error("Failed to load user data:", err);
       }
     };
     
     loadData();
-  }, [dispatch]);
+    // Include profileUpdateCounter in dependencies to reload data when profile is updated
+  }, [dispatch, profileUpdateCounter]);
+  
+  // Function to explicitly fetch user data from AsyncStorage
+  const refreshUserDataFromStorage = async () => {
+    try {
+      console.log('Explicitly fetching user data from AsyncStorage');
+      const userData = await getUserDataFromStorage();
+      if (userData) {
+        console.log('User data from storage:', userData);
+        console.log('Photo URL from storage:', userData.photo_url);
+        
+        // Manually update Redux store with the fetched data
+        dispatch({ 
+          type: 'user/updateUserProfile', 
+          payload: userData 
+        });
+        console.log('User data refreshed from AsyncStorage');
+        
+        // Force immediate rerender
+        setProfileUpdateCounter(prev => prev + 1);
+      }
+    } catch (err) {
+      console.error('Failed to refresh user data from storage:', err);
+    }
+  };
   
   // Handle applying new preferences
   const handleApplyPreferences = async (newPreferences) => {
@@ -123,6 +149,8 @@ export default function UserProfileScreen() {
               <Image
                 source={currentUser?.photo_url ? { uri: currentUser.photo_url } : require("../assets/icons/crime.png")}
                 style={styles.profileImage}
+                // Add key prop with photo_url to force re-render when the image changes
+                key={currentUser?.photo_url || 'default-profile'}
               />
               <TouchableOpacity 
                 style={styles.editButton}
@@ -212,6 +240,15 @@ export default function UserProfileScreen() {
         <EditProfileModal
           visible={editProfileVisible}
           onClose={() => setEditProfileVisible(false)}
+          onProfileUpdated={async (result, shouldRefetch) => {
+            if (shouldRefetch) {
+              // Explicitly fetch fresh data from AsyncStorage
+              await refreshUserDataFromStorage();
+            }
+            // Increment counter to force a rerender
+            setProfileUpdateCounter(prev => prev + 1);
+            console.log('Profile updated, triggering rerender');
+          }}
         />
       </View>
     </SafeAreaView>

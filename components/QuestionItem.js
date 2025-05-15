@@ -1,23 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput } from 'react-native';
 import QuestionScale from './survey/QuestionScale';
 
 const QuestionItem = ({ question, index, initialValue, onSelect, disabled = false }) => {
 
+  // Initialize input value with existing data if available
+  const [inputValue, setInputValue] = useState(initialValue !== null && initialValue !== undefined ? String(initialValue) : '');
+  
+  // Update local state if initialValue changes (e.g., when answers are loaded from server)
+  React.useEffect(() => {
+    if (initialValue !== null && initialValue !== undefined) {
+      setInputValue(String(initialValue));
+    }
+  }, [initialValue]);
+
   const renderQuestionContent = () => {
     switch (question.question_type) {
       case 'text':
-        // For text questions, display the saved answer or placeholder
+        // For text questions, display an interactive TextInput
+        // Use numeric keyboard for the second question (index 1) in the first tab
+        const keyboardType = index === 1 ? 'numeric' : 'default';
+        
         return (
-          <View style={styles.textInputPlaceholder}>
-            {initialValue ? (
-              // If there's a saved answer, display it
-              <Text style={styles.savedAnswerText}>{initialValue}</Text>
-            ) : (
-              // Otherwise show the placeholder
-              <Text style={styles.placeholderText}>{question.placeholder}</Text>
-            )}
-          </View>
+          <TextInput
+            style={styles.textInput}
+            placeholder={question.placeholder}
+            placeholderTextColor="#999"
+            value={inputValue}
+            onChangeText={(text) => {
+              setInputValue(text);
+              // Convert to number for numeric inputs if needed
+              const parsedValue = keyboardType === 'numeric' && text !== '' ? Number(text) : text;
+              onSelect(parsedValue);
+            }}
+            keyboardType={keyboardType}
+            editable={!disabled}
+          />
         );
       case 'radio':
         // For radio/scale questions, use the QuestionScale component
@@ -75,6 +93,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     justifyContent: 'center',
     backgroundColor: '#F5F5F5',
+  },
+  textInput: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    backgroundColor: '#F5F5F5',
+    fontFamily: 'comfortaaMedium',
+    color: '#333',
   },
   placeholderText: {
     color: '#999',
