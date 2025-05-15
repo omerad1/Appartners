@@ -14,10 +14,11 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import DrawerModal from './DrawerModal';
 import { updateUserProfileData } from '../store/redux/userThunks';
+import { saveUserDataToStorage } from '../api/user';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-const EditProfileModal = ({ visible, onClose }) => {
+const EditProfileModal = ({ visible, onClose, onProfileUpdated }) => {
   const dispatch = useDispatch();
   const currentUser = useSelector(state => state.user.currentUser);
   const isLoading = useSelector(state => state.user.isProfileUpdating);
@@ -120,13 +121,51 @@ const EditProfileModal = ({ visible, onClose }) => {
   // Handle save
   const handleSave = async () => {
     try {
-      // Combine form data with profile image
-      const updatedData = {
-        ...formData,
-        photo: profileImage
+      // Prepare the updated data
+      let updatedData = { ...formData };
+      
+      // Handle profile image separately to ensure it's properly formatted
+      if (profileImage) {
+        // If the image is an object with URI (from image picker)
+        if (profileImage.uri) {
+          // Keep the full image object for the API
+          updatedData.photo = profileImage;
+          
+          // Also store the URI in photo_url for display purposes
+          updatedData.photo_url = profileImage.uri;
+        } 
+        // If it's already a string URL
+        else if (typeof profileImage === 'string') {
+          updatedData.photo_url = profileImage;
+        }
+      }
+      
+      console.log('Saving profile with data:', updatedData);
+      
+      // Update user profile data through the thunk
+      const result = await dispatch(updateUserProfileData(updatedData));
+      
+      // Explicitly save the updated user data to AsyncStorage with photo_url
+      const currentUserData = {
+        ...currentUser,
+        ...updatedData,
+        // Ensure photo_url is set for display purposes
+        photo_url: updatedData.photo_url || (updatedData.photo && updatedData.photo.uri) || currentUser.photo_url
       };
       
-      await dispatch(updateUserProfileData(updatedData));
+      // Log the photo URL being saved
+      console.log('Saving user with photo_url:', currentUserData.photo_url);
+      
+      // Save to AsyncStorage
+      await saveUserDataToStorage(currentUserData);
+      console.log('User data explicitly saved to AsyncStorage');
+      
+      // Force a rerender by triggering the callback if provided
+      if (onProfileUpdated) {
+        onProfileUpdated(result, true); // Pass true to indicate data should be refetched
+      }
+      
+      // Close the modal
       onClose();
     } catch (error) {
       console.error('Error saving profile:', error);

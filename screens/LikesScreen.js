@@ -10,100 +10,25 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Linking,
+  Alert,
 } from "react-native";
+import BackgroundImage from "../components/BackgroundImage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import ApartmentLike from "../components/ApartmentLike";
 import ModalApartmentDisplayer from "../components/ModalApartmentDisplayer";
 import UserDisplayer from "../components/UserDisplayer";
 import UserDisplayerModal from "../components/UserDisplayerModal";
+import { getLikedApartments, getUsersWhoLikedMyApartment, likeApartment, unlikeApartment } from "../api/likes";
+import AppartnersLoader from "../components/ApartnersLoader";
 
-// Synthetic data for apartments I liked
-const MOCK_LIKED_APARTMENTS = [
-  {
-    id: 1,
-    image_url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267", // Will use fallback image
-    address: "דיזינגוף 12, תל אביב",
-    tags: ["Spacious", "Central", "Balcony"],
-    price_per_month: 5500,
-    rooms: 3,
-    area_sqm: 85,
-  },
-  {
-    id: 2,
-    image_url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    address: "רח' הלם 345 , חיפה",
-    tags: ["Cozy", "Newly renovated", "Parking"],
-    price_per_month: 4200,
-    rooms: 2,
-    area_sqm: 65,
-  },
-  {
-    id: 3,
-    image_url: "https://images.unsplash.com/photo-1493809842364-78817add7ffb",
-    address: "סמטת פיין 12, ירושלים",
-    tags: ["Garden", "Quiet", "Pet friendly"],
-    price_per_month: 6800,
-    rooms: 4,
-    area_sqm: 110,
-  },
-  {
-    id: 4,
-    image_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
-    address: "יצחק רגר 13, באר שבע",
-    tags: ["Sea view", "Modern", "Gym"],
-    price_per_month: 7500,
-    rooms: 3,
-    area_sqm: 95,
-  },
-];
 
-// Synthetic data for people who liked my apartment
-const MOCK_USERS_LIKED_MY_APARTMENT = [
-  {
-    id: 1,
-    name: "מאיה רוזנברג",
-    profile_image: "https://randomuser.me/api/portraits/women/44.jpg",
-    facebook_link: "https://www.facebook.com/maya.rosenberg",
-    bio: "סטודנטית לתואר שני בפסיכולוגיה באוניברסיטת תל אביב. אוהבת לטייל, לקרוא ספרים ולבלות עם חברים. מחפשת דירה שקטה באזור המרכז עם גישה נוחה לאוניברסיטה. יש לי חתול קטן בשם לונה שמאוד אוהב מרפסות.",
-    age: 24,
-    university: "אוניברסיטת תל אביב",
-  },
-  {
-    id: 2,
-    name: "דניאל כהן",
-    profile_image: "https://randomuser.me/api/portraits/men/32.jpg",
-    facebook_link: "https://www.facebook.com/daniel.cohen",
-    bio: "מהנדס תוכנה בחברת היי-טק. עובד מהבית רוב השבוע ומחפש דירה מרווחת עם פינת עבודה. חובב ספורט, במיוחד ריצה וכדורסל. מעוניין בדירה לטווח ארוך באזור שקט. אוהב לבשל ומחפש מטבח מאובזר היטב.",
-    age: 28,
-    university: "הטכניון",
-  },
-  {
-    id: 3,
-    name: "נועה לוי",
-    profile_image: "https://randomuser.me/api/portraits/women/68.jpg",
-    facebook_link: "https://www.facebook.com/noa.levi",
-    bio: "רופאה מתמחה בבית חולים איכילוב. עובדת במשמרות ומחפשת דירה קרובה לבית החולים. אוהבת אמנות, מוזיקה קלאסית ובישול. מעדיפה דירה מרוהטת באזור שקט. מחפשת שותפים שמבינים את אורח החיים של רופאה במשמרות.",
-    age: 30,
-    university: "האוניברסיטה העברית",
-  },
-  {
-    id: 4,
-    name: "אלון ברק",
-    profile_image: "https://randomuser.me/api/portraits/men/75.jpg",
-    facebook_link: "https://www.facebook.com/alon.barak",
-    bio: "סטודנט לתואר ראשון במשפטים וכלכלה באוניברסיטה העברית. מחפש דירת שותפים באזור ירושלים. חובב מוזיקה, מנגן בגיטרה ואוהב לארח חברים. מעוניין בדירה עם סלון מרווח ואווירה חברתית. יכול לעזור בתיקונים קטנים בבית.",
-    age: 22,
-    university: "האוניברסיטה העברית",
-  },
-];
 
 const ApartmentsILiked = ({ apartments, loading, error, onApartmentPress }) => {
   if (loading) {
     return (
       <View style={styles.placeholderContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading apartments you liked...</Text>
+        <AppartnersLoader />
       </View>
     );
   }
@@ -144,10 +69,7 @@ const PeopleLikedMyApartment = ({ users, loading, error, onUserPress }) => {
   if (loading) {
     return (
       <View style={styles.placeholderContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.hebrewText}>
-          טוען משתמשים שאהבו את הדירה שלך...
-        </Text>
+        <AppartnersLoader />
       </View>
     );
   }
@@ -206,22 +128,66 @@ const LikesScreen = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
-    // Simulate fetching data
-    const apartmentsTimer = setTimeout(() => {
-      setLikedApartments(MOCK_LIKED_APARTMENTS);
-      setLoadingApartments(false);
-    }, 1000);
-
-    const usersTimer = setTimeout(() => {
-      setUsersWhoLikedMyApartment(MOCK_USERS_LIKED_MY_APARTMENT);
-      setLoadingUsers(false);
-    }, 1500);
-
-    return () => {
-      clearTimeout(apartmentsTimer);
-      clearTimeout(usersTimer);
-    };
+    // Fetch real data from the server
+    fetchLikedApartments();
+    fetchUsersWhoLikedMyApartment();
   }, []);
+
+  // Function to fetch apartments that the user has liked
+  const fetchLikedApartments = async () => {
+    try {
+      setLoadingApartments(true);
+      setApartmentsError(null);
+      
+      const data = await getLikedApartments();
+      console.log('Fetched liked apartments:', data);
+      
+      // Check if the data is in the expected format
+      if (Array.isArray(data)) {
+        setLikedApartments(data);
+      } else if (data && Array.isArray(data.results)) {
+        // Handle case where data might be wrapped in a results array
+        setLikedApartments(data.results);
+      } else {
+        console.error('Unexpected data format for liked apartments:', data);
+        setLikedApartments([]);
+      }
+    } catch (error) {
+      console.error('Error fetching liked apartments:', error);
+      setApartmentsError(error.message || 'Failed to load liked apartments');
+
+    } finally {
+      setLoadingApartments(false);
+    }
+  };
+
+  // Function to fetch users who liked the user's apartment
+  const fetchUsersWhoLikedMyApartment = async () => {
+    try {
+      setLoadingUsers(true);
+      setUsersError(null);
+      
+      const data = await getUsersWhoLikedMyApartment();
+      console.log('Fetched users who liked my apartment:', data);
+      
+      // Check if the data is in the expected format
+      if (Array.isArray(data)) {
+        setUsersWhoLikedMyApartment(data);
+      } else if (data && Array.isArray(data.results)) {
+        // Handle case where data might be wrapped in a results array
+        setUsersWhoLikedMyApartment(data.results);
+      } else {
+        console.error('Unexpected data format for users who liked my apartment:', data);
+        setUsersWhoLikedMyApartment([]);
+      }
+    } catch (error) {
+      console.error('Error fetching users who liked my apartment:', error);
+      setUsersError(error.message || 'Failed to load users who liked your apartment');
+
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   const handleApartmentPress = (apartment) => {
     setSelectedApartment(apartment);
@@ -233,16 +199,49 @@ const LikesScreen = () => {
     setUserModalVisible(true);
   };
 
-  const handleLikeUser = () => {
-    // In a real app, this would call an API to like the user
-    console.log("Liked user:", selectedUser?.name);
-    setUserModalVisible(false);
+  const handleLikeUser = async () => {
+    if (!selectedUser || !selectedUser.id) {
+      console.error('No user selected or user ID missing');
+      setUserModalVisible(false);
+      return;
+    }
+    
+    try {
+      // Here you would call the API to match with the user
+      // For now, we'll just show a success message
+      Alert.alert(
+        'Match Request Sent',
+        `You've sent a match request to ${selectedUser.name}!`,
+        [{ text: 'OK' }]
+      );
+      
+      // Refresh the users list after matching
+      fetchUsersWhoLikedMyApartment();
+      setUserModalVisible(false);
+    } catch (error) {
+      console.error('Error liking user:', error);
+      Alert.alert('Error', 'Failed to send match request. Please try again.');
+    }
   };
 
-  const handleDislikeUser = () => {
-    // In a real app, this would call an API to dislike the user
-    console.log("Disliked user:", selectedUser?.name);
-    setUserModalVisible(false);
+  const handleDislikeUser = async () => {
+    if (!selectedUser || !selectedUser.id) {
+      console.error('No user selected or user ID missing');
+      setUserModalVisible(false);
+      return;
+    }
+    
+    try {
+      // Here you would call the API to reject the user
+      // For now, we'll just close the modal
+      
+      // Refresh the users list after rejecting
+      fetchUsersWhoLikedMyApartment();
+      setUserModalVisible(false);
+    } catch (error) {
+      console.error('Error disliking user:', error);
+      Alert.alert('Error', 'Failed to reject. Please try again.');
+    }
   };
 
   const renderTab = () => {
@@ -268,6 +267,7 @@ const LikesScreen = () => {
   };
 
   return (
+    <BackgroundImage>
     <SafeAreaView style={styles.container}>
       <View style={styles.tabContainer}>
         <LinearGradient
@@ -335,6 +335,7 @@ const LikesScreen = () => {
         onDislike={handleDislikeUser}
       />
     </SafeAreaView>
+    </BackgroundImage>
   );
 };
 
@@ -396,7 +397,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    marginTop: -80, // Shift the content higher on the screen
   },
   placeholderText: {
     color: "#888",

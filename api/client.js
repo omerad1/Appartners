@@ -6,7 +6,7 @@ const API_BASE_URL = "http://10.0.0.3:8000/";
 const API_BASE_URL_Production =
   "https://appartners-backend-production.up.railway.app";
 
-const api_base_tom_comp ="https://dfdb-13-134-10-39.ngrok-free.app";
+const api_base_tom_comp ="https://d3a3-2a06-c701-97ff-ea00-7947-9759-9da2-4a2e.ngrok-free.app";
 
 // Create an axios instance with default config
 const api = axios.create({

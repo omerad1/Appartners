@@ -10,7 +10,7 @@ import {
 import { usePreferencesPayload } from '../context/PreferencesPayloadContext';
 import DrawerModal from './DrawerModal';
 import QuestionItem from './QuestionItem';
-import { getUserAnswers, submitAnswer } from '../api/questions';
+import { getUserAnswers, submitAnswer, submitMultipleAnswers } from '../api/questions';
 
 
 const QuestionnaireModal = ({ visible, onClose }) => {
@@ -18,6 +18,7 @@ const QuestionnaireModal = ({ visible, onClose }) => {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [tabsVisible, setTabsVisible] = useState(true);
   const [userAnswers, setUserAnswers] = useState({});
+  const [pendingAnswers, setPendingAnswers] = useState({});
   const [isLoadingAnswers, setIsLoadingAnswers] = useState(false);
   const [isSavingAnswer, setIsSavingAnswer] = useState(false);
   
@@ -75,50 +76,36 @@ const QuestionnaireModal = ({ visible, onClose }) => {
   };
   
   // Function to handle when a user selects an answer
-  const handleAnswerSelect = async (questionId, value) => {
-    try {
-      setIsSavingAnswer(true);
+  const handleAnswerSelect = (questionId, value) => {
+    // Handle empty string values for text inputs (questions 1 and 2)
+    if ((questionId === 1 || questionId === 2) && value === '') {
+      // Treat empty string as null for text inputs
+      value = null;
+    }
+    
+    // Only update the pending answers locally without submitting to server
+    if (value === null) {
+      // If answer is deselected or empty, remove it from pending answers
+      setPendingAnswers(prev => {
+        const newState = {...prev};
+        delete newState[questionId];
+        return newState;
+      });
       
-      // Update local state immediately for responsive UI
-      if (value === null) {
-        // If answer is deselected, remove it from the local state
+      // Also mark it as null in userAnswers if it exists there
+      if (userAnswers[questionId]) {
         setUserAnswers(prev => {
           const newState = {...prev};
           delete newState[questionId];
           return newState;
         });
-      } else {
-        // If a new answer is selected, add it to the local state
-        setUserAnswers(prev => ({
-          ...prev,
-          [questionId]: value
-        }));
       }
-      
-      // Submit the answer to the server (submitAnswer function will handle null values)
-      await submitAnswer(questionId, value);
-    } catch (error) {
-      console.error('Failed to save answer:', error);
-      // Revert the local state if the server request fails
-      setUserAnswers(prev => {
-        const newState = {...prev};
-        if (value === null) {
-          // If we were trying to delete an answer, restore the previous value
-          if (prev[questionId] !== undefined) {
-            newState[questionId] = prev[questionId];
-          }
-        } else {
-          // If we were trying to add/update an answer, remove or restore as needed
-          if (prev[questionId] === undefined) {
-            delete newState[questionId];
-          } else {
-            newState[questionId] = prev[questionId];
-          }
-        }
-        return newState;
-      });
-    } finally {
-      setIsSavingAnswer(false);
+    } else {
+      // If a new answer is selected, add it to pending answers
+      setPendingAnswers(prev => ({
+        ...prev,
+        [questionId]: value
+      }));
     }
   };
 
@@ -155,12 +142,65 @@ const QuestionnaireModal = ({ visible, onClose }) => {
 
   const currentSection = questions[currentSectionIndex];
 
-  const handleNextSection = () => {
+  const handleNextSection = async () => {
     if (currentSectionIndex < questions.length - 1) {
+      // Just move to the next section without saving
       setCurrentSectionIndex(currentSectionIndex + 1);
     } else {
-      // If we're at the last section, close the modal
-      onClose();
+      // If we're at the last section (Finish button), save all answers (both pending and previously saved)
+      try {
+        setIsSavingAnswer(true);
+        
+        // Combine previously saved answers with pending answers
+        const combinedAnswers = { ...userAnswers, ...pendingAnswers };
+        
+        // Filter out any null, undefined, or empty string answers
+        const filteredAnswers = {};
+        Object.entries(combinedAnswers).forEach(([questionId, answer]) => {
+          // Skip null, undefined, or empty string answers
+          if (answer === null || answer === undefined || answer === '') {
+            console.log(`Skipping question ${questionId} with empty/null answer`);
+            return;
+          }
+          
+          // For questions 1 and 2 (text inputs), skip if they're empty strings
+          if ((parseInt(questionId) === 1 || parseInt(questionId) === 2) && 
+              (typeof answer === 'string' && answer.trim() === '')) {
+            console.log(`Skipping question ${questionId} with empty text`);
+            return;
+          }
+          
+          // Otherwise, keep the answer
+          filteredAnswers[questionId] = answer;
+        });
+        
+        // Prepare all valid answers for submission
+        const allAnswersToSubmit = Object.entries(filteredAnswers).map(([questionId, answer]) => ({
+          questionId: parseInt(questionId),
+          answer
+        }));
+        
+        console.log(`Submitting ${allAnswersToSubmit.length} total valid answers (filtered from ${Object.keys(combinedAnswers).length} total)`);
+        
+        if (allAnswersToSubmit.length > 0) {
+          // Submit all valid answers at once
+          await submitMultipleAnswers(allAnswersToSubmit);
+          
+          // Update userAnswers with filtered answers
+          setUserAnswers(filteredAnswers);
+          
+          // Clear pending answers
+          setPendingAnswers({});
+        }
+        
+        // Close the modal
+        onClose();
+      } catch (error) {
+        console.error('Failed to save answers:', error);
+        // Don't close the modal if there was an error
+      } finally {
+        setIsSavingAnswer(false);
+      }
     }
   };
 
@@ -173,7 +213,7 @@ const QuestionnaireModal = ({ visible, onClose }) => {
         <QuestionItem 
           question={question} 
           index={index}
-          initialValue={previousAnswer}
+          initialValue={pendingAnswers[question.id] !== undefined ? pendingAnswers[question.id] : previousAnswer}
           onSelect={(value) => handleAnswerSelect(question.id, value)}
           disabled={isSavingAnswer}
         />
