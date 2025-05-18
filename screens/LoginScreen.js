@@ -17,7 +17,8 @@ import InputField from "../components/onBoarding/InputField";
 import BackgroundImage from "../components/BackgroundImage";
 import { useDispatch } from "react-redux";
 import { login } from "../store/redux/user";
-import { fetchUserPreferences } from "../store/redux/userThunks";
+import { useAuth } from "../context/AuthContext";
+import { fetchUserData } from "../api/user";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -26,6 +27,7 @@ const LoginScreen = () => {
   const [errors, setErrors] = useState({});
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { loginSuccess } = useAuth();
 
   const validateForm = () => {
     const newErrors = {};
@@ -55,21 +57,22 @@ const LoginScreen = () => {
       const response = await apiLogin(email, password);
       console.log("Login successful:", response);
 
-      if (response && response.UserAuth) {
-        // Store user data in Redux
-        dispatch(login(response.UserAuth));
-        
-        // Fetch user preferences and store in Redux
+      if (response && response.UserAuth && response.RefreshToken) {
+        // Fetch user data after successful login
         try {
-          await dispatch(fetchUserPreferences());
-          console.log("User preferences loaded");
-        } catch (prefError) {
-          console.error("Error loading preferences:", prefError);
-          // Continue with navigation even if preferences fail to load
+          const userData = await fetchUserData(true); // Force refresh from server
+          console.log("userDATA: ", userData)
+          if (userData) {
+            // Dispatch user data to Redux store
+            dispatch(login(userData));
+            console.log("User data fetched and stored in Redux");
+          }
+        } catch (userDataError) {
+          console.error("Failed to fetch user data:", userDataError);
+          // Continue with login even if user data fetch fails
         }
-        
-        // Navigate to main app
-        navigation.navigate("MainApp");
+        // Set authentication state to true
+        loginSuccess();
       }
     } catch (error) {
       console.error("Login failed:", error);

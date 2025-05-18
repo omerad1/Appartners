@@ -16,7 +16,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Title from "../../components/Title"; // Import your custom Title component
 import { useNavigation } from "@react-navigation/native";
 import ModalApartmentDisplayer from "../../components/ModalApartmentDisplayer"; // Import the modal
-import { getUserApartments } from "../../api/myApartments"; // Import the function to fetch apartmentsapartment"; // Adjust the import path as needed
+import { getUserApartments, DeleteUserApartment } from "../../api/myApartments"; // Import the functions to fetch and delete apartments
 
 const ApartmentScreen = () => {
   const [apartments, setApartments] = useState([]);
@@ -66,9 +66,16 @@ const ApartmentScreen = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    console.log(`Delete Apartment with ID: ${id}`);
-    setApartments(apartments.filter((apartment) => apartment.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      console.log(`Deleting Apartment with ID: ${id}`);
+      await DeleteUserApartment(id);
+      // After successful deletion from the server, update the local state
+      setApartments(apartments.filter((apartment) => apartment.id !== id));
+    } catch (error) {
+      console.error("Failed to delete apartment:", error.message);
+      // You might want to show an error message to the user here
+    }
   };
 
   const handleEdit = (id) => {

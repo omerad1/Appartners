@@ -11,41 +11,76 @@ import {
 import { usePreferencesPayload } from '../context/PreferencesPayloadContext';
 import Ionicons from "@expo/vector-icons/Ionicons";
 
+// Helper to log objects clearly
+const logObject = (label, obj) => {
+  console.log(`${label}:`, JSON.stringify(obj, null, 2));
+};
+
 /**
  * City search input component with autocomplete functionality
  * Uses the PreferencesPayload context to access available cities
  */
-const CitySearchInput = ({ value, onChange }) => {
-  // Log the incoming value to debug
-  console.log('CitySearchInput received value:', value);
+const CitySearchInput = ({ value, onChange, initialValue }) => {
+  console.log('CitySearchInput - value:', value);
+  console.log('CitySearchInput - initialValue:', initialValue);
   
-  // Initialize searchText based on value (object or string)
-  const [searchText, setSearchText] = useState(value && typeof value === 'object' ? value.name : value || '');
+  // Initialize searchText based on value (object or string) or initialValue
+  const [searchText, setSearchText] = useState(() => {
+    // If initialValue is provided, use it
+    if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+      console.log('CitySearchInput - Using initialValue:', initialValue);
+      return initialValue;
+    }
+    // Otherwise fall back to value
+    if (value && typeof value === 'object' && value.name) {
+      console.log('CitySearchInput - Using value.name:', value.name);
+      return value.name;
+    } else if (typeof value === 'string' && value.trim() !== '') {
+      console.log('CitySearchInput - Using value string:', value);
+      return value;
+    }
+    console.log('CitySearchInput - No valid value, using empty string');
+    return '';
+  });
   const [showResults, setShowResults] = useState(false);
   const [filteredCities, setFilteredCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState(value && typeof value === 'object' ? value : null);
   
   // If value changes externally, update the internal state
   useEffect(() => {
-    if (value) {
-      console.log('Value changed in CitySearchInput:', value);
-      if (typeof value === 'object' && value.name) {
-        setSearchText(value.name);
-        setSelectedCity(value);
-      } else if (typeof value === 'string') {
-        setSearchText(value);
-        // Try to find a matching city object
+    
+    if (!value) {
+      // If value is null/undefined/empty, clear the input
+      setSearchText('');
+      setSelectedCity(null);
+      return;
+    }
+    
+    if (typeof value === 'object' && value.name) {
+      // If value is an object with a name property, use that
+      setSearchText(value.name);
+      setSelectedCity(value);
+    } else if (typeof value === 'string' && value.trim() !== '') {
+      // If value is a non-empty string, use it directly for display
+
+      setSearchText(value);
+      
+      // Only try to match with a city object if cities are available
+      if (cities && cities.length > 0) {
         const matchingCity = cities.find(city => 
           city.name && city.name.toLowerCase() === value.toLowerCase());
+          
         if (matchingCity) {
-          console.log('Found matching city object:', matchingCity);
+
           setSelectedCity(matchingCity);
-          // Update the parent with the full city object
-          onChange(matchingCity);
+        } else {
+          // If no match found, just keep the string value
+
+          setSelectedCity(null);
         }
       }
     }
-  }, [value]);
+  }, [value, cities]);
   
   // Get cities data from context
   const { cities, isLoading, error } = usePreferencesPayload();
@@ -72,11 +107,17 @@ const CitySearchInput = ({ value, onChange }) => {
   
   // Handle city selection
   const handleSelectCity = (city) => {
+    // Log the complete city object with UUID
+    logObject('SELECTED CITY WITH UUID', city);
+    console.log('CITY UUID:', city.id);
+    
     setSearchText(city.name);
     setSelectedCity(city); // Store the selected city object
-    onChange(city); // Pass the entire city object with id, name, and area
+    
+    // Pass the entire city object with id, name, and area
+    onChange(city);
+    
     setShowResults(false);
-    console.log('Selected city object:', city); // Log the selected city object
   };
   
   // Handle text input
@@ -91,6 +132,15 @@ const CitySearchInput = ({ value, onChange }) => {
     setShowResults(true);
   };
   
+  // Show all cities when input is focused
+  const handleFocus = () => {
+    // Set filtered cities to all cities if search text is empty
+    if (searchText.trim() === '') {
+      setFilteredCities(cities);
+    }
+    setShowResults(true);
+  };
+  
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -99,7 +149,7 @@ const CitySearchInput = ({ value, onChange }) => {
           value={searchText}
           onChangeText={handleChangeText}
           placeholder="Enter city name"
-          onFocus={() => setShowResults(true)}
+          onFocus={handleFocus}
           autoCapitalize="words"
         />
         {searchText ? (
@@ -153,22 +203,31 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
     zIndex: 999, // Increased z-index to ensure dropdown appears above other elements
+    marginVertical: 10,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    borderRadius: 10,
+    paddingHorizontal: 15,
     backgroundColor: '#fff',
+    position: 'relative',
   },
   input: {
     flex: 1,
     height: 50,
     fontSize: 16,
     fontFamily: 'comfortaaRegular',
+  },
+  label: {
+    marginBottom: 5,
+    paddingLeft: 10,
+    fontSize: 20,
+    color: '#333',
+    fontFamily: 'comfortaaSemiBold',
   },
   clearButton: {
     padding: 5,

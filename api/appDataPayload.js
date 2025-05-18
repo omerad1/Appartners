@@ -8,7 +8,7 @@ import endpoints from "./endpoints";
 export const getPreferencesPayload = async () => {
   try {
     const res = await api.get(endpoints.preferencesPayload);
-    console.log("Fetched preferences payload", res.data);
+    //console.log("Fetched preferences payload", res.data);
     return res.data;
   } catch (err) {
     const message = err.response?.data?.detail || err.message;

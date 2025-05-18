@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   KeyboardAvoidingView,
@@ -14,11 +14,14 @@ import NumberSlider from "../../../components/NumberSlider";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation } from "@react-navigation/native";
 import BackgroundImage from "../../../components/BackgroundImage";
+import CitySearchInput from "../../../components/CitySearchInput";
+import AreaSearchInput from "../../../components/AreaSearchInput";
+import { usePreferencesPayload } from "../../../context/PreferencesPayloadContext";
 const AddApartmentScreen = () => {
   const [entryDay, setEntryDay] = useState(dayjs());
   const [formData, setFormData] = useState({
-    city: "",
-    area: "",
+    city: null, // Will store the full city object
+    area: null, // Will store the full area object
     street: "",
     buildingNumber: "",
     apartmentNumber: "",
@@ -28,6 +31,9 @@ const AddApartmentScreen = () => {
     availableRooms: 1,
     totalPrice: "",
   });
+  
+  // Get cities data from context
+  const { cities, isLoading: loadingCities } = usePreferencesPayload();
   const navigation = useNavigation();
 
   const handleRoomsChange = (rooms) => {
@@ -45,7 +51,15 @@ const AddApartmentScreen = () => {
   };
 
   const handleNext = () => {
-    console.log("Form data:", formData);
+    // Prepare data for logging - convert city and area objects to their names for cleaner output
+    const logData = {
+      ...formData,
+      city: formData.city ? formData.city.name : '',
+      area: formData.area ? formData.area.name : ''
+    };
+    
+    console.log("Form data:", logData);
+    
     // Navigate to the next screen in the CreateApartmentNavigator
     navigation.navigate("PropertyTagsScreen");
     return true; // Return true to allow navigation
@@ -65,20 +79,22 @@ const AddApartmentScreen = () => {
             onPress={handleNext}
           >
             <View style={styles.formContainer}>
-              <InputField
-                placeholder="Enter City"
-                type="text"
-                onChange={(text) => handleInputChange("city", text)}
-                label="City"
-                value={formData.city}
-              />
-              <InputField
-                placeholder="Enter Area"
-                type="text"
-                onChange={(text) => handleInputChange("area", text)}
-                label="Area"
-                value={formData.area}
-              />
+              <View style={styles.inputWrapper}>
+                <Text style={styles.label}>City</Text>
+                <CitySearchInput
+                  value={formData.city}
+                  onChange={(city) => handleInputChange("city", city)}
+                />
+              </View>
+              
+              <View style={styles.inputWrapper}>
+                <Text style={styles.label}>Area</Text>
+                <AreaSearchInput
+                  value={formData.area}
+                  onChange={(area) => handleInputChange("area", area)}
+                  selectedCity={formData.city}
+                />
+              </View>
               <InputField
                 placeholder="Enter Street"
                 type="text"
@@ -183,6 +199,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   formContainer: {
+    width: "100%",
+  },
+  inputWrapper: {
+    marginBottom: 15,
     width: "100%",
   },
   addressContainer: {
