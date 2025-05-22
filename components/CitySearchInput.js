@@ -11,35 +11,25 @@ import {
 import { usePreferencesPayload } from '../context/PreferencesPayloadContext';
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-// Helper to log objects clearly
-const logObject = (label, obj) => {
-  console.log(`${label}:`, JSON.stringify(obj, null, 2));
-};
 
 /**
  * City search input component with autocomplete functionality
  * Uses the PreferencesPayload context to access available cities
  */
 const CitySearchInput = ({ value, onChange, initialValue }) => {
-  console.log('CitySearchInput - value:', value);
-  console.log('CitySearchInput - initialValue:', initialValue);
   
   // Initialize searchText based on value (object or string) or initialValue
   const [searchText, setSearchText] = useState(() => {
     // If initialValue is provided, use it
     if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
-      console.log('CitySearchInput - Using initialValue:', initialValue);
       return initialValue;
     }
     // Otherwise fall back to value
     if (value && typeof value === 'object' && value.name) {
-      console.log('CitySearchInput - Using value.name:', value.name);
       return value.name;
     } else if (typeof value === 'string' && value.trim() !== '') {
-      console.log('CitySearchInput - Using value string:', value);
       return value;
     }
-    console.log('CitySearchInput - No valid value, using empty string');
     return '';
   });
   const [showResults, setShowResults] = useState(false);
@@ -107,14 +97,11 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
   
   // Handle city selection
   const handleSelectCity = (city) => {
-    // Log the complete city object with UUID
-    logObject('SELECTED CITY WITH UUID', city);
-    console.log('CITY UUID:', city.id);
     
     setSearchText(city.name);
     setSelectedCity(city); // Store the selected city object
     
-    // Pass the entire city object with id, name, and area
+  
     onChange(city);
     
     setShowResults(false);

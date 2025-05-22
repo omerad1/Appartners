@@ -31,299 +31,226 @@ const SECTION_KEYS = {
 
 const defaultPriceRange = { min: 0, max: 10000 };
 
-// A much simpler implementation to avoid the infinite loop
 const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = {} }) => {
-  // Track if we've already initialized the sections to avoid re-initialization
   const initializedRef = useRef(false);
-  
-  // Get cities from the context
-  const { cities, isLoading: citiesLoading } = usePreferencesPayload();
-  
-  // Ensure initialPreferences is not null and log it for debugging
+  // Get all data from context at the top level
+  const { cities, tags, isLoading: citiesLoading } = usePreferencesPayload();
   const safePreferences = initialPreferences || {};
   
-  // Log all incoming preferences data with type information
-  console.log('FilterScreen - Initial preferences data:', JSON.stringify(safePreferences, null, 2));
-  console.log('FilterScreen - number_of_roommates type:', Array.isArray(safePreferences.number_of_roommates) ? 
-    'Array[' + safePreferences.number_of_roommates.map(item => typeof item).join(', ') + ']' : 
-    typeof safePreferences.number_of_roommates);
-  console.log('FilterScreen - city type:', typeof safePreferences.city);
-  console.log('FilterScreen - max_floor type:', typeof safePreferences.max_floor);
-  console.log('FilterScreen - Available cities:', cities.length);
+  // Create a reference to store the original preferences
+  const originalPrefs = useRef(safePreferences);
   
-  // Debug the structure of the preferences data
-  console.log('PREFERENCES STRUCTURE CHECK:');
-  if (safePreferences.moveInDate) console.log('- moveInDate:', safePreferences.moveInDate);
-  if (safePreferences.priceRange) console.log('- priceRange:', JSON.stringify(safePreferences.priceRange));
-  if (safePreferences.number_of_roommates) console.log('- number_of_roommates:', JSON.stringify(safePreferences.number_of_roommates));
-  if (safePreferences.city) console.log('- city:', JSON.stringify(safePreferences.city));
-  if (safePreferences.features) console.log('- features:', JSON.stringify(safePreferences.features));
-  if (safePreferences.max_floor) console.log('- max_floor:', safePreferences.max_floor);
-  if (safePreferences.area) console.log('- area:', safePreferences.area);
-
-  
-  // Basic state setup with proper type handling
-  const [moveInDate, setMoveInDate] = useState(() => {
-    // Handle date string conversion if needed
-    if (safePreferences.moveInDate) {
-      console.log('FilterScreen - Move-in date:', safePreferences.moveInDate);
+  // Initialize temporary form state
+  const initTempForm = () => {
+    // Move-in date
+    const tempMoveInDate = (() => {
+      if (!originalPrefs.current.move_in_date) return null;
       try {
-        // Try to parse the date
-        const date = new Date(safePreferences.moveInDate);
-        // Check if it's a valid date
-        if (!isNaN(date.getTime())) {
-          console.log('FilterScreen - Parsed move-in date:', date);
-          return date;
-        }
+        const date = new Date(originalPrefs.current.move_in_date);
+        return !isNaN(date.getTime()) ? date : null;
       } catch (error) {
-        console.error('Error parsing move-in date:', error);
+        return null;
       }
-    }
-    console.log('FilterScreen - No valid move-in date found');
-    return null;
-  });
-  
-  const [priceRange, setPriceRange] = useState(() => {
-    console.log('FilterScreen - Original price range:', safePreferences.priceRange);
+    })();
     
-    // Check if we have a valid price range object
-    if (safePreferences.priceRange && typeof safePreferences.priceRange === 'object') {
-      const min = safePreferences.priceRange.min !== undefined && safePreferences.priceRange.min !== null
-        ? Number(safePreferences.priceRange.min)
-        : defaultPriceRange.min;
+    // Price range
+    const tempPriceRange = (() => {
+      if (!originalPrefs.current.price_range) return defaultPriceRange;
+      return {
+        min: originalPrefs.current.price_range?.min ?? defaultPriceRange.min,
+        max: originalPrefs.current.price_range?.max ?? defaultPriceRange.max
+      };
+    })();
+    
+    // Roommates
+    const tempSelectedRoommates = (() => {
+      if (!originalPrefs.current.number_of_roommates || !Array.isArray(originalPrefs.current.number_of_roommates)) return [];
+      return originalPrefs.current.number_of_roommates
+        .map(val => typeof val === 'string' ? parseInt(val, 10) : val)
+        .filter(val => typeof val === 'number' && !isNaN(val));
+    })();
+    
+    // City
+    const tempCity = (() => {
+      if (!originalPrefs.current.city) return "";
+      
+      if (typeof originalPrefs.current.city === 'object' && 
+          originalPrefs.current.city.id && 
+          originalPrefs.current.city.name) {
+        return originalPrefs.current.city;
+      }
+      
+      if (typeof originalPrefs.current.city === 'string') {
+        const cityId = originalPrefs.current.city.trim();
+        const matchingCity = cities.find(c => c.id === cityId || 
+          (c.name && c.name.toLowerCase() === cityId.toLowerCase()));
         
-      const max = safePreferences.priceRange.max !== undefined && safePreferences.priceRange.max !== null
-        ? Number(safePreferences.priceRange.max)
-        : defaultPriceRange.max;
-      
-      console.log('FilterScreen - Parsed price range:', { min, max });
-      return { min, max };
-    }
-    
-    console.log('FilterScreen - Using default price range');
-    return defaultPriceRange;
-  });
-  
-  // For roommates, ensure it's an array of numbers
-  const [selectedRoommates, setSelectedRoommates] = useState(() => {
-    console.log('FilterScreen - Roommates data:', safePreferences.number_of_roommates);
-    
-    // Ensure roommates is an array of numbers
-    if (Array.isArray(safePreferences.number_of_roommates)) {
-      // Convert any string values to numbers and filter out invalid values
-      const roommates = safePreferences.number_of_roommates
-        .map(val => {
-          // Handle different types of values
-          if (typeof val === 'number') return val;
-          if (typeof val === 'string') {
-            const numVal = parseInt(val, 10);
-            return isNaN(numVal) ? null : numVal;
-          }
-          return null;
-        })
-        .filter(val => val !== null);
-      
-      console.log('FilterScreen - FINAL ROOMMATES ARRAY:', roommates);
-      return roommates;
-    }
-    
-    console.log('FilterScreen - No valid roommates data found');
-    return [];
-  }); 
-  
-  // For city, handle it as a string or object
-  const [city, setCity] = useState(() => {
-    console.log('FilterScreen - City data:', safePreferences.city);
-    
-    // City can be a string, object with id/name, or null
-    if (typeof safePreferences.city === 'object' && safePreferences.city !== null) {
-      // If it's already an object with id and name, use it directly
-      if (safePreferences.city.id && safePreferences.city.name) {
-        console.log('FilterScreen - Using city object with UUID:', safePreferences.city.id);
-        return safePreferences.city;
-      }
-    } 
-    
-    // If it's a string ID, try to find the matching city object by ID
-    if (typeof safePreferences.city === 'string' && safePreferences.city.trim() !== '') {
-      const cityId = safePreferences.city.trim();
-      console.log('FilterScreen - Looking for city with ID:', cityId);
-      
-      // First try to find by ID
-      const matchingCityById = cities.find(c => c.id === cityId);
-      if (matchingCityById) {
-        console.log('FilterScreen - Found city by ID:', matchingCityById.name);
-        return matchingCityById;
+        if (matchingCity) return matchingCity;
+        return { id: cityId, name: cityId };
       }
       
-      // If not found by ID, try to find by name
-      const matchingCityByName = cities.find(c => 
-        c.name && c.name.toLowerCase() === cityId.toLowerCase());
-      if (matchingCityByName) {
-        console.log('FilterScreen - Found city by name:', matchingCityByName.name);
-        return matchingCityByName;
-      }
-      
-      // If still not found, create a simple object
-      console.log('FilterScreen - Creating temporary city object with ID:', cityId);
-      return { id: cityId, name: cityId };
-    }
-    
-    console.log('FilterScreen - No valid city data found');
-    return "";
-  });
-  
-  // For features/tags, we need to ensure we're using IDs instead of names
-  const [selectedFeatures, setSelectedFeatures] = useState(() => {
-    console.log('FilterScreen - Features data:', safePreferences.features);
-    
-    if (Array.isArray(safePreferences.features)) {
-      // Filter out any null or undefined values
-      const validFeatures = safePreferences.features.filter(feature => feature !== null && feature !== undefined);
-      console.log('FilterScreen - Parsed features:', validFeatures);
-      return validFeatures;
-    }
-    
-    console.log('FilterScreen - No valid features data found');
-    return [];
-  }); 
-  
-  // For max floor, handle it as a string or number, but keep null as null
-  const [maxFloor, setMaxFloor] = useState(() => {
-    console.log('FilterScreen - Max floor data:', safePreferences.max_floor);
-    
-    // If max_floor is null or undefined, return null
-    if (safePreferences.max_floor === null || safePreferences.max_floor === undefined) {
-      console.log('FilterScreen - No max floor data found');
-      return null;
-    }
-    
-    // Convert to string
-    const maxFloorStr = safePreferences.max_floor.toString();
-    console.log('FilterScreen - Parsed max floor:', maxFloorStr);
-    return maxFloorStr;
-  });
-  
-  const [area, setArea] = useState(() => {
-    console.log('FilterScreen - Area data:', safePreferences.area);
-    
-    // If area is null or undefined, return empty string
-    if (safePreferences.area === null || safePreferences.area === undefined) {
-      console.log('FilterScreen - No area data found');
       return "";
-    }
+    })();
     
-    // Convert to string
-    const areaStr = safePreferences.area.toString();
-    console.log('FilterScreen - Parsed area:', areaStr);
-    return areaStr;
-  });
+    // Features
+    const tempSelectedFeatures = (() => {
+      if (!Array.isArray(originalPrefs.current.features)) return [];
+      
+      // Handle features that might be objects with id and name properties
+      return originalPrefs.current.features
+        .filter(feature => feature !== null && feature !== undefined)
+        .map(feature => {
+          // If feature is an object with id, extract the id
+          if (typeof feature === 'object' && feature !== null && feature.id) {
+            return feature.id;
+          }
+          // Otherwise return the feature as is (assuming it's an id string)
+          return feature;
+        });
+    })();
+    
+    // Max floor
+    const tempMaxFloor = (() => {
+      if (originalPrefs.current.max_floor === null || originalPrefs.current.max_floor === undefined) {
+        return null;
+      }
+      return String(originalPrefs.current.max_floor);
+    })();
+    
+    // Area
+    const tempArea = (() => {
+      if (originalPrefs.current.area === null || originalPrefs.current.area === undefined) {
+        return "";
+      }
+      return String(originalPrefs.current.area);
+    })();
+    
+    return {
+      moveInDate: tempMoveInDate,
+      priceRange: tempPriceRange,
+      selectedRoommates: tempSelectedRoommates,
+      city: tempCity,
+      selectedFeatures: tempSelectedFeatures,
+      maxFloor: tempMaxFloor,
+      area: tempArea
+    };
+  };
   
-  // Initialize openSections with an empty object
+  // Create temporary form state
+  const [tempForm, setTempForm] = useState(initTempForm);
+  
+  // Reset form when modal becomes visible or initialPreferences change
+  useEffect(() => {
+    if (visible) {
+      // Reset to the original data from initialPreferences
+      originalPrefs.current = safePreferences;
+      setTempForm(initTempForm());
+      initializedRef.current = false;
+    }
+  }, [visible, safePreferences]);
+  
+  // Accessor functions for temporary form state
+  const setMoveInDate = (value) => setTempForm(prev => ({ ...prev, moveInDate: value }));
+  const setPriceRange = (value) => setTempForm(prev => ({ ...prev, priceRange: value }));
+  
+  // Special handling for roommates to ensure we always get an array
+  const setSelectedRoommates = (value) => {
+    setTempForm(prev => {
+      // If value is a function, execute it with the current selectedRoommates
+      const newValue = typeof value === 'function' 
+        ? value(prev.selectedRoommates) 
+        : value;
+      return { ...prev, selectedRoommates: newValue };
+    });
+  };
+  
+  const setCity = (value) => setTempForm(prev => ({ ...prev, city: value }));
+  const setSelectedFeatures = (value) => setTempForm(prev => ({ ...prev, selectedFeatures: value }));
+  const setMaxFloor = (value) => setTempForm(prev => ({ ...prev, maxFloor: value }));
+  const setArea = (value) => setTempForm(prev => ({ ...prev, area: value }));
+  
+  // Destructure the temporary form for easier access in the component
+  const { moveInDate, priceRange, selectedRoommates, city, selectedFeatures, maxFloor, area } = tempForm;
+  
   const [openSections, setOpenSections] = useState({});
 
-  // Initialize sections when component becomes visible
   useEffect(() => {
     if (visible && !initializedRef.current) {
-      console.log('Initializing filter sections with data:', safePreferences);
-      
       const sectionsToOpen = {};
       
-      // Check each preference and open its section if it has a value
-      if (safePreferences.moveInDate) sectionsToOpen[SECTION_KEYS.MOVE_IN_DATE] = true;
-      
-      if (safePreferences.priceRange && 
-          (safePreferences.priceRange.min !== defaultPriceRange.min || 
-           safePreferences.priceRange.max !== defaultPriceRange.max)) {
+      if (originalPrefs.current.move_in_date) sectionsToOpen[SECTION_KEYS.MOVE_IN_DATE] = true;
+      if (originalPrefs.current.price_range && 
+          (originalPrefs.current.price_range.min !== defaultPriceRange.min || 
+           originalPrefs.current.price_range.max !== defaultPriceRange.max)) {
         sectionsToOpen[SECTION_KEYS.PRICE_RANGE] = true;
       }
-      
-      if (Array.isArray(safePreferences.number_of_roommates) && safePreferences.number_of_roommates.length > 0) {
-        console.log('OPENING ROOMMATES SECTION - Data found:', safePreferences.number_of_roommates);
+      if (Array.isArray(originalPrefs.current.number_of_roommates) && originalPrefs.current.number_of_roommates.length > 0) {
         sectionsToOpen[SECTION_KEYS.ROOMMATES] = true;
       }
-      
-      if (safePreferences.city) {
-        console.log('OPENING CITY SECTION - Data found:', safePreferences.city);
+      if (originalPrefs.current.city) {
         sectionsToOpen[SECTION_KEYS.CITY] = true;
       }
-      
-      if (Array.isArray(safePreferences.features) && safePreferences.features.length > 0) {
+      if (Array.isArray(originalPrefs.current.features) && originalPrefs.current.features.length > 0) {
         sectionsToOpen[SECTION_KEYS.FEATURES] = true;
       }
-      
-      if (safePreferences.max_floor !== null && safePreferences.max_floor !== undefined) {
-        console.log('OPENING MAX FLOOR SECTION - Data found:', safePreferences.max_floor);
+      if (originalPrefs.current.max_floor !== null && originalPrefs.current.max_floor !== undefined) {
         sectionsToOpen[SECTION_KEYS.MAX_FLOOR] = true;
       }
-      
-      if (safePreferences.area) {
+      if (originalPrefs.current.area) {
         sectionsToOpen[SECTION_KEYS.AREA] = true;
       }
       
       setOpenSections(sectionsToOpen);
       initializedRef.current = true;
     }
-  }, [visible, safePreferences]);
+  }, [visible]);
 
   const toggleSection = (sectionKey) => {
-    setOpenSections((prevOpenSections) => ({
-      ...prevOpenSections,
-      [sectionKey]: !prevOpenSections[sectionKey],
-    }));
-  };
-
-  // Toggle roommate selection
-  const handleToggleRoommate = (roommate) => {
-    console.log('Toggling roommate:', roommate, typeof roommate);
-    // Ensure roommate is a number
-    const roommateNum = Number(roommate);
-    
-    setSelectedRoommates((prev) => {
-      // Check if this roommate is already selected (using numeric comparison)
-      const isSelected = prev.some(r => Number(r) === roommateNum);
-      console.log('Is roommate already selected?', isSelected);
-      
-      if (isSelected) {
-        // Remove the roommate
-        console.log('Removing roommate:', roommateNum);
-        return prev.filter(r => Number(r) !== roommateNum);
-      } else {
-        // Add the roommate
-        console.log('Adding roommate:', roommateNum);
-        return [...prev, roommateNum];
-      }
+    setOpenSections(prev => {
+      const newSections = { ...prev };
+      newSections[sectionKey] = !prev[sectionKey];
+      return newSections;
     });
   };
 
-  const handleApplyFilters = () => {
-    // Extract the city UUID directly
-    let cityUuid = null;
+  const handleToggleRoommate = (roommate) => {
+    // Ensure we're working with a number
+    const roommateNum = Number(roommate);
     
-    if (typeof city === 'object' && city !== null) {
-      // If city is an object, extract the UUID directly
-      cityUuid = city.id;
-      console.log('CITY UUID EXTRACTED:', cityUuid);
+    // Direct approach to toggle roommates
+    const currentRoommates = [...selectedRoommates]; // Create a copy of the current array
+    const isSelected = currentRoommates.some(r => Number(r) === roommateNum);
+    
+    let newRoommates;
+    if (isSelected) {
+      // If selected, remove it
+      newRoommates = currentRoommates.filter(r => Number(r) !== roommateNum);
+    } else {
+      // If not selected, add it
+      newRoommates = [...currentRoommates, roommateNum];
     }
     
-    // Prepare the filters object
+    // Update the state directly with the new array
+    setSelectedRoommates(newRoommates);
+  };
+
+  const handleApplyFilters = () => {
+    // Create the filters object with the temporary form data
     const filters = {
-      // Format the date as dd-mm-yy for API consumption
-      moveInDate: moveInDate ? moveInDate.format('DD-MM-YY') : null,
-      priceRange,
-      number_of_roommates: selectedRoommates,
-      city: cityUuid, // Use ONLY the UUID
+      area: area || null,
+      city: typeof city === 'object' && city !== null ? city : null,
+      // Send features as an array of IDs
       features: selectedFeatures,
       max_floor: maxFloor ? parseInt(maxFloor, 10) : null,
-      area: area || null,
+      move_in_date: moveInDate ? moveInDate.format('YYYY-MM-DD') : null,
+      number_of_roommates: selectedRoommates,
+      price_range: {
+        min: priceRange.min,
+        max: priceRange.max
+      }
     };
-    
-    console.log('FINAL FILTERS BEING SENT:', JSON.stringify(filters, null, 2));
 
-    // Log the filters being applied
-    console.log('FilterScreen - Applying filters:', JSON.stringify(filters, null, 2));
-
-    // Call the onApply callback with the filters
+    // Call the onApply callback with the filters to save them on the backend
     if (onApply) {
       onApply(filters);
     }
@@ -337,9 +264,9 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   return (
     <DrawerModal
       visible={visible}
-      onClose={onClose}
+      onClose={onClose} // This will close without applying changes, and reset on next open
       title="Narrow your search"
-      onSave={handleApplyFilters}
+      onSave={handleApplyFilters} // This will apply changes and then close
       saveButtonTitle="Apply Filters"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -410,7 +337,7 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
             iconName="star-outline"
             isOpen={!!openSections[SECTION_KEYS.FEATURES]}
             onToggle={() => toggleSection(SECTION_KEYS.FEATURES)}
-            hasValue={selectedFeatures.length > 0}
+            hasValue={selectedFeatures && selectedFeatures.length > 0}
             onClear={() => setSelectedFeatures([])}
           >
             <TagsSelector
@@ -434,24 +361,16 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
             iconName="people-outline"
             isOpen={!!openSections[SECTION_KEYS.ROOMMATES]}
             onToggle={() => toggleSection(SECTION_KEYS.ROOMMATES)}
-            hasValue={selectedRoommates.length > 0}
+            hasValue={selectedRoommates && selectedRoommates.length > 0}
             onClear={() => setSelectedRoommates([])}
           >
             <View style={styles.roommateOptionsContainer}>
               {roommateOptions.map((option) => {
-                // Convert option to number for consistent comparison
                 const optionNum = Number(option);
                 
-                // Force log the current state of selectedRoommates
-                console.log(`CURRENT ROOMMATES ARRAY: ${JSON.stringify(selectedRoommates)}`);
-                
-                // Check if this option is selected by comparing numbers
-                const isSelected = selectedRoommates.includes(optionNum) || 
-                                  selectedRoommates.includes(String(optionNum)) ||
-                                  selectedRoommates.some(val => Number(val) === optionNum);
-                                  
-                console.log(`Roommate option ${option} (${typeof option}): ${isSelected ? 'SELECTED' : 'NOT SELECTED'}`);
-                
+                // Check if this option is selected
+                const isSelected = Array.isArray(selectedRoommates) && 
+                  selectedRoommates.some(val => Number(val) === optionNum);
                 return (
                   <TouchableOpacity
                     key={option}
