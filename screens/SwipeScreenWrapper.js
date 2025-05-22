@@ -11,6 +11,9 @@ import {
   Dimensions,
   ImageBackground,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchUserPreferences } from "../store/redux/userThunks";
 import SwipeScreen from "./SwipeScreen";
 import { LinearGradient } from "expo-linear-gradient";
 import { getApartments } from "../api/apartments";
@@ -23,12 +26,20 @@ const DISLIKE_COLOR = "#8B4513";
 const LIKE_COLOR = "#FFC107";
 
 const SwipeScreenWrapper = () => {
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  // Get user preferences from Redux store
+  const userPreferences = useSelector((state) => state.user.preferences);
+  const isPreferencesLoading = useSelector((state) => state.user.isLoading);
+
   const [apartments, setApartments] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [swipeAction, setSwipeAction] = useState(null); // 'like' or 'dislike'
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [allApartmentsLoaded, setAllApartmentsLoaded] = useState(false);
+  const [filterPreferences, setFilterPreferences] = useState({});
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -37,7 +48,31 @@ const SwipeScreenWrapper = () => {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    fetchApartments();
+    // Fetch user preferences if they're not already loaded
+    if (!userPreferences) {
+      dispatch(fetchUserPreferences())
+        .then((result) => {
+          console.log(
+            "SwipeScreenWrapper: Preferences fetched:",
+            JSON.stringify(result, null, 2)
+          );
+          // Use the fetched preferences for filtering apartments
+          if (result) {
+            setFilterPreferences(result);
+            fetchApartments(result);
+          } else {
+            fetchApartments();
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load preferences:", err);
+          fetchApartments();
+        });
+    } else {
+      // Use existing preferences from Redux
+      setFilterPreferences(userPreferences);
+      fetchApartments(userPreferences);
+    }
 
     // Start pulse animation for UI elements
     Animated.loop(
@@ -56,7 +91,7 @@ const SwipeScreenWrapper = () => {
         }),
       ])
     ).start();
-  }, []);
+  }, [userPreferences]);
 
   useEffect(() => {
     if (swipeAction) {
@@ -80,8 +115,18 @@ const SwipeScreenWrapper = () => {
   const fetchApartments = async (filters = {}) => {
     setLoading(true);
     try {
-      const data = await getApartments();
+      // Use the provided filters, or fall back to user preferences from Redux, or local state
+      const preferencesToUse =
+        Object.keys(filters).length > 0
+          ? filters
+          : userPreferences || filterPreferences || {};
 
+      console.log(
+        "Fetching apartments with filters:",
+        JSON.stringify(preferencesToUse, null, 2)
+      );
+      const data = await getApartments(preferencesToUse);
+      console.log("data", data);
       // Check if we received apartments or an empty array
       if (data && data.apartments && data.apartments.length > 0) {
         setApartments(data.apartments);
@@ -103,7 +148,9 @@ const SwipeScreenWrapper = () => {
 
     setIsLoadingMore(true);
     try {
-      const data = await getApartments();
+      // Use user preferences from Redux if available, otherwise use local state
+      const preferencesToUse = userPreferences || filterPreferences || {};
+      const data = await getApartments(preferencesToUse);
       console.log("🔄 Loading more apartments at index:", currentIndex);
       setCurrentIndex(0);
       if (data && data.apartments && data.apartments.length > 0) {
@@ -123,7 +170,7 @@ const SwipeScreenWrapper = () => {
   };
 
   const handleFilterPress = () => {
-    console.log("Filter button pressed!");
+    console.log("Filter button pressed - navigating to filter screen");
 
     // Add animation to filter button press
     Animated.sequence([
@@ -139,7 +186,14 @@ const SwipeScreenWrapper = () => {
       }),
     ]).start();
 
-    // Open a filter modal, show options, or implement custom filter logic
+    // Navigate to filter screen with current preferences
+    navigation.navigate("Filter", {
+      initialPreferences: userPreferences || filterPreferences || {},
+      onApply: (newPreferences) => {
+        setFilterPreferences(newPreferences);
+        fetchApartments(newPreferences);
+      },
+    });
   };
 
   const handleSwipe = (direction) => {
@@ -195,11 +249,7 @@ const SwipeScreenWrapper = () => {
       images: apartment.photo_urls || [],
       aboutApartment: apartment.about || "No description available",
       tags: apartment.feature_details?.map((feature) => feature.name) || [],
-      user: {
-        name: "Contact Owner",
-        image: "https://via.placeholder.com/150",
-        link: "",
-      },
+      user_details: apartment.user_details,
       price: parseFloat(apartment.total_price) || 0,
       rooms: apartment.number_of_rooms || 0,
       availableRooms: apartment.number_of_available_rooms || 0,

@@ -83,6 +83,7 @@ const PeopleLikedMyApartment = ({
   error,
   onUserPress,
   onRefresh,
+  onApartmentPress,
 }) => {
   if (loading && !users.length) {
     return (
@@ -113,16 +114,70 @@ const PeopleLikedMyApartment = ({
       data={users}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
-        <View style={styles.userCardWrapper}>
-          <UserDisplayer
-            avatarSource={
-              item.profile_image || "../assets/icons/avi-avatar.jpg"
-            }
-            name={item.name}
-            facebookLink={item.facebook_link}
-            bio={item.bio}
-            onPress={() => onUserPress(item)}
-          />
+        <View style={styles.likeCardContainer}>
+          <LinearGradient
+            colors={["rgba(91, 89, 85, 0.7)", "rgba(91, 89, 85, 0.85)"]}
+            style={styles.likeCardGradient}
+          >
+            {/* User info section */}
+            <View style={styles.userSection}>
+              <UserDisplayer
+                avatarSource={
+                  item.profile_image || "../assets/icons/avi-avatar.jpg"
+                }
+                name={item.name}
+                facebookLink={item.facebook_link}
+                bio={item.bio}
+                onPress={() => onUserPress(item)}
+              />
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider} />
+
+            {/* Apartment info section */}
+            <TouchableOpacity
+              style={styles.apartmentSection}
+              onPress={() =>
+                item.liked_apartment && onApartmentPress(item.liked_apartment)
+              }
+            >
+              <View style={styles.apartmentHeader}>
+                <Ionicons name="home" size={18} color="#FFFFFF" />
+                <Text style={styles.apartmentHeaderText}>Liked Apartment</Text>
+              </View>
+
+              {item.liked_apartment ? (
+                <View style={styles.apartmentDetails}>
+                  <Text style={styles.apartmentTitle}>
+                    {item.liked_apartment.street || "Apartment"}
+                  </Text>
+                  <Text style={styles.apartmentInfo}>
+                    {item.liked_apartment.price &&
+                      `₪${item.liked_apartment.price} • `}
+                    {item.liked_apartment.location &&
+                      `${item.liked_apartment.location}`}
+                  </Text>
+                  {item.liked_apartment.room_count && (
+                    <Text style={styles.apartmentInfo}>
+                      {`${item.liked_apartment.room_count} rooms • ${
+                        item.liked_apartment.floor
+                          ? `Floor ${item.liked_apartment.floor}`
+                          : "N/A"
+                      }`}
+                    </Text>
+                  )}
+                  <Text style={styles.viewApartmentLink}>
+                    View apartment details →
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.apartmentInfo}>
+                  Apartment information not available
+                </Text>
+              )}
+            </TouchableOpacity>
+          </LinearGradient>
         </View>
       )}
       contentContainerStyle={styles.userList}
@@ -225,7 +280,32 @@ const LikesScreen = () => {
   };
 
   const handleApartmentPress = (apartment) => {
-    setSelectedApartment(apartment);
+    console.log("Opening apartment details:", apartment);
+
+    // Format apartment data to include all necessary fields for ModalApartmentDisplayer
+    const formattedApartment = {
+      ...apartment,
+      // Map feature_details to tags if they exist, otherwise use existing tags or empty array
+      tags: apartment.feature_details
+        ? apartment.feature_details
+            .map((feature) =>
+              typeof feature === "object" ? feature.name : feature
+            )
+            .filter((name) => name)
+        : apartment.tags || [],
+
+      // Ensure all fields expected by ModalApartmentDisplayer are present
+      address: `${apartment.street || ""} ${apartment.house_number || ""}`,
+      images: apartment.photo_urls || apartment.images || [],
+      aboutApartment: apartment.about || apartment.aboutApartment || "",
+      price: apartment.total_price || apartment.price,
+      rooms: apartment.number_of_rooms || apartment.rooms,
+      availableRooms: apartment.available_rooms || apartment.availableRooms,
+      entryDate: apartment.available_entry_date || apartment.entryDate,
+    };
+
+    console.log("Formatted apartment with tags:", formattedApartment.tags);
+    setSelectedApartment(formattedApartment);
     setModalVisible(true);
   };
 
@@ -298,6 +378,7 @@ const LikesScreen = () => {
           error={usersError}
           onUserPress={handleUserPress}
           onRefresh={fetchUsersWhoLikedMyApartment}
+          onApartmentPress={handleApartmentPress}
         />
       );
     }
@@ -493,6 +574,68 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     backgroundColor: "rgba(91, 89, 85, 0.6)",
+  },
+  // New styles for enhanced UI
+  likeCardContainer: {
+    marginVertical: 10,
+    borderRadius: 16,
+    overflow: "hidden",
+    width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  likeCardGradient: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  userSection: {
+    padding: 12,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    marginHorizontal: 15,
+  },
+  apartmentSection: {
+    padding: 15,
+  },
+  apartmentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  apartmentHeaderText: {
+    fontFamily: "comfortaaMedium",
+    fontSize: 15,
+    color: "#FFFFFF",
+    marginLeft: 6,
+    fontWeight: "600",
+  },
+  apartmentDetails: {
+    marginLeft: 24,
+  },
+  apartmentTitle: {
+    fontFamily: "comfortaaMedium",
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  apartmentInfo: {
+    fontFamily: "comfortaa",
+    fontSize: 14,
+    color: "#E0E0E0",
+    marginBottom: 2,
+  },
+  viewApartmentLink: {
+    fontFamily: "comfortaaMedium",
+    fontSize: 14,
+    color: "#B3F4E0",
+    marginTop: 6,
+    fontWeight: "600",
   },
 });
 

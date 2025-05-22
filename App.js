@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, StatusBar, ImageBackground, ActivityIndicator, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  StatusBar,
+  ImageBackground,
+  ActivityIndicator,
+  Text,
+} from "react-native";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Provider as ReduxProvider } from 'react-redux';
-import { Provider as PaperProvider } from 'react-native-paper';
-import store from './store/redux/store';
+import { Provider as ReduxProvider } from "react-redux";
+import { Provider as PaperProvider } from "react-native-paper";
+import store from "./store/redux/store";
 import TabNavigator from "./navigation/TabNavigator";
 import LoginScreen from "./screens/LoginScreen";
 import OnBoardingNavigator from "./navigation/OnBoardingNavigator";
 import CreateApartmentNavigator from "./navigation/CreateApartmentNavigator";
+import FilterScreenPage from "./screens/FilterScreenPage";
 import { PreferencesPayloadProvider } from "./context/PreferencesPayloadContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AppartnersLoader from "./components/ApartnersLoader";
@@ -20,27 +28,27 @@ const Stack = createStackNavigator();
 function MainNavigator() {
   // Get auth state from context
   const { isLoading, isAuthenticated } = useAuth();
-  
+
   // Show loading screen while checking auth state
   if (isLoading) {
     return (
       <View style={styles.loadingScreen}>
-        <AppartnersLoader/>
+        <AppartnersLoader />
       </View>
     );
   }
-  
+
   return (
-    <ImageBackground 
-      source={require("./assets/background.jpg")} 
+    <ImageBackground
+      source={require("./assets/background.jpg")}
       style={styles.background}
       resizeMode="cover"
     >
       <View style={styles.overlay} />
       <NavigationContainer>
         <StatusBar barStyle="dark-content" />
-        <Stack.Navigator 
-          screenOptions={{ 
+        <Stack.Navigator
+          screenOptions={{
             headerShown: false,
             animationEnabled: true,
           }}
@@ -59,6 +67,15 @@ function MainNavigator() {
               <Stack.Screen
                 name="CreateApartment"
                 component={CreateApartmentNavigator}
+              />
+              <Stack.Screen
+                name="Filter"
+                component={FilterScreenPage}
+                options={{
+                  headerShown: false,
+                  presentation: "modal",
+                  animationEnabled: true,
+                }}
               />
             </>
           )}
@@ -97,12 +114,12 @@ export default function App() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     opacity: 0.3,
   },
   loadingScreen: {
@@ -114,6 +131,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    fontFamily: 'comfortaaMedium',
+    fontFamily: "comfortaaMedium",
   },
 });

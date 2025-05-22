@@ -13,10 +13,10 @@ import SearchTags from "./SearchTags";
 
 // Minimalist color scheme
 const COLORS = {
-  light: "#F5F5F5",      // Light gray
-  lighter: "#E5E5E5",    // Lighter gray for subtle contrast
-  dark: "#333333",       // Dark gray/black
-  white: "#FFFFFF",      // White
+  light: "#F5F5F5", // Light gray
+  lighter: "#E5E5E5", // Lighter gray for subtle contrast
+  dark: "#333333", // Dark gray/black
+  white: "#FFFFFF", // White
 };
 
 const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
@@ -28,7 +28,11 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
           <View style={styles.modalContent}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <View style={styles.closeButtonCircle}>
-                <MaterialCommunityIcons name="close" size={24} color={COLORS.dark} />
+                <MaterialCommunityIcons
+                  name="close"
+                  size={24}
+                  color={COLORS.dark}
+                />
               </View>
             </TouchableOpacity>
             <View style={styles.emptyContainer}>
@@ -41,34 +45,40 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
   }
 
   // Extract properties with safe defaults
-  const address = apartment.address || 
-    (apartment.street && apartment.house_number ? 
-      `${apartment.street} ${apartment.house_number}` : 
-      'No address available');
-  
-  const images = apartment.images || apartment.photo_urls || [
-    "https://via.placeholder.com/300x200?text=No+Image",
-  ];
-  
-  const aboutApartment = apartment.aboutApartment || apartment.about || "No description available";
-  
+  const address =
+    apartment.street ||
+    (apartment.street && apartment.house_number
+      ? `${apartment.street} ${apartment.house_number}`
+      : "No address available");
+
+  const images = apartment.images ||
+    apartment.photo_urls || [
+      "https://via.placeholder.com/300x200?text=No+Image",
+    ];
+
+  const aboutApartment =
+    apartment.aboutApartment || apartment.about || "No description available";
+
   // Handle tags properly to avoid duplication
   const tags = apartment.tags || [];
-  
+
   // Format price with commas and ₪ symbol
-  const price = apartment.price ? 
-    `₪${Number(apartment.price).toLocaleString()}` : 
-    'Price not available';
-  
+  const price = apartment.price
+    ? `₪${Number(apartment.price).toLocaleString()}`
+    : "Price not available";
+
   // Room information
-  const totalRooms = apartment.rooms || apartment.number_of_rooms || 'N/A';
-  const availableRooms = apartment.availableRooms || apartment.number_of_available_rooms || 'N/A';
-  
+  const totalRooms = apartment.rooms || apartment.number_of_rooms || "N/A";
+  const availableRooms =
+    apartment.availableRooms || apartment.number_of_available_rooms || "N/A";
+
   // Entry date formatting - ensure it's compact
-  const entryDate = apartment.entryDate || apartment.available_entry_date || 'Not specified';
-  const formattedEntryDate = typeof entryDate === 'string' && entryDate.includes('-') ? 
-    entryDate.split('T')[0].split('-').reverse().join('/') : 
-    entryDate;
+  const entryDate =
+    apartment.entryDate || apartment.available_entry_date || "Not specified";
+  const formattedEntryDate =
+    typeof entryDate === "string" && entryDate.includes("-")
+      ? entryDate.split("T")[0].split("-").reverse().join("/")
+      : entryDate;
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
@@ -77,7 +87,11 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
           {/* Close Button */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <View style={styles.closeButtonCircle}>
-              <MaterialCommunityIcons name="close" size={24} color={COLORS.dark} />
+              <MaterialCommunityIcons
+                name="close"
+                size={24}
+                color={COLORS.dark}
+              />
             </View>
           </TouchableOpacity>
 
@@ -107,15 +121,29 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
             <View style={styles.infoCardsContainer}>
               <View style={styles.infoCard}>
                 <View style={styles.infoCardContent}>
-                  <MaterialCommunityIcons name="cash-multiple" size={28} color={COLORS.dark} />
+                  <MaterialCommunityIcons
+                    name="cash-multiple"
+                    size={28}
+                    color={COLORS.dark}
+                  />
                   <Text style={styles.infoCardTitle}>Price</Text>
-                  <Text style={styles.infoCardValue} numberOfLines={1} ellipsizeMode="tail">{price}</Text>
+                  <Text
+                    style={styles.infoCardValue}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {price}
+                  </Text>
                 </View>
               </View>
-              
+
               <View style={styles.infoCard}>
                 <View style={styles.infoCardContent}>
-                  <MaterialCommunityIcons name="home-outline" size={28} color={COLORS.dark} />
+                  <MaterialCommunityIcons
+                    name="home-outline"
+                    size={28}
+                    color={COLORS.dark}
+                  />
                   <Text style={styles.infoCardTitle}>Rooms</Text>
                   <View style={styles.roomsContainer}>
                     <View style={styles.roomBox}>
@@ -130,14 +158,16 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
                   </View>
                 </View>
               </View>
-              
+
               <View style={styles.infoCard}>
                 <View style={styles.infoCardContent}>
-                  <MaterialCommunityIcons name="calendar-check" size={28} color={COLORS.dark} />
+                  <MaterialCommunityIcons
+                    name="calendar-check"
+                    size={28}
+                    color={COLORS.dark}
+                  />
                   <Text style={styles.infoCardTitle}>Entry Date</Text>
-                  <Text 
-                    style={styles.infoCardValueSmall}
-                  >
+                  <Text style={styles.infoCardValueSmall}>
                     {formattedEntryDate}
                   </Text>
                 </View>
@@ -147,7 +177,11 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
             {/* About Apartment */}
             <View style={styles.sectionContainer}>
               <View style={styles.sectionHeaderContainer}>
-                <MaterialCommunityIcons name="information-outline" size={24} color={COLORS.dark} />
+                <MaterialCommunityIcons
+                  name="information-outline"
+                  size={24}
+                  color={COLORS.dark}
+                />
                 <Text style={styles.sectionHeader}>About</Text>
               </View>
               <Text style={styles.sectionContent}>{aboutApartment}</Text>
@@ -156,14 +190,15 @@ const ModalApartmentDisplayer = ({ visible, onClose, apartment }) => {
             {/* Tags */}
             <View style={styles.sectionContainer}>
               <View style={styles.sectionHeaderContainer}>
-                <MaterialCommunityIcons name="tag-multiple" size={24} color={COLORS.dark} />
+                <MaterialCommunityIcons
+                  name="tag-multiple"
+                  size={24}
+                  color={COLORS.dark}
+                />
                 <Text style={styles.sectionHeader}>Tags</Text>
               </View>
               <View style={styles.tagsWrapper}>
-                <SearchTags
-                  tags={tags}
-                  selectedTags={tags}
-                />
+                <SearchTags tags={tags} selectedTags={tags} />
               </View>
             </View>
           </ScrollView>
@@ -283,14 +318,14 @@ const styles = StyleSheet.create({
     color: COLORS.dark,
     textAlign: "center",
     fontWeight: "bold",
-    width: '100%',
+    width: "100%",
   },
   infoCardValueSmall: {
     fontSize: 13,
     color: COLORS.dark,
     textAlign: "center",
     fontWeight: "bold",
-    width: '100%',
+    width: "100%",
   },
   infoCardSubtitle: {
     fontSize: 10,
@@ -299,18 +334,18 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   roomsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   },
   roomBox: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 5,
   },
   roomNumber: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.dark,
   },
   roomLabel: {
@@ -357,12 +392,12 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyText: {
     fontSize: 18,
     color: COLORS.dark,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
