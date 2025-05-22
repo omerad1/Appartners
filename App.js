@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, View, StatusBar, ImageBackground } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View, StatusBar, ImageBackground, ActivityIndicator, Text } from "react-native";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -11,8 +11,62 @@ import LoginScreen from "./screens/LoginScreen";
 import OnBoardingNavigator from "./navigation/OnBoardingNavigator";
 import CreateApartmentNavigator from "./navigation/CreateApartmentNavigator";
 import { PreferencesPayloadProvider } from "./context/PreferencesPayloadContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import AppartnersLoader from "./components/ApartnersLoader";
 
 const Stack = createStackNavigator();
+
+// Main navigation component that handles auth state
+function MainNavigator() {
+  // Get auth state from context
+  const { isLoading, isAuthenticated } = useAuth();
+  
+  // Show loading screen while checking auth state
+  if (isLoading) {
+    return (
+      <View style={styles.loadingScreen}>
+        <AppartnersLoader/>
+      </View>
+    );
+  }
+  
+  return (
+    <ImageBackground 
+      source={require("./assets/background.jpg")} 
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay} />
+      <NavigationContainer>
+        <StatusBar barStyle="dark-content" />
+        <Stack.Navigator 
+          screenOptions={{ 
+            headerShown: false,
+            animationEnabled: true,
+          }}
+          initialRouteName={isAuthenticated ? "MainApp" : "Login"}
+        >
+          {!isAuthenticated ? (
+            // Auth screens
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
+            </>
+          ) : (
+            // App screens
+            <>
+              <Stack.Screen name="MainApp" component={TabNavigator} />
+              <Stack.Screen
+                name="CreateApartment"
+                component={CreateApartmentNavigator}
+              />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ImageBackground>
+  );
+}
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -31,31 +85,9 @@ export default function App() {
     <PreferencesPayloadProvider>
       <ReduxProvider store={store}>
         <PaperProvider>
-          <ImageBackground 
-            source={require("./assets/background.jpg")} 
-            style={styles.background}
-            resizeMode="cover"
-          >
-            <View style={styles.overlay} />
-            <NavigationContainer>
-              <StatusBar barStyle="dark-content" />
-              <Stack.Navigator 
-                screenOptions={{ 
-                  headerShown: false,
-                  //cardStyle: { backgroundColor: 'transparent' },
-                  animationEnabled: true,
-                }}
-              >
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
-                <Stack.Screen name="MainApp" component={TabNavigator} />
-                <Stack.Screen
-                  name="CreateApartment"
-                  component={CreateApartmentNavigator}
-                />
-              </Stack.Navigator>
-            </NavigationContainer>
-          </ImageBackground>
+          <AuthProvider>
+            <MainNavigator />
+          </AuthProvider>
         </PaperProvider>
       </ReduxProvider>
     </PreferencesPayloadProvider>
@@ -78,5 +110,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontFamily: 'comfortaaMedium',
   },
 });

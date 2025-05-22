@@ -2,8 +2,14 @@ const endpoints = {
   login: "/api/v1/authenticate/login/",
   register: "/api/v1/authenticate/register/",
   validateUnique: "/api/v1/authenticate/validate-unique/",
+  refreshToken: "/api/v1/authenticate/token/refresh/",
+  logout: "/api/v1/authenticate/logout/",
+
+  //my apartments
   myApartments: "/api/v1/apartments/my/",
-  profile: "/api/v1/user/profile/",
+  DeleteApartment: (apartmentId) => `/api/v1/apartments/${apartmentId}/`,
+  
+  profile: "/api/v1/users/me/",
   GET_APARTMENTS: "/api/v1/apartments/recommendations/",
   filters: "/api/v1/users/preferences/",
   newApartment: "/api/v1/apartments/new/",

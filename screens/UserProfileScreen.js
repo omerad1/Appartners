@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, cache } from "react";
 import {
   View,
   Text,
@@ -17,12 +17,14 @@ import { getUserDataFromStorage } from "../api/user";
 import QuestionnaireModal from "../components/QuestionnaireModal";
 import EditProfileModal from "../components/EditProfileModal";
 import UserDisplayerModal from "../components/UserDisplayerModal";
+import SettingsDrawerModal from "../components/SettingsDrawerModal";
 
 export default function UserProfileScreen() {
   const [preferencesVisible, setPreferencesVisible] = useState(false);
   const [questionnaireVisible, setQuestionnaireVisible] = useState(false);
   const [editProfileVisible, setEditProfileVisible] = useState(false);
   const [previewProfileVisible, setPreviewProfileVisible] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
   // Add a state to force rerenders when profile is updated
   const [profileUpdateCounter, setProfileUpdateCounter] = useState(0);
   const dispatch = useDispatch();
@@ -35,41 +37,40 @@ export default function UserProfileScreen() {
   
   // Fetch preferences and user data when component mounts if they're not already loaded
   useEffect(() => {
+    const fetchData = async () => {
+      try{
+        // fetch user data
+        const userData = await loadUserData();
+        if (userData){
+          console.log("good")
+        }
+      }
+      catch{
+        console.error("Error logging in user:", error);
+      }
+    }
     if (!preferences) {
       dispatch(fetchUserPreferences())
         .catch(err => console.error("Failed to load preferences:", err));
     }
-  }, [dispatch, preferences]);
+  }, [dispatch, preferences,  profileUpdateCounter]);
   
-  // Load user data from AsyncStorage
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        await dispatch(loadUserData());
-      } catch (err) {
-        console.error("Failed to load user data:", err);
-      }
-    };
-    
-    loadData();
-    // Include profileUpdateCounter in dependencies to reload data when profile is updated
-  }, [dispatch, profileUpdateCounter]);
   
   // Function to explicitly fetch user data from AsyncStorage
   const refreshUserDataFromStorage = async () => {
     try {
-      console.log('Explicitly fetching user data from AsyncStorage');
+
       const userData = await getUserDataFromStorage();
       if (userData) {
-        console.log('User data from storage:', userData);
-        console.log('Photo URL from storage:', userData.photo_url);
+
+
         
         // Manually update Redux store with the fetched data
         dispatch({ 
           type: 'user/updateUserProfile', 
           payload: userData 
         });
-        console.log('User data refreshed from AsyncStorage');
+
         
         // Force immediate rerender
         setProfileUpdateCounter(prev => prev + 1);
@@ -135,10 +136,11 @@ export default function UserProfileScreen() {
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity>
-              <View style={styles.settingsIcon}>
-                <Ionicons name="settings" size={30} color="black" />
-              </View>
+            <TouchableOpacity 
+              style={styles.settingsButton}
+              onPress={() => setSettingsVisible(true)}
+            >
+              <Ionicons name="settings-outline" size={30} color="#333" />
             </TouchableOpacity>
           </View>
 
@@ -213,11 +215,15 @@ export default function UserProfileScreen() {
         </View>
         
         {/* Preferences Drawer */}
+        {/* Debug preferences data */}
+        {console.log('UserProfileScreen - Preferences being passed to FilterScreen:', 
+          JSON.stringify(preferences, null, 2))}
+        
         <FilterScreen 
           visible={preferencesVisible}
           onClose={() => setPreferencesVisible(false)}
           onApply={handleApplyPreferences}
-          initialPreferences={preferences}
+          initialPreferences={preferences || {}}
         />
         
         {/* Preview Profile Modal */}
@@ -247,8 +253,14 @@ export default function UserProfileScreen() {
             }
             // Increment counter to force a rerender
             setProfileUpdateCounter(prev => prev + 1);
-            console.log('Profile updated, triggering rerender');
+
           }}
+        />
+        
+        {/* Settings Drawer Modal */}
+        <SettingsDrawerModal
+          visible={settingsVisible}
+          onClose={() => setSettingsVisible(false)}
         />
       </View>
     </SafeAreaView>

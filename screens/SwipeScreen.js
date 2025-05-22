@@ -66,7 +66,7 @@ const SwipeScreen = (props) => {
 
   // Reset animations when apartment changes
   useEffect(() => {
-    console.log("🏠 Apartment changed:", apartment);
+    //console.log("🏠 Apartment changed:", apartment);
     likeOpacity.setValue(0);
     dislikeOpacity.setValue(0);
     scale.setValue(1);

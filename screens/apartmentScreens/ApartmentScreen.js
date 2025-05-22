@@ -22,6 +22,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Title from "../../components/Title"; // Import your custom Title component
 import { useNavigation } from "@react-navigation/native";
 import ModalApartmentDisplayer from "../../components/ModalApartmentDisplayer"; // Import the modal
+
 import { getUserApartments } from "../../api/myApartments"; // Import the function to fetch apartments
 import { deleteApartment } from "../../api/deleteApartment"; // Import the function to delete apartments
 import BackgroundImage from "../../components/BackgroundImage";
@@ -82,6 +83,7 @@ const ApartmentScreen = () => {
   };
 
   const handleDelete = async (id) => {
+
     Alert.alert(
       "Confirm Deletion",
       "Are you sure you want to delete this apartment?",

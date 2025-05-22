@@ -1,8 +1,7 @@
 import { getUserFilters, postUserFilters } from '../../api/filters';
 import { getPreferencesPayload } from '../../api/appDataPayload';
 import { setLoading, setError, setPreferences, updatePreferences, updateUserProfile, setProfileUpdating, setProfileUpdateError } from './user';
-import { saveUserDataToStorage, updateUserProfile as apiUpdateUserProfile } from '../../api/user';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveUserDataToStorage, updateUserProfile as apiUpdateUserProfile, fetchUserData } from '../../api/user';
 
 // Thunk action to fetch user preferences
 export const fetchUserPreferences = () => async (dispatch) => {
@@ -11,6 +10,21 @@ export const fetchUserPreferences = () => async (dispatch) => {
     
     // Fetch filters from the server
     const serverFilters = await getUserFilters();
+    
+    // Check if serverFilters is null or undefined
+    if (!serverFilters) {
+      dispatch(setPreferences({
+        moveInDate: null,
+        priceRange: { min: 0, max: 10000 },
+        number_of_roommates: [],
+        city: null,
+        features: [],
+        max_floor: null,
+        area: null
+      }));
+      dispatch(setLoading(false));
+      return {};
+    }
     
     // If we have a city ID, try to get the city object with name
     let cityData = serverFilters.city;
@@ -87,6 +101,12 @@ export const saveUserPreferences = (newPreferences) => async (dispatch, getState
   }
 };
 
+
+//  get user data from the storage or server
+
+export const getUserData = () => async () => {
+
+}
 // Thunk action to save user data to AsyncStorage and Redux store
 export const saveUserData = (userData) => async (dispatch) => {
   try {
@@ -103,30 +123,23 @@ export const saveUserData = (userData) => async (dispatch) => {
   }
 };
 
-// Thunk action to load user data from AsyncStorage
-export const loadUserData = () => async (dispatch) => {
+// Thunk action to load user data
+export const loadUserData = (forceRefresh = false) => async (dispatch) => {
   try {
-    console.log('Loading user data from AsyncStorage...');
-    // Get user data from AsyncStorage
-    const userData = await AsyncStorage.getItem('userData');
+    console.log('Loading user data...');
+    
+    // Use the fetchUserData function which handles both local and server data
+    const userData = await fetchUserData(forceRefresh);
     
     if (userData) {
-      // Parse and update Redux store
-      const parsedUserData = JSON.parse(userData);
-      console.log('User data loaded:', parsedUserData);
-      
       // Dispatch action to update Redux store
-      dispatch(updateUserProfile(parsedUserData));
-      
-      // Log the updated state
+      dispatch(updateUserProfile(userData));
       console.log('User data loaded into Redux store');
-      
-      return parsedUserData;
+      return userData;
     } else {
-      console.log('No user data found in AsyncStorage');
+      console.warn('No user data found');
+      return null;
     }
-    
-    return null;
   } catch (error) {
     console.error('Error loading user data:', error);
     throw error;

@@ -11,7 +11,6 @@ export const saveUserDataToStorage = async (userData) => {
 
       return false;
     }
-    
     await AsyncStorage.setItem("userData", JSON.stringify(userData));
 
     return true;
@@ -29,6 +28,45 @@ export const getUserDataFromStorage = async () => {
   } catch (error) {
     console.error("Error getting user data from AsyncStorage:", error);
     return null;
+  }
+};
+
+// Fetch user data - first try AsyncStorage, then server if needed
+export const fetchUserData = async (forceRefresh = false) => {
+  try {
+    // First try to get from AsyncStorage (unless forceRefresh is true)
+    if (!forceRefresh) {
+      console.log('Trying to get user data from AsyncStorage...');
+      const localUserData = await getUserDataFromStorage();
+      
+      if (localUserData) {
+        console.log('User data found in AsyncStorage');
+        return localUserData;
+      }
+      
+      console.log('No user data in AsyncStorage, fetching from server...');
+    } else {
+      console.log('Force refresh requested, fetching user data from server...');
+    }
+  
+    // Make the API call to get user profile
+    const response = await api.get(endpoints.profile);
+    
+    // Log the complete user data from the response
+    console.log('User data from /users/me endpoint:', JSON.stringify(response.data, null, 2));
+    
+    // Check if the response contains user data before saving
+    if (response.data){
+      // Save the user data to AsyncStorage
+      await saveUserDataToStorage(response.data);
+      return response.data;
+    } else {
+      console.warn("No user data found in response");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
   }
 };
 

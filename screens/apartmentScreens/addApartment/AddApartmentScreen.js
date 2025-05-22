@@ -15,6 +15,7 @@ import NumberSlider from "../../../components/NumberSlider";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import BackgroundImage from "../../../components/BackgroundImage";
+
 import { createApartment } from "../../../api/createApartment";
 import { updateApartment } from "../../../api/updateApartment";
 import { Card } from "react-native-paper";
@@ -133,6 +134,7 @@ const AddApartmentScreen = () => {
   };
 
   const handleNext = () => {
+
     if (!validateForm()) return false;
 
     // Store the form data in global state or pass it as a parameter
@@ -159,6 +161,7 @@ const AddApartmentScreen = () => {
             next="Next"
             onPress={handleNext}
           >
+
             <Card style={styles.card}>
               <Card.Content style={styles.formContainer}>
                 <Text style={styles.sectionTitle}>Location Details</Text>
@@ -299,6 +302,7 @@ const styles = StyleSheet.create({
   formContainer: {
     width: "100%",
   },
+
   card: {
     borderRadius: 10,
     elevation: 4,

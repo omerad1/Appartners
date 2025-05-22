@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -90,6 +91,7 @@ const AreaSearchInput = ({ value, onChange, selectedCity }) => {
             <ActivityIndicator size="small" color="#000" />
           ) : error ? (
             <Text style={styles.errorText}>Error loading areas</Text>
+
           ) : (
             <ScrollView
               style={styles.dropdownScroll}
@@ -190,6 +192,7 @@ const styles = StyleSheet.create({
   noResultsText: {
     padding: 15,
     fontSize: 14,
+
     fontFamily: "comfortaaRegular",
     color: "#666",
     textAlign: "center",
@@ -197,6 +200,7 @@ const styles = StyleSheet.create({
   errorText: {
     padding: 15,
     fontSize: 14,
+
     fontFamily: "comfortaaRegular",
     color: "red",
     textAlign: "center",
