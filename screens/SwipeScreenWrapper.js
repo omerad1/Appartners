@@ -190,6 +190,7 @@ const SwipeScreenWrapper = () => {
   // Helper function to format apartment data for SwipeScreen
   const formatApartmentForSwipe = (apartment) => {
     return {
+      id: apartment.id,
       address: apartment.street + (apartment.area ? ", " + apartment.area : ""),
       images: apartment.photo_urls || [],
       aboutApartment: apartment.about || "No description available",

@@ -41,6 +41,29 @@ const SwipeScreen = (props) => {
   const rotation = useRef(new Animated.Value(0)).current;
   const contentOpacity = useRef(new Animated.Value(1)).current;
 
+  // Function to handle liking or disliking an apartment
+  const setLikedOrDisliked = async (direction) => {
+    try {
+      if (!apartment || !apartment.id) {
+        console.error("No apartment ID available for like/dislike action");
+        return;
+      }
+
+      if (direction === "like") {
+        console.log("👍 Liking apartment", apartment.id);
+        await likeApartment(apartment.id);
+      } else if (direction === "dislike") {
+        console.log("👎 Disliking apartment", apartment.id);
+        await unlikeApartment(apartment.id);
+      }
+    } catch (error) {
+      console.error(
+        `Error ${direction === "like" ? "liking" : "disliking"} apartment:`,
+        error
+      );
+    }
+  };
+
   // Reset animations when apartment changes
   useEffect(() => {
     console.log("🏠 Apartment changed:", apartment);
@@ -64,10 +87,14 @@ const SwipeScreen = (props) => {
           likeOpacity.setValue(gesture.dx / (SCREEN_WIDTH / 2));
           dislikeOpacity.setValue(0);
           setCurrentSwipe("like");
+          // Set rotation value directly for smoother animation
+          rotation.setValue(gesture.dx * 0.005); // Positive rotation for right swipe
         } else if (gesture.dx < 0) {
           dislikeOpacity.setValue(Math.abs(gesture.dx) / (SCREEN_WIDTH / 2));
           likeOpacity.setValue(0);
           setCurrentSwipe("dislike");
+          // Set rotation value directly for smoother animation
+          rotation.setValue(gesture.dx * 0.008); // Negative rotation for left swipe (with amplification)
         }
 
         // Fade content slightly when swiping far
@@ -147,7 +174,7 @@ const SwipeScreen = (props) => {
       // Rotation pop
       Animated.sequence([
         Animated.timing(rotation, {
-          toValue: direction === "like" ? 0.2 : -0.2,
+          toValue: direction === "like" ? 0.2 : -0.4,
           duration: 100,
           useNativeDriver: false,
         }),
@@ -193,14 +220,11 @@ const SwipeScreen = (props) => {
       { translateY: position.y },
       { scale },
       {
-        rotate: Animated.add(
-          rotation,
-          position.x.interpolate({
-            inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-            outputRange: ["-8deg", "0deg", "8deg"],
-            extrapolate: "clamp",
-          })
-        ),
+        rotate: position.x.interpolate({
+          inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
+          outputRange: ["-10deg", "0deg", "10deg"],
+          extrapolate: "clamp",
+        }),
       },
     ],
     opacity: position.x.interpolate({
@@ -213,7 +237,7 @@ const SwipeScreen = (props) => {
   const cardBorderStyle = position.x.interpolate({
     inputRange: [-SCREEN_WIDTH / 4, 0, SCREEN_WIDTH / 4],
     outputRange: [
-      "rgba(120, 62, 12, 0.5)",
+      "rgba(120, 62, 12, 0.8)",
       "rgba(0, 0, 0, 0.1)",
       "rgba(255, 193, 7, 0.5)",
     ],
@@ -230,7 +254,7 @@ const SwipeScreen = (props) => {
   const dislikeButtonStyle = [
     styles.actionButton,
     styles.dislikeButton,
-    currentSwipe === "dislike" ? styles.activeButton : {},
+    currentSwipe === "dislike" ? styles.activeDislikeButton : {},
   ];
 
   return (
@@ -528,6 +552,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 10,
   },
+  activeDislikeButton: {
+    transform: [{ scale: 1.15 }],
+    backgroundColor: "rgba(255, 240, 240, 0.9)",
+    borderWidth: 3,
+    shadowColor: "#783e0c",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+  },
   card: {
     flex: 1,
     borderRadius: 15,
@@ -556,7 +589,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 193, 7, 0.2)",
   },
   dislikeOverlay: {
-    backgroundColor: "rgba(120, 62, 12, 0.2)",
+    backgroundColor: "rgba(120, 62, 12, 0.4)",
   },
   overlayText: {
     fontSize: 42,

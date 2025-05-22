@@ -58,7 +58,7 @@ const LoginScreen = () => {
       if (response && response.UserAuth) {
         // Store user data in Redux
         dispatch(login(response.UserAuth));
-        
+
         // Fetch user preferences and store in Redux
         try {
           await dispatch(fetchUserPreferences());
@@ -67,7 +67,7 @@ const LoginScreen = () => {
           console.error("Error loading preferences:", prefError);
           // Continue with navigation even if preferences fail to load
         }
-        
+
         // Navigate to main app
         navigation.navigate("MainApp");
       }
