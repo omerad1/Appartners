@@ -42,15 +42,18 @@ export default function UserProfileScreen() {
         // fetch user data
         const userData = await loadUserData();
         if (userData){
-          console.log("good")
+        } else {
+          console.log('UserProfileScreen: No user data returned from loadUserData()');
         }
       }
-      catch{
-        console.error("Error logging in user:", error);
+      catch(err){
+        console.error("Error fetching user data:", err);
       }
     }
+    fetchData();
     if (!preferences) {
       dispatch(fetchUserPreferences())
+        .then(result => console.log('UserProfileScreen: Preferences fetched:', JSON.stringify(result?.payload, null, 2)))
         .catch(err => console.error("Failed to load preferences:", err));
     }
   }, [dispatch, preferences,  profileUpdateCounter]);
@@ -59,21 +62,18 @@ export default function UserProfileScreen() {
   // Function to explicitly fetch user data from AsyncStorage
   const refreshUserDataFromStorage = async () => {
     try {
-
       const userData = await getUserDataFromStorage();
       if (userData) {
-
-
         
         // Manually update Redux store with the fetched data
         dispatch({ 
           type: 'user/updateUserProfile', 
           payload: userData 
         });
-
         
         // Force immediate rerender
         setProfileUpdateCounter(prev => prev + 1);
+      } else {
       }
     } catch (err) {
       console.error('Failed to refresh user data from storage:', err);
@@ -84,7 +84,7 @@ export default function UserProfileScreen() {
   const handleApplyPreferences = async (newPreferences) => {
     try {
       // Save new preferences to Redux store
-      await dispatch(saveUserPreferences(newPreferences));
+      const result = await dispatch(saveUserPreferences(newPreferences));
 
     } catch (error) {
       console.error("Error updating preferences:", error);
