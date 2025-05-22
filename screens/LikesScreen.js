@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -12,6 +12,7 @@ import {
   Linking,
   Alert,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import BackgroundImage from "../components/BackgroundImage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,13 +20,22 @@ import ApartmentLike from "../components/ApartmentLike";
 import ModalApartmentDisplayer from "../components/ModalApartmentDisplayer";
 import UserDisplayer from "../components/UserDisplayer";
 import UserDisplayerModal from "../components/UserDisplayerModal";
-import { getLikedApartments, getUsersWhoLikedMyApartment, likeApartment, unlikeApartment } from "../api/likes";
+import {
+  getLikedApartments,
+  getUsersWhoLikedMyApartment,
+  likeApartment,
+  unlikeApartment,
+} from "../api/likes";
 import AppartnersLoader from "../components/ApartnersLoader";
 
-
-
-const ApartmentsILiked = ({ apartments, loading, error, onApartmentPress }) => {
-  if (loading) {
+const ApartmentsILiked = ({
+  apartments,
+  loading,
+  error,
+  onApartmentPress,
+  onRefresh,
+}) => {
+  if (loading && !apartments.length) {
     return (
       <View style={styles.placeholderContainer}>
         <AppartnersLoader />
@@ -61,12 +71,20 @@ const ApartmentsILiked = ({ apartments, loading, error, onApartmentPress }) => {
       contentContainerStyle={styles.apartmentList}
       showsVerticalScrollIndicator={false}
       centerContent={true}
+      refreshing={loading}
+      onRefresh={onRefresh}
     />
   );
 };
 
-const PeopleLikedMyApartment = ({ users, loading, error, onUserPress }) => {
-  if (loading) {
+const PeopleLikedMyApartment = ({
+  users,
+  loading,
+  error,
+  onUserPress,
+  onRefresh,
+}) => {
+  if (loading && !users.length) {
     return (
       <View style={styles.placeholderContainer}>
         <AppartnersLoader />
@@ -108,6 +126,8 @@ const PeopleLikedMyApartment = ({ users, loading, error, onUserPress }) => {
         </View>
       )}
       contentContainerStyle={styles.userList}
+      refreshing={loading}
+      onRefresh={onRefresh}
     />
   );
 };
@@ -127,21 +147,33 @@ const LikesScreen = () => {
   const [userModalVisible, setUserModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // Use useFocusEffect to refresh data whenever the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log("LikesScreen is focused - refreshing data");
+      fetchLikedApartments();
+      fetchUsersWhoLikedMyApartment();
+    }, [])
+  );
+
+  // Refresh data when switching tabs
   useEffect(() => {
-    // Fetch real data from the server
-    fetchLikedApartments();
-    fetchUsersWhoLikedMyApartment();
-  }, []);
+    if (activeTab === "apartments") {
+      fetchLikedApartments();
+    } else {
+      fetchUsersWhoLikedMyApartment();
+    }
+  }, [activeTab]);
 
   // Function to fetch apartments that the user has liked
   const fetchLikedApartments = async () => {
     try {
       setLoadingApartments(true);
       setApartmentsError(null);
-      
+
       const data = await getLikedApartments();
-      console.log('Fetched liked apartments:', data);
-      
+      console.log("Fetched liked apartments:", data.length);
+
       // Check if the data is in the expected format
       if (Array.isArray(data)) {
         setLikedApartments(data);
@@ -149,13 +181,12 @@ const LikesScreen = () => {
         // Handle case where data might be wrapped in a results array
         setLikedApartments(data.results);
       } else {
-        console.error('Unexpected data format for liked apartments:', data);
+        console.error("Unexpected data format for liked apartments:", data);
         setLikedApartments([]);
       }
     } catch (error) {
-      console.error('Error fetching liked apartments:', error);
-      setApartmentsError(error.message || 'Failed to load liked apartments');
-
+      console.error("Error fetching liked apartments:", error);
+      setApartmentsError(error.message || "Failed to load liked apartments");
     } finally {
       setLoadingApartments(false);
     }
@@ -166,10 +197,10 @@ const LikesScreen = () => {
     try {
       setLoadingUsers(true);
       setUsersError(null);
-      
+
       const data = await getUsersWhoLikedMyApartment();
-      console.log('Fetched users who liked my apartment:', data);
-      
+      console.log("Fetched users who liked my apartment:", data);
+
       // Check if the data is in the expected format
       if (Array.isArray(data)) {
         setUsersWhoLikedMyApartment(data);
@@ -177,13 +208,17 @@ const LikesScreen = () => {
         // Handle case where data might be wrapped in a results array
         setUsersWhoLikedMyApartment(data.results);
       } else {
-        console.error('Unexpected data format for users who liked my apartment:', data);
+        console.error(
+          "Unexpected data format for users who liked my apartment:",
+          data
+        );
         setUsersWhoLikedMyApartment([]);
       }
     } catch (error) {
-      console.error('Error fetching users who liked my apartment:', error);
-      setUsersError(error.message || 'Failed to load users who liked your apartment');
-
+      console.error("Error fetching users who liked my apartment:", error);
+      setUsersError(
+        error.message || "Failed to load users who liked your apartment"
+      );
     } finally {
       setLoadingUsers(false);
     }
@@ -201,46 +236,46 @@ const LikesScreen = () => {
 
   const handleLikeUser = async () => {
     if (!selectedUser || !selectedUser.id) {
-      console.error('No user selected or user ID missing');
+      console.error("No user selected or user ID missing");
       setUserModalVisible(false);
       return;
     }
-    
+
     try {
       // Here you would call the API to match with the user
       // For now, we'll just show a success message
       Alert.alert(
-        'Match Request Sent',
+        "Match Request Sent",
         `You've sent a match request to ${selectedUser.name}!`,
-        [{ text: 'OK' }]
+        [{ text: "OK" }]
       );
-      
+
       // Refresh the users list after matching
       fetchUsersWhoLikedMyApartment();
       setUserModalVisible(false);
     } catch (error) {
-      console.error('Error liking user:', error);
-      Alert.alert('Error', 'Failed to send match request. Please try again.');
+      console.error("Error liking user:", error);
+      Alert.alert("Error", "Failed to send match request. Please try again.");
     }
   };
 
   const handleDislikeUser = async () => {
     if (!selectedUser || !selectedUser.id) {
-      console.error('No user selected or user ID missing');
+      console.error("No user selected or user ID missing");
       setUserModalVisible(false);
       return;
     }
-    
+
     try {
       // Here you would call the API to reject the user
       // For now, we'll just close the modal
-      
+
       // Refresh the users list after rejecting
       fetchUsersWhoLikedMyApartment();
       setUserModalVisible(false);
     } catch (error) {
-      console.error('Error disliking user:', error);
-      Alert.alert('Error', 'Failed to reject. Please try again.');
+      console.error("Error disliking user:", error);
+      Alert.alert("Error", "Failed to reject. Please try again.");
     }
   };
 
@@ -252,6 +287,7 @@ const LikesScreen = () => {
           loading={loadingApartments}
           error={apartmentsError}
           onApartmentPress={handleApartmentPress}
+          onRefresh={fetchLikedApartments}
         />
       );
     } else {
@@ -261,6 +297,7 @@ const LikesScreen = () => {
           loading={loadingUsers}
           error={usersError}
           onUserPress={handleUserPress}
+          onRefresh={fetchUsersWhoLikedMyApartment}
         />
       );
     }
@@ -268,73 +305,91 @@ const LikesScreen = () => {
 
   return (
     <BackgroundImage>
-    <SafeAreaView style={styles.container}>
-      <View style={styles.tabContainer}>
-        <LinearGradient
-          colors={["rgba(91, 89, 85, 0.88)", "rgba(91, 89, 85, 0.95)"]}
-          style={styles.tabGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "apartments" && styles.activeTab]}
-            onPress={() => setActiveTab("apartments")}
+      <SafeAreaView style={styles.container}>
+        <View style={styles.tabContainer}>
+          <LinearGradient
+            colors={["rgba(91, 89, 85, 0.88)", "rgba(91, 89, 85, 0.95)"]}
+            style={styles.tabGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
           >
-            <Ionicons
-              name="home-outline"
-              size={20}
-              color={activeTab === "apartments" ? "#FFFFFF" : "#BDAEB4"}
-              style={styles.tabIcon}
-            />
-            <Text
+            <TouchableOpacity
               style={[
-                styles.tabText,
-                activeTab === "apartments" && styles.activeTabText,
+                styles.tab,
+                activeTab === "apartments" && styles.activeTab,
               ]}
+              onPress={() => setActiveTab("apartments")}
             >
-              Apartments I Liked
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name="home-outline"
+                size={20}
+                color={activeTab === "apartments" ? "#FFFFFF" : "#BDAEB4"}
+                style={styles.tabIcon}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "apartments" && styles.activeTabText,
+                ]}
+              >
+                Apartments I Liked
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "people" && styles.activeTab]}
+              onPress={() => setActiveTab("people")}
+            >
+              <Ionicons
+                name="people-outline"
+                size={20}
+                color={activeTab === "people" ? "#FFFFFF" : "#BDAEB4"}
+                style={styles.tabIcon}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "people" && styles.activeTabText,
+                ]}
+              >
+                Liked My Apartment
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+
+        <View style={styles.headerContainer}>
           <TouchableOpacity
-            style={[styles.tab, activeTab === "people" && styles.activeTab]}
-            onPress={() => setActiveTab("people")}
+            style={styles.refreshButton}
+            onPress={() => {
+              if (activeTab === "apartments") {
+                fetchLikedApartments();
+              } else {
+                fetchUsersWhoLikedMyApartment();
+              }
+            }}
           >
-            <Ionicons
-              name="people-outline"
-              size={20}
-              color={activeTab === "people" ? "#FFFFFF" : "#BDAEB4"}
-              style={styles.tabIcon}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "people" && styles.activeTabText,
-              ]}
-            >
-              Liked My Apartment
-            </Text>
+            <Ionicons name="refresh-outline" size={24} color="#FFFFFF" />
           </TouchableOpacity>
-        </LinearGradient>
-      </View>
+        </View>
 
-      <View style={styles.contentContainer}>{renderTab()}</View>
+        <View style={styles.contentContainer}>{renderTab()}</View>
 
-      {/* Apartment Modal */}
-      <ModalApartmentDisplayer
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        apartment={selectedApartment}
-      />
+        {/* Apartment Modal */}
+        <ModalApartmentDisplayer
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          apartment={selectedApartment}
+        />
 
-      {/* User Modal */}
-      <UserDisplayerModal
-        visible={userModalVisible}
-        onClose={() => setUserModalVisible(false)}
-        user={selectedUser}
-        onLike={handleLikeUser}
-        onDislike={handleDislikeUser}
-      />
-    </SafeAreaView>
+        {/* User Modal */}
+        <UserDisplayerModal
+          visible={userModalVisible}
+          onClose={() => setUserModalVisible(false)}
+          user={selectedUser}
+          onLike={handleLikeUser}
+          onDislike={handleDislikeUser}
+        />
+      </SafeAreaView>
     </BackgroundImage>
   );
 };
@@ -391,7 +446,7 @@ const styles = StyleSheet.create({
   },
   apartmentList: {
     padding: 10,
-    alignItems: 'center', // Center items horizontally
+    alignItems: "center", // Center items horizontally
   },
   placeholderContainer: {
     flex: 1,
@@ -425,6 +480,19 @@ const styles = StyleSheet.create({
     textAlign: "right",
     color: "#888",
     fontSize: 16,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    paddingTop: 5,
+    paddingBottom: 5,
+  },
+  refreshButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(91, 89, 85, 0.6)",
   },
 });
 

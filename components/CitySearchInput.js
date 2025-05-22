@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,9 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator
-} from 'react-native';
-import { usePreferencesPayload } from '../context/PreferencesPayloadContext';
+  ActivityIndicator,
+} from "react-native";
+import { usePreferencesPayload } from "../context/PreferencesPayloadContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 
@@ -34,11 +34,12 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
   });
   const [showResults, setShowResults] = useState(false);
   const [filteredCities, setFilteredCities] = useState([]);
-  const [selectedCity, setSelectedCity] = useState(value && typeof value === 'object' ? value : null);
-  
+  const [selectedCity, setSelectedCity] = useState(
+    value && typeof value === "object" ? value : null
+  );
+
   // If value changes externally, update the internal state
-  useEffect(() => {
-    
+  useEffect(() => {    
     if (!value) {
       // If value is null/undefined/empty, clear the input
       setSearchText('');
@@ -61,7 +62,6 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
           city.name && city.name.toLowerCase() === value.toLowerCase());
           
         if (matchingCity) {
-
           setSelectedCity(matchingCity);
         } else {
           // If no match found, just keep the string value
@@ -74,27 +74,27 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
   
   // Get cities data from context
   const { cities, isLoading, error } = usePreferencesPayload();
-  
+
   // Filter cities based on search text
   useEffect(() => {
-    if (searchText.trim() === '') {
+    if (searchText.trim() === "") {
       setFilteredCities([]);
       return;
     }
-    
+
     // More flexible search that shows results even with partial matches
-    const searchTerms = searchText.toLowerCase().split(' ');
-    
-    const filtered = cities.filter(city => {
+    const searchTerms = searchText.toLowerCase().split(" ");
+
+    const filtered = cities.filter((city) => {
       // Make sure city.name exists before using it
-      const cityName = city.name ? city.name.toLowerCase() : '';
+      const cityName = city.name ? city.name.toLowerCase() : "";
       // Check if any of the search terms are in the city name
-      return searchTerms.some(term => cityName.includes(term));
+      return searchTerms.some((term) => cityName.includes(term));
     });
-    
+
     setFilteredCities(filtered);
   }, [searchText, cities]);
-  
+
   // Handle city selection
   const handleSelectCity = (city) => {
     
@@ -106,7 +106,7 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
     
     setShowResults(false);
   };
-  
+
   // Handle text input
   const handleChangeText = (text) => {
     setSearchText(text);
@@ -140,10 +140,10 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
           autoCapitalize="words"
         />
         {searchText ? (
-          <TouchableOpacity 
-            style={styles.clearButton} 
+          <TouchableOpacity
+            style={styles.clearButton}
             onPress={() => {
-              setSearchText('');
+              setSearchText("");
               setSelectedCity(null); // Clear the selected city object
               onChange(null); // Pass null to parent to clear the city
               setShowResults(false);
@@ -153,26 +153,28 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
           </TouchableOpacity>
         ) : null}
       </View>
-      
-      {showResults && searchText.trim() !== '' && (
+
+      {showResults && searchText.trim() !== "" && (
         <View style={styles.resultsContainer}>
           {isLoading ? (
             <ActivityIndicator size="small" color="#000" />
           ) : error ? (
             <Text style={styles.errorText}>Error loading cities</Text>
           ) : filteredCities.length > 0 ? (
-            <ScrollView 
+            <ScrollView
               style={styles.resultsList}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={true}
             >
-              {filteredCities.map(item => (
+              {filteredCities.map((item) => (
                 <TouchableOpacity
                   key={item.id.toString()}
                   style={styles.resultItem}
                   onPress={() => handleSelectCity(item)}
                 >
-                  <Text style={styles.resultText}>{item.name || 'Unknown city'}</Text>
+                  <Text style={styles.resultText}>
+                    {item.name || "Unknown city"}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -187,8 +189,8 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    position: 'relative',
+    width: "100%",
+    position: "relative",
     zIndex: 999, // Increased z-index to ensure dropdown appears above other elements
     marginVertical: 10,
   },
@@ -202,12 +204,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     backgroundColor: '#fff',
     position: 'relative',
+
   },
   input: {
     flex: 1,
     height: 50,
     fontSize: 16,
-    fontFamily: 'comfortaaRegular',
+    fontFamily: "comfortaaRegular",
   },
   label: {
     marginBottom: 5,
@@ -220,51 +223,51 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   resultsContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 55, // Position below the input field
     left: 0,
     right: 0,
-    width: '100%',
+    width: "100%",
     maxHeight: 200,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     marginTop: 5,
     elevation: 5, // Increased elevation for Android
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2, // Increased shadow opacity
     shadowRadius: 4, // Increased shadow radius
     zIndex: 1000, // Very high z-index to ensure it appears above everything
   },
   resultsList: {
-    width: '100%',
+    width: "100%",
     maxHeight: 200,
   },
   resultItem: {
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   resultText: {
     fontSize: 16,
-    fontFamily: 'comfortaaRegular',
+    fontFamily: "comfortaaRegular",
   },
   noResultsText: {
     padding: 15,
     fontSize: 14,
-    fontFamily: 'comfortaaRegular',
-    color: '#666',
-    textAlign: 'center',
+    fontFamily: "comfortaaRegular",
+    color: "#666",
+    textAlign: "center",
   },
   errorText: {
     padding: 15,
     fontSize: 14,
-    fontFamily: 'comfortaaRegular',
-    color: 'red',
-    textAlign: 'center',
+    fontFamily: "comfortaaRegular",
+    color: "red",
+    textAlign: "center",
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -10,14 +10,40 @@ import { Searchbar } from "react-native-paper";
 import SearchTags from "../../../components/SearchTags";
 import { propertyTags } from "../../../data/tags/propertyTags";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import BackgroundImage from "../../../components/BackgroundImage";
+
 const PropertyTagsScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { formData, entryDay, isEditing, apartmentId } = route.params || {};
+  const editingApartment =
+    route.params?.apartment || route.params?.formData?.apartment;
+
+  // Get existing tags if editing
+  const [existingTags, setExistingTags] = useState([]);
+
+  useEffect(() => {
+    if (isEditing && editingApartment?.feature_details) {
+      // Log for debugging
+      console.log("Feature details:", editingApartment.feature_details);
+
+      // Extract feature names from feature_details
+      const tags = editingApartment.feature_details
+        .map((feature) =>
+          typeof feature === "object" ? feature.name : feature
+        )
+        .filter((tag) => tag); // Filter out any undefined/null values
+
+      setExistingTags(tags);
+      setSelectedTags(tags);
+    }
+  }, [isEditing, editingApartment]);
+
   const [selectedTags, setSelectedTags] = useState([]); // Store selected tags
   const [showAll, setShowAll] = useState(false); // Control showing all tags
   const [searchQuery, setSearchQuery] = useState(""); // Track the search query
   const [filteredTags, setFilteredTags] = useState(propertyTags.slice(0, 10)); // Filtered tags
-  const navigation = useNavigation();
 
   const handleTagToggle = (tag) => {
     if (selectedTags.includes(tag)) {
@@ -51,6 +77,18 @@ const PropertyTagsScreen = () => {
     }
   };
 
+  const handleNext = () => {
+    // Navigate to the next screen with all collected data
+    navigation.navigate("PhotosScreen", {
+      formData,
+      entryDay,
+      selectedTags,
+      isEditing,
+      apartmentId,
+      apartment: editingApartment,
+    });
+  };
+
   const isShowMoreDisabled =
     searchQuery.trim() !== "" || propertyTags.length <= 10;
 
@@ -60,11 +98,17 @@ const PropertyTagsScreen = () => {
         title={"Select Property Tags"}
         direction={"PhotosScreen"}
         next={true}
-        onPress={() => {
-          navigation.navigate("PhotosScreen");
-        }}
+        onPress={handleNext}
       >
         <View style={styles.container}>
+          <Text style={styles.instruction}>
+            Select features that your apartment has:
+          </Text>
+          {isEditing && existingTags.length > 0 && (
+            <Text style={styles.currentTagsText}>
+              Currently selected: {existingTags.length} features
+            </Text>
+          )}
           <Searchbar
             placeholder="Search tags..."
             value={searchQuery}
@@ -107,6 +151,21 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 5,
   },
+  instruction: {
+    fontSize: 16,
+    marginBottom: 15,
+    textAlign: "center",
+    color: "#333",
+    fontFamily: "comfortaaSemiBold",
+  },
+  currentTagsText: {
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: "center",
+    color: "#555",
+    fontFamily: "comfortaa",
+    fontStyle: "italic",
+  },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 50, // Prevent overlap with the Next button
@@ -116,10 +175,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   searchBar: {
-    marginBottom: 10,
+    marginBottom: 15,
     marginHorizontal: 14,
     borderRadius: 15,
     backgroundColor: "#f5f5f5",
+    elevation: 2,
   },
   showMoreButton: {
     alignSelf: "center",
@@ -127,7 +187,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 15,
-    marginTop: 10, // Adjusted for separation
+    marginTop: 20, // Adjusted for separation
+    elevation: 3,
   },
   disabledButton: {
     backgroundColor: "#aaa", // Grey out the button

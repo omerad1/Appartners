@@ -59,6 +59,7 @@ const LoginScreen = () => {
 
       if (response && response.UserAuth && response.RefreshToken) {
         // Fetch user data after successful login
+
         try {
           const userData = await fetchUserData(true); // Force refresh from server
           console.log("userDATA: ", userData)
@@ -73,6 +74,7 @@ const LoginScreen = () => {
         }
         // Set authentication state to true
         loginSuccess();
+
       }
     } catch (error) {
       console.error("Login failed:", error);

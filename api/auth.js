@@ -60,24 +60,28 @@ export const login = async (email, password) => {
   } catch (err) {
     // Log the full error object for debugging
     console.error("Login error - full error:", err);
-    
+
     // Extract detailed error information
     const errorDetails = {
       message: err.message,
       status: err.response?.status,
       statusText: err.response?.statusText,
       data: err.response?.data,
-      headers: err.response?.headers
+      headers: err.response?.headers,
     };
-    
-    console.error("Login error - details:", JSON.stringify(errorDetails, null, 2));
-    
+
+    console.error(
+      "Login error - details:",
+      JSON.stringify(errorDetails, null, 2)
+    );
+
     // Create a more informative error message
-    const message = err.response?.data?.detail || 
-                   err.response?.data?.error ||
-                   err.response?.data?.message ||
-                   err.message;
-                   
+    const message =
+      err.response?.data?.detail ||
+      err.response?.data?.error ||
+      err.response?.data?.message ||
+      err.message;
+
     throw new Error(message);
   }
 };

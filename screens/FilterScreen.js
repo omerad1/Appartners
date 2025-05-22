@@ -14,6 +14,7 @@ import InputField from "../components/onBoarding/InputField";
 import PriceRangePicker from "../components/PriceRangePicker";
 import FilterSection from "../components/FilterSection";
 import CitySearchInput from "../components/CitySearchInput";
+import AreaSearchInput from "../components/AreaSearchInput";
 import TagsSelector from "../components/TagsSelector";
 import { usePreferencesPayload } from "../context/PreferencesPayloadContext";
 
@@ -27,6 +28,7 @@ const SECTION_KEYS = {
   MAX_FLOOR: 'maxFloor',
   AREA: 'area',
   CITY: 'city',
+
 };
 
 const defaultPriceRange = { min: 0, max: 10000 };
@@ -205,6 +207,7 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
     }
   }, [visible]);
 
+
   const toggleSection = (sectionKey) => {
     setOpenSections(prev => {
       const newSections = { ...prev };
@@ -232,6 +235,7 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
     
     // Update the state directly with the new array
     setSelectedRoommates(newRoommates);
+
   };
 
   const handleApplyFilters = () => {
@@ -281,13 +285,18 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
             isOpen={!!openSections[SECTION_KEYS.CITY]}
             onToggle={() => toggleSection(SECTION_KEYS.CITY)}
             hasValue={!!city}
-            onClear={() => setCity("")}
+            onClear={() => {
+              setCity("");
+              setSelectedCity(null);
+              setArea(""); // Clear area when city is cleared
+            }}
           >
             <CitySearchInput
               value={city}
               onChange={setCity}
               initialValue={typeof city === 'object' && city !== null ? city.name : 
                           typeof city === 'string' ? city : ''}
+
             />
           </FilterSection>
           <FilterSection
@@ -298,10 +307,10 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
             hasValue={!!area}
             onClear={() => setArea("")}
           >
-            <InputField
-              placeholder="Enter preferred area/neighborhood"
-              onChange={setArea}
+            <AreaSearchInput
               value={area}
+              onChange={setArea}
+              selectedCity={selectedCity}
             />
           </FilterSection>
           <FilterSection
@@ -350,10 +359,16 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
             iconName="wallet-outline"
             isOpen={!!openSections[SECTION_KEYS.PRICE_RANGE]}
             onToggle={() => toggleSection(SECTION_KEYS.PRICE_RANGE)}
-            hasValue={priceRange.min !== defaultPriceRange.min || priceRange.max !== defaultPriceRange.max}
+            hasValue={
+              priceRange.min !== defaultPriceRange.min ||
+              priceRange.max !== defaultPriceRange.max
+            }
             onClear={() => setPriceRange(defaultPriceRange)}
           >
-            <PriceRangePicker initialRange={priceRange} onChange={setPriceRange} />
+            <PriceRangePicker
+              initialRange={priceRange}
+              onChange={setPriceRange}
+            />
           </FilterSection>
 
           <FilterSection
@@ -377,6 +392,7 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
                     style={[
                       styles.roommateOptionButton,
                       isSelected && styles.roommateOptionButtonSelected,
+
                     ]}
                     onPress={() => handleToggleRoommate(optionNum)}
                   >
@@ -393,7 +409,6 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
               })}
             </View>
           </FilterSection>
-
         </ScrollView>
       </TouchableWithoutFeedback>
     </DrawerModal>
@@ -409,56 +424,56 @@ const styles = StyleSheet.create({
 
   directLabel: {
     fontSize: 18,
-    fontFamily: 'comfortaaSemiBold',
-    color: '#333',
+    fontFamily: "comfortaaSemiBold",
+    color: "#333",
     marginBottom: 8,
-    marginTop: 5, 
+    marginTop: 5,
   },
   directInputContainer: {
     marginBottom: 20,
   },
   roommateOptionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingVertical: 10,
   },
   roommateOptionButton: {
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
-    minWidth: 50, 
-    alignItems: 'center',
+    minWidth: 50,
+    alignItems: "center",
   },
   roommateOptionButtonSelected: {
-    backgroundColor: '#333',
-    borderColor: '#333',
+    backgroundColor: "#333",
+    borderColor: "#333",
   },
   roommateOptionText: {
     fontSize: 16,
-    fontFamily: 'comfortaaRegular',
-    color: '#333',
+    fontFamily: "comfortaaRegular",
+    color: "#333",
   },
   roommateOptionTextSelected: {
-    color: '#fff',
-    fontFamily: 'comfortaaSemiBold',
+    color: "#fff",
+    fontFamily: "comfortaaSemiBold",
   },
   featuresPlaceholderContainer: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 20,
-    backgroundColor: '#f9f9f9',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f9f9f9",
+    alignItems: "center",
+    justifyContent: "center",
     minHeight: 80,
   },
   featuresPlaceholderText: {
     fontSize: 14,
-    fontFamily: 'comfortaaRegular',
-    color: '#777',
-    textAlign: 'center',
+    fontFamily: "comfortaaRegular",
+    color: "#777",
+    textAlign: "center",
   },
 });
 
