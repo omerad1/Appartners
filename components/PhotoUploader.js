@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -10,8 +10,26 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-const PhotoUploader = () => {
+const PhotoUploader = ({ onChange, initialPhotos = [] }) => {
   const [photos, setPhotos] = useState([]); // Store selected photos
+
+  // Process initial photos when component mounts
+  useEffect(() => {
+    if (initialPhotos && initialPhotos.length > 0) {
+      const formattedPhotos = initialPhotos.map((url) => ({
+        uri: url,
+        isExisting: true, // Flag to identify existing photos
+      }));
+      setPhotos(formattedPhotos);
+    }
+  }, [initialPhotos]);
+
+  // Notify parent component when photos change
+  useEffect(() => {
+    if (onChange) {
+      onChange(photos);
+    }
+  }, [photos, onChange]);
 
   const handleAddPhoto = async () => {
     // Request permission to access media library
@@ -23,9 +41,9 @@ const PhotoUploader = () => {
 
     // Launch the image picker
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: false,
-      quality: 1,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
