@@ -174,6 +174,18 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   // Destructure the temporary form for easier access in the component
   const { moveInDate, priceRange, selectedRoommates, city, selectedFeatures, maxFloor, area } = tempForm;
   
+  // Add selectedCity state to track the city object for AreaSearchInput
+  const [selectedCity, setSelectedCity] = useState(null);
+  
+  // Update selectedCity when city changes
+  useEffect(() => {
+    if (city && typeof city === 'object' && city.id) {
+      setSelectedCity(city);
+    } else {
+      setSelectedCity(null);
+    }
+  }, [city]);
+  
   const [openSections, setOpenSections] = useState({});
 
   useEffect(() => {
@@ -293,10 +305,12 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
           >
             <CitySearchInput
               value={city}
-              onChange={setCity}
+              onChange={(newCity) => {
+                setCity(newCity);
+                setSelectedCity(newCity); // Update selectedCity when city changes
+              }}
               initialValue={typeof city === 'object' && city !== null ? city.name : 
                           typeof city === 'string' ? city : ''}
-
             />
           </FilterSection>
           <FilterSection
