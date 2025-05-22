@@ -46,6 +46,7 @@
     "react-native-ui-datepicker": "^2.0.4",
     "react-native-vector-icons": "^10.2.0",
     "react-redux": "^9.2.0",
+    "socket.io-client": "^4.8.1",
     "undefined": "\\",
     "yup": "^1.6.1"
   },
