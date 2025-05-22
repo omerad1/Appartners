@@ -8,7 +8,6 @@ export const saveUserDataToStorage = async (userData) => {
   try {
     // Check if userData is valid before saving
     if (!userData) {
-
       return false;
     }
     await AsyncStorage.setItem("userData", JSON.stringify(userData));
@@ -36,27 +35,30 @@ export const fetchUserData = async (forceRefresh = false) => {
   try {
     // First try to get from AsyncStorage (unless forceRefresh is true)
     if (!forceRefresh) {
-      console.log('Trying to get user data from AsyncStorage...');
+      console.log("Trying to get user data from AsyncStorage...");
       const localUserData = await getUserDataFromStorage();
-      
+
       if (localUserData) {
-        console.log('User data found in AsyncStorage');
+        console.log("User data found in AsyncStorage");
         return localUserData;
       }
-      
-      console.log('No user data in AsyncStorage, fetching from server...');
+
+      console.log("No user data in AsyncStorage, fetching from server...");
     } else {
-      console.log('Force refresh requested, fetching user data from server...');
+      console.log("Force refresh requested, fetching user data from server...");
     }
-  
+
     // Make the API call to get user profile
     const response = await api.get(endpoints.profile);
-    
+
     // Log the complete user data from the response
-    console.log('User data from /users/me endpoint:', JSON.stringify(response.data, null, 2));
-    
+    console.log(
+      "User data from /users/me endpoint:",
+      JSON.stringify(response.data, null, 2)
+    );
+
     // Check if the response contains user data before saving
-    if (response.data){
+    if (response.data) {
       // Save the user data to AsyncStorage
       await saveUserDataToStorage(response.data);
       return response.data;
@@ -73,77 +75,48 @@ export const fetchUserData = async (forceRefresh = false) => {
 // Update user profile on the server
 export const updateUserProfile = async (userData) => {
   try {
-    // Get the auth token
-    const token = await AsyncStorage.getItem("authToken");
-    
-    if (!token) {
-      throw new Error("Authentication token not found");
-    }
-    
-    // Check if we have a photo to upload
-    const hasPhoto = userData.photo && (userData.photo.uri || userData.photo.startsWith('data:'));
-    
-    let response;
-    
+    const hasPhoto =
+      userData.photo &&
+      (userData.photo.uri || userData.photo.startsWith("data:"));
+
+    let formData;
+
     if (hasPhoto) {
-      // Create FormData for file upload
-      const formData = new FormData();
-      
-      // Add the photo to FormData
+      formData = new FormData();
+
       if (userData.photo.uri) {
-        // If it's an image picked from the device
         const photoUri = userData.photo.uri;
-        const filename = photoUri.split('/').pop();
-        const match = /\.([\w\d_]+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : 'image/jpeg';
-        
-        formData.append('photo', {
+        const filename = photoUri.split("/").pop();
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : "image/jpeg";
+
+        formData.append("photo", {
           uri: photoUri,
           name: filename,
-          type
+          type,
         });
-      } else if (userData.photo.startsWith('data:')) {
-        // If it's a base64 string, we'll need to convert it
-
-        // Implementation would depend on backend requirements
+      } else if (userData.photo.startsWith("data:")) {
+        // Backend-dependent handling of base64 images
+        formData.append("photo", userData.photo);
       }
-      
-      // Add other user data fields to FormData
-      Object.keys(userData).forEach(key => {
-        if (key !== 'photo') {
-          formData.append(key, userData[key]);
+
+      Object.entries(userData).forEach(([key, value]) => {
+        if (key !== "photo") {
+          formData.append(key, value);
         }
       });
-      
-      // Set up headers with the auth token and content type for FormData
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      };
-      
-
-      
-      // Make the API call with FormData
-      response = await api.put(endpoints.updateUserProfile, formData, { headers });
-    } else {
-      // Regular JSON request without photo
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      
-      // Make the API call to update user profile
-      response = await api.put(endpoints.updateUserProfile, userData, { headers });
     }
-    
-    // Check if the response contains user data before saving
-    if (response.data && response.data.user) {
-      // Save the updated user data to AsyncStorage
+
+    const response = hasPhoto
+      ? await api.put(endpoints.updateUserProfile, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+      : await api.put(endpoints.updateUserProfile, userData);
+
+    if (response.data?.user) {
       await saveUserDataToStorage(response.data.user);
-    } else {
-
     }
-    
+
     return response.data;
   } catch (error) {
     console.error("Error updating user profile:", error);

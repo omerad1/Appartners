@@ -91,7 +91,7 @@ const calculateAge = (birthDateString) => {
 export const getLikedApartments = async () => {
   try {
     const res = await api.get(endpoints.likedApartments);
-
+    console.log("🏠 Liked apartments:", res.data);
     // Transform the data to match the expected format
     let transformedData;
 

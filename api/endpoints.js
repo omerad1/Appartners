@@ -8,8 +8,9 @@ const endpoints = {
   //my apartments
   myApartments: "/api/v1/apartments/my/",
   DeleteApartment: (apartmentId) => `/api/v1/apartments/${apartmentId}/`,
-  
+
   profile: "/api/v1/users/me/",
+  users: "/api/v1/users", // Base endpoint for users
   GET_APARTMENTS: "/api/v1/apartments/recommendations/",
   filters: "/api/v1/users/preferences/",
   newApartment: "/api/v1/apartments/new/",

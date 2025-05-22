@@ -12,6 +12,7 @@ import { propertyTags } from "../../../data/tags/propertyTags";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import BackgroundImage from "../../../components/BackgroundImage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const PropertyTagsScreen = () => {
   const navigation = useNavigation();
@@ -22,6 +23,27 @@ const PropertyTagsScreen = () => {
 
   // Get existing tags if editing
   const [existingTags, setExistingTags] = useState([]);
+
+  // Check for saved form data when component mounts
+  useEffect(() => {
+    // Debug log route params
+    console.log("PropertyTagsScreen - route params:", route.params);
+    console.log("formData received in PropertyTagsScreen:", formData);
+
+    // Load saved form data from AsyncStorage if needed
+    const loadSavedFormData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem("apartmentFormData");
+        if (savedData) {
+          console.log("Found saved form data in PropertyTagsScreen");
+        }
+      } catch (error) {
+        console.error("Error checking saved form data:", error);
+      }
+    };
+
+    loadSavedFormData();
+  }, []);
 
   useEffect(() => {
     if (isEditing && editingApartment?.feature_details) {
@@ -77,7 +99,37 @@ const PropertyTagsScreen = () => {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Update the saved form data with the selected tags
+    try {
+      // First, get the existing form data to ensure we're not losing anything
+      const savedData = await AsyncStorage.getItem("apartmentFormData");
+      let dataToSave = formData || {};
+
+      // If we have saved data, use it as a base
+      if (savedData) {
+        dataToSave = {
+          ...JSON.parse(savedData),
+          ...dataToSave, // Override with current route formData
+        };
+      }
+
+      // Add the selected tags
+      dataToSave = {
+        ...dataToSave,
+        tags: selectedTags,
+      };
+
+      // Save the updated data
+      await AsyncStorage.setItem(
+        "apartmentFormData",
+        JSON.stringify(dataToSave)
+      );
+      console.log("Saved form data with tags:", dataToSave);
+    } catch (error) {
+      console.error("Error saving form data with tags:", error);
+    }
+
     // Navigate to the next screen with all collected data
     navigation.navigate("PhotosScreen", {
       formData,

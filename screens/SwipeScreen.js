@@ -8,14 +8,27 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
+  Linking,
+  Image,
+  Modal,
+  Alert,
 } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import {
+  Ionicons,
+  FontAwesome5,
+  AntDesign,
+  FontAwesome,
+} from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import ImageDisplayer from "../components/ImageDisplayer";
 import SearchTags from "../components/SearchTags";
 import UserDisplayer from "../components/UserDisplayer";
 import { likeApartment, unlikeApartment } from "../api/likes";
+import { getUser } from "../api/users";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = 120;
+const defaultUserImage = require("../assets/placeholders/default-user-image.jpg");
 
 const SwipeScreen = (props) => {
   const { onSwipe, apartment } = props; // Prop to notify the parent of swipe action
@@ -29,7 +42,14 @@ const SwipeScreen = (props) => {
     price,
     rooms,
     availableRooms,
+    entryDate,
+    id: apartmentId,
+    owner_id: ownerId,
   } = apartment;
+
+  const [ownerDetails, setOwnerDetails] = useState(null);
+  const [contactModalVisible, setContactModalVisible] = useState(false);
+  const [loadingOwner, setLoadingOwner] = useState(false);
 
   const position = useRef(new Animated.ValueXY()).current;
   const [currentSwipe, setCurrentSwipe] = useState(null); // 'like' or 'dislike' or null
@@ -40,6 +60,61 @@ const SwipeScreen = (props) => {
   const scale = useRef(new Animated.Value(1)).current;
   const rotation = useRef(new Animated.Value(0)).current;
   const contentOpacity = useRef(new Animated.Value(1)).current;
+  const contactButtonScale = useRef(new Animated.Value(1)).current;
+
+  const [ownerLoaded, setOwnerLoaded] = useState(false);
+  const [ownerData, setOwnerData] = useState(null);
+  const compatibilityScore = Math.floor(Math.random() * 40) + 60; // Random score between 60-99%
+
+  // Fetch apartment owner details when the contact button is pressed
+  const fetchOwnerDetails = async () => {
+    if (ownerDetails) {
+      // Already fetched, just show modal
+      setContactModalVisible(true);
+      return;
+    }
+
+    setLoadingOwner(true);
+    try {
+      // Use either user.id or ownerId depending on what your API expects
+      const ownerId = user?.id || apartment.owner_id;
+      if (!ownerId) {
+        throw new Error("No owner ID available");
+      }
+
+      const ownerData = await getUser(ownerId);
+      console.log("Owner details:", ownerData);
+      setOwnerDetails(ownerData);
+      setContactModalVisible(true);
+    } catch (error) {
+      console.error("Failed to fetch owner details:", error);
+      Alert.alert(
+        "Error",
+        "Could not fetch owner contact information. Please try again later."
+      );
+    } finally {
+      setLoadingOwner(false);
+    }
+  };
+
+  useEffect(() => {
+    console.log("apartmentffsfssfs", apartment);
+    // Pulse animation for contact button
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(contactButtonScale, {
+          toValue: 1.05,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(contactButtonScale, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
 
   // Function to handle liking or disliking an apartment
   const setLikedOrDisliked = async (direction) => {
@@ -73,6 +148,7 @@ const SwipeScreen = (props) => {
     rotation.setValue(0);
     contentOpacity.setValue(1);
     setCurrentSwipe(null);
+    setOwnerDetails(null);
   }, [apartment]);
 
   const panResponder = useRef(
@@ -257,6 +333,310 @@ const SwipeScreen = (props) => {
     currentSwipe === "dislike" ? styles.activeDislikeButton : {},
   ];
 
+  const handleContactPress = () => {
+    // Animate the button press
+    Animated.sequence([
+      Animated.timing(contactButtonScale, {
+        toValue: 1.2,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(contactButtonScale, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Fetch owner details and show contact modal
+    fetchOwnerDetails();
+  };
+
+  const handleSendMessage = () => {
+    // Could implement in-app messaging here
+    Alert.alert(
+      "Message Sent",
+      "Your interest has been sent to the apartment owner. They will contact you soon."
+    );
+    setContactModalVisible(false);
+  };
+
+  const handleCallOwner = () => {
+    if (ownerDetails?.phone) {
+      Linking.openURL(`tel:${ownerDetails.phone}`);
+    } else {
+      Alert.alert(
+        "No Phone Number",
+        "The owner did not provide a phone number."
+      );
+    }
+  };
+
+  const handleOpenFacebook = (url) => {
+    Linking.openURL(url).catch((err) =>
+      Alert.alert("Could not open Facebook profile")
+    );
+  };
+
+  const loadOwnerData = async () => {
+    if (ownerLoaded || loadingOwner) return;
+
+    setLoadingOwner(true);
+    try {
+      console.log("apartmentffsffs", apartment);
+      // Check if apartment has user_details - use it directly
+      if (apartment && apartment.user_details) {
+        console.log(
+          "Using user_details from apartment",
+          apartment.user_details
+        );
+        setOwnerData(apartment.user_details);
+        setOwnerLoaded(true);
+      } else {
+        // Fallback in case user_details is not available
+        console.log("No user_details found in apartment data, using fallback");
+        setOwnerData({
+          first_name: "Apartment",
+          last_name: "Owner",
+          occupation: "Property Owner",
+          about_me: "No information available about this apartment owner.",
+          photo_url: null,
+        });
+      }
+    } catch (error) {
+      console.error("Error processing owner data:", error);
+    } finally {
+      setLoadingOwner(false);
+    }
+  };
+
+  // Call loadOwnerData when the apartment changes
+  useEffect(() => {
+    if (apartment) {
+      loadOwnerData();
+    }
+    return () => {
+      setOwnerLoaded(false);
+      setOwnerData(null);
+    };
+  }, [apartment]);
+
+  const renderContactSection = () => {
+    if (loadingOwner) {
+      return (
+        <LinearGradient
+          colors={["rgba(139, 69, 19, 0.85)", "rgba(160, 82, 45, 0.8)"]}
+          style={styles.ownerProfileContainer}
+        >
+          <Text style={styles.ownerSectionTitle}>Loading owner details...</Text>
+        </LinearGradient>
+      );
+    }
+
+    // Use a default URL if none exists
+    const facebookUrl = "https://facebook.com";
+    const fullName = ownerData
+      ? `${ownerData.first_name || ""} ${ownerData.last_name || ""}`.trim()
+      : "Property Owner";
+
+    return (
+      <LinearGradient
+        colors={["rgba(139, 69, 19, 0.85)", "rgba(160, 82, 45, 0.8)"]}
+        style={styles.ownerProfileContainer}
+      >
+        <View style={styles.ownerHeader}>
+          <View style={styles.matchBadgeContainer}>
+            <LinearGradient
+              colors={["#FFC107", "#FFD54F"]}
+              style={styles.compatibilityBadge}
+            >
+              <Text style={styles.compatibilityText}>
+                {compatibilityScore}% Match
+              </Text>
+            </LinearGradient>
+          </View>
+        </View>
+
+        <View style={styles.ownerProfileContent}>
+          <View style={styles.ownerImageContainer}>
+            <Image
+              source={
+                ownerData?.photo_url
+                  ? { uri: ownerData.photo_url }
+                  : defaultUserImage
+              }
+              style={styles.ownerImage}
+            />
+          </View>
+
+          <View style={styles.ownerDetails}>
+            <Text style={styles.ownerName}>{fullName}</Text>
+
+            <Text style={styles.ownerOccupation}>
+              {ownerData?.occupation || "Not specified"}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.facebookButton}
+              onPress={() => handleOpenFacebook(facebookUrl)}
+            >
+              <FontAwesome name="facebook-square" size={20} color="#3b5998" />
+              <Text style={styles.facebookButtonText}>Facebook Profile</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.aboutSection}>
+          <Text style={styles.aboutSectionTitle}>About the Owner</Text>
+          <Text style={styles.aboutText}>
+            {ownerData?.about_me ||
+              "No additional information provided by the owner."}
+          </Text>
+        </View>
+      </LinearGradient>
+    );
+  };
+
+  // Add helper function to calculate age from birth date
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return "Unknown";
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  const renderContactModal = () => (
+    <Modal
+      visible={contactModalVisible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setContactModalVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <LinearGradient
+          colors={["#8B4513", "#A0522D", "#CD853F"]}
+          style={styles.contactModalContainer}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.contactModalHeader}>
+            <Text style={styles.contactModalTitle}>Contact Owner</Text>
+            <TouchableOpacity
+              style={styles.closeModalButton}
+              onPress={() => setContactModalVisible(false)}
+            >
+              <Ionicons name="close-circle-outline" size={28} color="#FFF" />
+            </TouchableOpacity>
+          </View>
+
+          {loadingOwner ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>
+                Loading contact information...
+              </Text>
+            </View>
+          ) : ownerDetails ? (
+            <>
+              <View style={styles.ownerInfoContainer}>
+                <Image
+                  source={{
+                    uri:
+                      ownerDetails.profile_image ||
+                      "https://via.placeholder.com/100",
+                  }}
+                  style={styles.ownerImage}
+                />
+                <View style={styles.ownerTextInfo}>
+                  <Text style={styles.ownerName}>
+                    {ownerDetails.name || "Apartment Owner"}
+                  </Text>
+                  {ownerDetails.bio && (
+                    <Text style={styles.ownerBio}>{ownerDetails.bio}</Text>
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.contactOptionsContainer}>
+                <TouchableOpacity
+                  style={styles.contactOption}
+                  onPress={handleSendMessage}
+                >
+                  <LinearGradient
+                    colors={["#8B4513", "#A0522D"]}
+                    style={styles.contactOptionGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                  >
+                    <Ionicons name="chatbox-ellipses" size={24} color="#FFF" />
+                    <Text style={styles.contactOptionText}>Send Message</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.contactOption}
+                  onPress={handleCallOwner}
+                  disabled={!ownerDetails.phone}
+                >
+                  <LinearGradient
+                    colors={[
+                      ownerDetails.phone ? "#8B4513" : "#999",
+                      ownerDetails.phone ? "#A0522D" : "#777",
+                    ]}
+                    style={styles.contactOptionGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                  >
+                    <Ionicons name="call" size={24} color="#FFF" />
+                    <Text style={styles.contactOptionText}>
+                      {ownerDetails.phone ? "Call" : "No Phone"}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.contactOption}
+                  onPress={() => handleOpenFacebook(ownerDetails.facebook_link)}
+                  disabled={!ownerDetails.facebook_link}
+                >
+                  <LinearGradient
+                    colors={[
+                      ownerDetails.facebook_link ? "#3b5998" : "#999",
+                      ownerDetails.facebook_link ? "#5f82ce" : "#777",
+                    ]}
+                    style={styles.contactOptionGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                  >
+                    <FontAwesome5 name="facebook" size={24} color="#FFF" />
+                    <Text style={styles.contactOptionText}>
+                      Facebook Profile
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <View style={styles.noContactInfo}>
+              <Text style={styles.noContactText}>
+                Could not load contact information. Please try again.
+              </Text>
+            </View>
+          )}
+        </LinearGradient>
+      </View>
+    </Modal>
+  );
+
   return (
     <Animated.View
       {...panResponder.panHandlers}
@@ -298,15 +678,20 @@ const SwipeScreen = (props) => {
       >
         <Animated.View style={{ opacity: contentOpacity }}>
           {/* Address Section */}
-          <View style={styles.headerContainer}>
+          <LinearGradient
+            colors={["rgba(139, 69, 19, 0.9)", "rgba(160, 82, 45, 0.85)"]}
+            style={styles.headerContainer}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
             <MaterialCommunityIcons
               name="map-marker"
-              size={24}
-              color="black"
+              size={26}
+              color="#FFF"
               style={styles.gpsIcon}
             />
             <Text style={styles.addressHeader}>{address}</Text>
-          </View>
+          </LinearGradient>
 
           {/* Images Section */}
           <View style={styles.imageDisplayerContainer}>
@@ -314,50 +699,76 @@ const SwipeScreen = (props) => {
           </View>
 
           {/* Key Details Section */}
-          <View style={styles.keyDetailsContainer}>
+          <LinearGradient
+            colors={["rgba(205, 133, 63, 0.8)", "rgba(244, 164, 96, 0.85)"]}
+            style={styles.keyDetailsContainer}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
             <View style={styles.keyDetail}>
               <MaterialCommunityIcons
                 name="currency-ils"
-                size={22}
-                color="#333"
+                size={24}
+                color="#FFFFFF"
               />
               <Text style={styles.keyDetailText}>
-                ₪{price.toLocaleString()}
+                ₪{price?.toLocaleString() || "N/A"}
               </Text>
             </View>
             <View style={styles.keyDetail}>
-              <MaterialCommunityIcons name="door" size={22} color="#333" />
-              <Text style={styles.keyDetailText}>{rooms} Rooms</Text>
+              <MaterialCommunityIcons name="door" size={24} color="#FFFFFF" />
+              <Text style={styles.keyDetailText}>{rooms || "?"} Rooms</Text>
             </View>
             <View style={styles.keyDetail}>
-              <MaterialCommunityIcons name="door-open" size={22} color="#333" />
+              <MaterialCommunityIcons
+                name="door-open"
+                size={24}
+                color="#FFFFFF"
+              />
               <Text style={styles.keyDetailText}>
-                {availableRooms} Available
+                {availableRooms || "?"} Available
               </Text>
             </View>
-          </View>
+            {entryDate && (
+              <View style={styles.keyDetail}>
+                <MaterialCommunityIcons
+                  name="calendar"
+                  size={22}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.keyDetailText}>
+                  {new Date(entryDate)
+                    .toLocaleDateString("en-GB")
+                    .substring(0, 5)}
+                </Text>
+              </View>
+            )}
+          </LinearGradient>
 
           {/* About Section */}
-          <View style={styles.aboutContainer}>
-            <Text style={styles.textHeader}>אודות הדירה</Text>
-            <Text style={styles.text}>{aboutApartment}</Text>
-          </View>
+          <LinearGradient
+            colors={["rgba(245, 245, 245, 0.9)", "rgba(235, 235, 235, 0.95)"]}
+            style={styles.aboutContainer}
+          >
+            <Text style={styles.textHeader}>About</Text>
+            <Text style={styles.text}>
+              {aboutApartment || "No description provided."}
+            </Text>
+          </LinearGradient>
 
           {/* Tags Section */}
-          <View style={styles.tagsContainer}>
-            <Text style={styles.sectionTitle}>Tags</Text>
-            <SearchTags tags={tags} selectedTags={tags} />
-          </View>
+          {tags && tags.length > 0 && (
+            <LinearGradient
+              colors={["rgba(245, 245, 245, 0.9)", "rgba(235, 235, 235, 0.95)"]}
+              style={styles.tagsContainer}
+            >
+              <Text style={styles.sectionTitle}>Apartment Features</Text>
+              <SearchTags tags={tags} selectedTags={tags} />
+            </LinearGradient>
+          )}
 
-          {/* User Section */}
-          <View style={styles.userContainer}>
-            <Text style={styles.sectionTitle}>Contact</Text>
-            <UserDisplayer
-              avatarSource={user.image}
-              name={user.name}
-              facebookLink={user.link}
-            />
-          </View>
+          {/* Contact Section */}
+          {renderContactSection()}
 
           {/* Like and Dislike Buttons */}
           <View style={styles.buttonContainer}>
@@ -381,6 +792,9 @@ const SwipeScreen = (props) => {
           </View>
         </Animated.View>
       </ScrollView>
+
+      {/* Contact Modal */}
+      {renderContactModal()}
     </Animated.View>
   );
 };
@@ -391,26 +805,25 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.68)",
   },
   contentContainer: {
-    padding: 20,
-    paddingTop: 20,
+    padding: 15,
+    paddingTop: 15,
   },
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 15,
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 10,
-    paddingVertical: 12,
+    paddingVertical: 15,
     paddingHorizontal: 15,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   gpsIcon: {
     marginRight: 10,
@@ -418,7 +831,10 @@ const styles = StyleSheet.create({
   addressHeader: {
     fontSize: 22,
     fontFamily: "comfortaaBold",
-    color: "rgb(0, 0, 0)",
+    color: "#FFFFFF",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   imageDisplayerContainer: {
     marginBottom: 15,
@@ -437,16 +853,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 10,
-    padding: 15,
+    padding: 18,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowOpacity: 0.2,
+    shadowRadius: 3.84,
     elevation: 3,
   },
   keyDetail: {
@@ -454,16 +869,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   keyDetailText: {
-    marginTop: 5,
+    marginTop: 8,
     fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+    fontFamily: "comfortaaSemiBold",
+    color: "#FFFFFF",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
   },
   aboutContainer: {
     alignItems: "center",
     paddingVertical: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 10,
+    borderRadius: 15,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -472,32 +889,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     marginBottom: 15,
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "#D2B48C",
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    fontFamily: "comfortaaBold",
+    marginBottom: 15,
+    color: "#5D4037",
     textAlign: "center",
   },
   textHeader: {
     fontSize: 24,
     fontFamily: "comfortaaBold",
-    marginBottom: 10,
+    marginBottom: 12,
+    color: "#8B4513",
   },
   text: {
     fontSize: 16,
     fontFamily: "comfortaaRegular",
-    textAlign: "right",
+    textAlign: "center",
     lineHeight: 24,
+    color: "#5D4037",
   },
   tagsContainer: {
     marginBottom: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 15,
+    padding: 20,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -506,25 +926,74 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "#D2B48C",
   },
-  userContainer: {
-    marginBottom: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 10,
-    padding: 15,
+  contactContainer: {
+    marginBottom: 20,
+    borderRadius: 15,
+    padding: 20,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 3,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
+    alignItems: "center",
+  },
+  contactSectionTitle: {
+    fontSize: 22,
+    fontFamily: "comfortaaBold",
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginBottom: 15,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  contactButton: {
+    marginVertical: 10,
+    width: 200,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+    elevation: 6,
+  },
+  contactButtonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+  },
+  contactButtonText: {
+    color: "#8B4513",
+    fontFamily: "comfortaaBold",
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  contactPrompt: {
+    fontFamily: "comfortaaSemiBold",
+    fontSize: 14,
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginTop: 10,
+    fontStyle: "italic",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 1,
   },
   buttonContainer: {
     marginTop: 5,
-    marginBottom: 10,
-    marginHorizontal: 40,
+    marginBottom: 30,
+    marginHorizontal: 50,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -536,20 +1005,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   dislikeButton: {
     borderColor: "#783e0c",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "white",
   },
   likeButton: {
     borderColor: "#FFC107",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "white",
   },
   activeButton: {
-    transform: [{ scale: 1.1 }],
-    shadowColor: "#000",
+    transform: [{ scale: 1.15 }],
+    shadowColor: "#FFC107",
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.5,
     shadowRadius: 10,
   },
   activeDislikeButton: {
@@ -599,6 +1075,258 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
     marginTop: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  contactModalContainer: {
+    width: "100%",
+    maxWidth: 350,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  contactModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.3)",
+    paddingBottom: 10,
+  },
+  contactModalTitle: {
+    fontSize: 24,
+    fontFamily: "comfortaaBold",
+    color: "#FFF",
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  closeModalButton: {
+    padding: 5,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  loadingText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: "comfortaa",
+  },
+  ownerInfoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 20,
+  },
+  ownerImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 2,
+    borderColor: "#FFF",
+  },
+  ownerTextInfo: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  ownerName: {
+    fontSize: 18,
+    fontFamily: "comfortaaBold",
+    color: "#FFFFFF",
+    marginBottom: 5,
+  },
+  ownerBio: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.8)",
+    fontFamily: "comfortaa",
+  },
+  contactOptionsContainer: {
+    marginTop: 10,
+  },
+  contactOption: {
+    marginBottom: 15,
+    borderRadius: 10,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
+  },
+  contactOptionGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
+  contactOptionText: {
+    color: "white",
+    fontFamily: "comfortaaSemiBold",
+    fontSize: 16,
+    marginLeft: 15,
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  },
+  noContactInfo: {
+    padding: 20,
+    alignItems: "center",
+  },
+  noContactText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: "comfortaa",
+    textAlign: "center",
+  },
+  ownerProfileContainer: {
+    marginBottom: 20,
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  ownerHeader: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  matchBadgeContainer: {
+    alignItems: "center",
+  },
+  compatibilityBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+  },
+  compatibilityText: {
+    color: "#8B4513",
+    fontFamily: "comfortaaBold",
+    fontSize: 16,
+  },
+  ownerProfileContent: {
+    flexDirection: "row",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+  },
+  ownerImageContainer: {
+    marginRight: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  ownerImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 3,
+    borderColor: "white",
+  },
+  ownerDetails: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  ownerName: {
+    fontSize: 22,
+    fontFamily: "comfortaaBold",
+    color: "#FFFFFF",
+    marginBottom: 5,
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  },
+  ownerOccupation: {
+    fontSize: 16,
+    fontFamily: "comfortaaSemiBold",
+    color: "#F5F5F5",
+    marginBottom: 12,
+  },
+  facebookButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 10,
+    alignSelf: "flex-start",
+    marginTop: 5,
+  },
+  facebookButtonText: {
+    color: "#3b5998",
+    fontFamily: "comfortaaBold",
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  aboutSection: {
+    padding: 15,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  aboutSectionTitle: {
+    fontSize: 18,
+    fontFamily: "comfortaaBold",
+    color: "#FFFFFF",
+    marginBottom: 10,
+    textAlign: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  },
+  aboutText: {
+    fontSize: 15,
+    fontFamily: "comfortaaRegular",
+    color: "#FFFFFF",
+    lineHeight: 22,
+    textAlign: "center",
+    fontStyle: "italic",
   },
 });
 

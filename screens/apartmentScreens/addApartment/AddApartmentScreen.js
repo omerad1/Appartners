@@ -15,6 +15,7 @@ import NumberSlider from "../../../components/NumberSlider";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import BackgroundImage from "../../../components/BackgroundImage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { createApartment } from "../../../api/createApartment";
 import { updateApartment } from "../../../api/updateApartment";
@@ -49,7 +50,7 @@ const AddApartmentScreen = () => {
   );
 
   const [formData, setFormData] = useState({
-    city: isEditing ? editingApartment.city_details.name : "",
+    city: isEditing ? editingApartment.city_details.id : "",
     area: isEditing ? editingApartment.area || "" : "",
     street: isEditing ? editingApartment.street : "",
     buildingNumber: isEditing
@@ -63,11 +64,44 @@ const AddApartmentScreen = () => {
     about: isEditing ? editingApartment.about || "" : "",
   });
 
+  // Check for any saved form data on component mount
+  useEffect(() => {
+    const loadSavedFormData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem("apartmentFormData");
+        if (savedData && !isEditing) {
+          const parsedData = JSON.parse(savedData);
+          console.log("Loaded saved apartment form data:", parsedData);
+
+          // Only use saved data if we're not editing
+          setFormData((prevData) => ({
+            ...prevData,
+            ...parsedData,
+          }));
+
+          // Restore city object if it exists
+          if (parsedData.cityObject) {
+            setSelectedCity(parsedData.cityObject);
+          }
+
+          // Restore entry day if it exists
+          if (parsedData.entryDayStr) {
+            setEntryDay(dayjs(parsedData.entryDayStr));
+          }
+        }
+      } catch (error) {
+        console.error("Error loading saved form data:", error);
+      }
+    };
+
+    loadSavedFormData();
+  }, [isEditing]);
+
   // Update form data if editing apartment changes
   useEffect(() => {
     if (isEditing && editingApartment) {
       setFormData({
-        city: editingApartment.city_details.name || "",
+        city: editingApartment.city_details.id || "",
         area: editingApartment.area || "",
         street: editingApartment.street || "",
         buildingNumber: editingApartment.house_number?.toString() || "",
@@ -104,9 +138,10 @@ const AddApartmentScreen = () => {
 
   // Handle city selection
   const handleCityChange = (city) => {
+    console.log("City selection changed:", city);
     setSelectedCity(city);
     if (city) {
-      setFormData((prev) => ({ ...prev, city: city.name }));
+      setFormData((prev) => ({ ...prev, city: city.id }));
       // Reset area when city changes
       setFormData((prev) => ({ ...prev, area: "" }));
     } else {
@@ -133,9 +168,27 @@ const AddApartmentScreen = () => {
     return true;
   };
 
-  const handleNext = () => {
-
+  const handleNext = async () => {
     if (!validateForm()) return false;
+
+    // Save complete form data to AsyncStorage before navigating
+    try {
+      // Save form data including city object for later restoration
+      const dataToSave = {
+        ...formData,
+        cityObject: selectedCity, // Save the full city object
+        entryDayStr: entryDay.format("YYYY-MM-DD"), // Save as string
+      };
+
+      await AsyncStorage.setItem(
+        "apartmentFormData",
+        JSON.stringify(dataToSave)
+      );
+      console.log("Saved form data to AsyncStorage:", dataToSave);
+    } catch (error) {
+      console.error("Error saving form data:", error);
+      // Continue with navigation even if saving fails
+    }
 
     // Store the form data in global state or pass it as a parameter
     navigation.navigate("PropertyTagsScreen", {
@@ -161,7 +214,6 @@ const AddApartmentScreen = () => {
             next="Next"
             onPress={handleNext}
           >
-
             <Card style={styles.card}>
               <Card.Content style={styles.formContainer}>
                 <Text style={styles.sectionTitle}>Location Details</Text>
