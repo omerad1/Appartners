@@ -73,20 +73,25 @@ const AddApartmentScreen = () => {
           const parsedData = JSON.parse(savedData);
           console.log("Loaded saved apartment form data:", parsedData);
 
-          // Only use saved data if we're not editing
-          setFormData((prevData) => ({
-            ...prevData,
-            ...parsedData,
-          }));
+          // Only use saved data if we're not editing and if we explicitly want to load saved data
+          if (route.params?.loadSavedData) {
+            setFormData((prevData) => ({
+              ...prevData,
+              ...parsedData,
+            }));
 
-          // Restore city object if it exists
-          if (parsedData.cityObject) {
-            setSelectedCity(parsedData.cityObject);
-          }
+            // Restore city object if it exists
+            if (parsedData.cityObject) {
+              setSelectedCity(parsedData.cityObject);
+            }
 
-          // Restore entry day if it exists
-          if (parsedData.entryDayStr) {
-            setEntryDay(dayjs(parsedData.entryDayStr));
+            // Restore entry day if it exists
+            if (parsedData.entryDayStr) {
+              setEntryDay(dayjs(parsedData.entryDayStr));
+            }
+          } else {
+            // Clear saved data if we don't want to load it
+            await AsyncStorage.removeItem("apartmentFormData");
           }
         }
       } catch (error) {
@@ -95,7 +100,7 @@ const AddApartmentScreen = () => {
     };
 
     loadSavedFormData();
-  }, [isEditing]);
+  }, [isEditing, route.params?.loadSavedData]);
 
   // Update form data if editing apartment changes
   useEffect(() => {
