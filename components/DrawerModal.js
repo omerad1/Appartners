@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Dimensions,
   SafeAreaView,
-  Platform,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -15,14 +14,22 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { Portal } from 'react-native-paper'; // Import Portal from react-native-paper
+import { Portal } from 'react-native-paper';
 
 const { height } = Dimensions.get('window');
 
-const DrawerModal = ({ visible, onClose, title, children, onSave, saveButtonTitle}) => {
+const DrawerModal = ({
+  visible,
+  onClose,
+  title,
+  children,
+  onSave,
+  saveButtonTitle,
+  leftAction,
+}) => {
+  const [isModalRendered, setIsModalRendered] = useState(visible);
   const translateY = useSharedValue(height);
   const opacity = useSharedValue(0);
-  const [isModalRendered, setIsModalRendered] = useState(visible);
 
   useEffect(() => {
     if (visible) {
@@ -40,34 +47,23 @@ const DrawerModal = ({ visible, onClose, title, children, onSave, saveButtonTitl
   }, [visible]);
 
   const triggerClose = () => {
-    if (onClose) {
-      onClose();
-    }
+    onClose?.();
   };
 
   const handleSaveChanges = () => {
-    if (onSave) {
-      onSave();
-    }
+    onSave?.();
   };
 
-  const backdropStyle = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.value,
-    };
-  });
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value * 0.5,
+  }));
 
-  const drawerStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: translateY.value }],
-    };
-  });
+  const drawerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
-  if (!isModalRendered) {
-    return null;
-  }
+  if (!isModalRendered) return null;
 
-  // Wrap the entire modal in a Portal component
   return (
     <Portal>
       <View style={styles.container}>
@@ -76,33 +72,32 @@ const DrawerModal = ({ visible, onClose, title, children, onSave, saveButtonTitl
           style={[styles.backdrop, backdropStyle]}
           onTouchEnd={triggerClose}
         />
-        
+
         {/* Drawer */}
         <Animated.View style={[styles.drawer, drawerStyle]}>
           <SafeAreaView style={styles.safeArea}>
-            {/* Header with X button and title */}
+            {/* Header */}
             <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={triggerClose}
-              >
-                <Ionicons name="close-outline" size={26} color="#333" />
-              </TouchableOpacity>
+              {leftAction ? (
+                leftAction
+              ) : (
+                <TouchableOpacity style={styles.closeButton} onPress={triggerClose}>
+                  <Ionicons name="close-outline" size={26} color="#333" />
+                </TouchableOpacity>
+              )}
               <View style={styles.titleContainer}>
                 <Text style={styles.headerTitle}>{title}</Text>
               </View>
               <View style={styles.headerRight} />
             </View>
-            
+
             {/* Divider */}
             <View style={styles.divider} />
-            
+
             {/* Content */}
-            <View style={styles.contentContainer}>
-              {children}
-            </View>
-            
-            {/* Footer with button */}
+            <View style={styles.contentContainer}>{children}</View>
+
+            {/* Footer with Save Button */}
             {onSave && (
               <View style={styles.footer}>
                 <TouchableOpacity
@@ -128,11 +123,11 @@ const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 1001, // Ensure backdrop is above navigation
+    zIndex: 1001,
   },
   drawer: {
     backgroundColor: '#fff',
-    height: height *0.95, // Use full screen height
+    height: height * 0.95,
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -141,12 +136,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.27,
     shadowRadius: 4.65,
-    elevation: 9999, // Very high elevation to ensure it's above everything
-    zIndex: 9999, // Very high z-index to ensure it's above everything
+    elevation: 9999,
+    zIndex: 9999,
   },
   safeArea: {
     flex: 1,
-    display: 'flex',
     flexDirection: 'column',
   },
   header: {
@@ -157,26 +151,6 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     paddingHorizontal: 15,
     backgroundColor: '#fff',
-
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E0E0E0',
-    marginBottom: 15,
-  },
-  titleContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontFamily: 'comfortaaSemiBold',
-    color: '#333',
-    textAlign: 'center',
-  },
-  headerRight: {
-    width: 40, // For layout balance
   },
   closeButton: {
     padding: 8,
@@ -186,9 +160,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'comfortaaSemiBold',
+    color: '#333',
+    textAlign: 'center',
+  },
+  headerRight: {
+    width: 40,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginBottom: 15,
+  },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: 5
+    paddingHorizontal: 5,
   },
   footer: {
     padding: 15,

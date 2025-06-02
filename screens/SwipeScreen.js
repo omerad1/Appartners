@@ -98,7 +98,6 @@ const SwipeScreen = (props) => {
   };
 
   useEffect(() => {
-    console.log("apartmentffsfssfs", apartment);
     // Pulse animation for contact button
     Animated.loop(
       Animated.sequence([
@@ -383,13 +382,8 @@ const SwipeScreen = (props) => {
 
     setLoadingOwner(true);
     try {
-      console.log("apartmentffsffs", apartment);
       // Check if apartment has user_details - use it directly
       if (apartment && apartment.user_details) {
-        console.log(
-          "Using user_details from apartment",
-          apartment.user_details
-        );
         setOwnerData(apartment.user_details);
         setOwnerLoaded(true);
       } else {

@@ -97,6 +97,7 @@ export const AuthProvider = ({ children }) => {
     if (isAuthenticated) {
       // Get the current user from Redux store
       const currentUser = store.getState().user.currentUser;
+      console.log("checking auth user: ", currentUser)
       
       if (currentUser && currentUser.id) {
         console.log('User is authenticated, initializing socket with user ID:', currentUser.id);
@@ -133,7 +134,8 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
     // Initialize socket connection after successful login
     try {
-      const socket = await initializeSocket();
+      const currentUser = store.getState().user.currentUser;
+      const socket = await initializeSocket(currentUser.id);
       if (socket) {
         console.log('Socket initialized after login');
       } else {

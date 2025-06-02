@@ -4,40 +4,64 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  Image,
   Alert,
+  Text as RNText,
 } from "react-native";
 import { Avatar, Text, Badge, IconButton } from "react-native-paper";
-import Title from "../../components/Title"; // Import your custom Title component
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import Title from "../../components/Title";
 import BackgroundImage from "../../components/BackgroundImage";
-import {getUserChatRooms, createChatRoomById} from "../../api/chat";
-import {getUserDataFromStorage} from "../../api/user";
+import {getUserChatRooms} from "../../api/chat";
 import { useSelector } from "react-redux";
 import { registerSocketMessageHandler, isSocketConnected } from "../../api/socket";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import ModalApartmentDisplayer from "../../components/ModalApartmentDisplayer";
+
 
 const AllChatsScreen = () => {
   const [messages, setMessages] = useState([]);
+  const [selectedApartment, setSelectedApartment] = useState(null);
+  const [apartmentModalVisible, setApartmentModalVisible] = useState(false);
   const currentUser = useSelector(state => state.user.currentUser);
+  const navigation = useNavigation();
 
   // Function to fetch chat rooms
   const fetchChatRooms = useCallback(async () => {
     try {
       const chatRooms = await getUserChatRooms();
-      console.log("Fetched chat rooms:", JSON.stringify(chatRooms, null, 2));
-      setMessages(chatRooms);
+      console.log(JSON.stringify(chatRooms[0], null, 2))
+      setMessages(prevMessages => {
+        // Avoid re-setting if nothing changed
+        const newJson = JSON.stringify(chatRooms);
+        const oldJson = JSON.stringify(prevMessages);
+  
+        if (newJson !== oldJson) {
+          return chatRooms;
+        }
+        return prevMessages; // No update needed
+      });
     } catch (error) {
       console.error("Error fetching chat rooms:", error);
     }
   }, []);
-
-  // Initial fetch of chat rooms
   useEffect(() => {
     fetchChatRooms();
-  }, [fetchChatRooms]);
+  }, [fetchChatRooms])
+  // Force re-render when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log('AllChatsScreen focused - refreshing chat list');
+      fetchChatRooms();
+      
+      return () => {
+        console.log('AllChatsScreen unfocused');
+      };
+    }, [fetchChatRooms])
+  );
   
   // Handle room updates from WebSocket
   const handleRoomUpdate = useCallback((room) => {
-    console.log('Room update received in component:', room);
     // Update the specific room in the messages list
     setMessages(prevMessages => {
       // Check if the room already exists in our list
@@ -132,6 +156,7 @@ const AllChatsScreen = () => {
     
     return () => clearInterval(intervalId);
   }, []);
+
   const handleDelete = (id) => {
     setMessages((prevMessages) =>
       prevMessages.filter((message) => message.id !== id)
@@ -156,99 +181,214 @@ const AllChatsScreen = () => {
     );
   };
 
+  // Navigate to chat screen with the selected room
+  const navigateToChat = (room) => {
+    console.log(JSON.stringify(room, null, 2))
+    // Find the other participant (not the current user)
+    const otherParticipant = currentUser ? 
+      room.participants.find(p => p.id !== currentUser.id) : room.participants[0];
+    // Navigate to chat screen with room data
+    navigation.navigate('ChatScreen', { 
+      roomId: room.id,
+      otherParticipant: otherParticipant,
+    });
+    
+    // If there are unread messages, they will be marked as read in the ChatScreen
+  };
+
+  // Format timestamp
+  const formatTime = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = (now - date) / (1000 * 60 * 60);
+    
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    } else if (diffInHours < 48) {
+      return 'אתמול';
+    } else {
+      return date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
+    }
+  };
+
   return (
     <BackgroundImage>
-      <View style={styles.container}>
-        {/* Icon and Title */}
-        <View style={styles.iconAndTitle}>
-          <Image
-            source={require("../../assets/icons/logo.png")}
-            style={styles.logo}
-          />
-          <Title>צ'אטים</Title>
-        </View>
-
-        {/* Transparent Chat Container */}
-        <View style={styles.chatContainer}>
-          {/* Chat List or No Active Chats Message */}
-          {messages.length === 0 ? (
-            <View style={styles.noChatsContainer}>
-              <Text style={styles.noChatsText}>אין צ'אטים פעילים</Text>
+        <View style={styles.container}>
+          {/* Header Section */}
+          <View style={styles.header}>
+            <View style={styles.titleContainer}>
+              <Title style={styles.title}>צ'אטים</Title>
+              
             </View>
-          ) : (
-            <ScrollView>
-              {messages.map((room) => {
-                // Defensive: ensure participants is an array
-                if (!room.participants || !Array.isArray(room.participants)) {
-                  console.error('Room missing participants:', room);
-                  return null;
-                }
-                
-                // Find the other participant (not the current user)
-                const otherParticipant = currentUser ? 
-                  room.participants.find(p => p.id !== currentUser.id) : room.participants[0];
-                
-                // Get participant name or default to "Unknown User"
-                const participantName = otherParticipant ? 
-                  `${otherParticipant.first_name} ${otherParticipant.last_name}` : 'Unknown User';
-                
-                // Get the last message content or default to "New match created"
-                const lastMessageContent = room.last_message && room.last_message.content ? 
-                  room.last_message.content : 'New match created';
-                
-                return (
-                  <TouchableOpacity
-                    key={room.id}
-                    style={styles.messageItem}
-                    onPress={() => console.log(`Opening chat with ${participantName}`)}
-                    onLongPress={() => onLongPressChat(room.id, participantName)}
-                  >
-                    {/* Avatar - use participant's image if available */}
-                    <Avatar.Image
-                      size={50}
-                      source={{ uri: otherParticipant?.profile_image || 'https://via.placeholder.com/50' }}
-                      style={styles.messageAvatar}
-                    />
+          </View>
 
-                    {/* Chat Content */}
-                    <View style={styles.messageContent}>
-                      <View style={styles.nameContainer}>
-                        <Text style={styles.messageName}>{participantName}</Text>
+          {/* Chat Container */}
+          <View style={styles.chatContainer}>
+              <View style={styles.subtitleContainer}>
+                <Badge style={styles.chatCountBadge}>{messages.length} {" "}
+                  <Text style={styles.subtitleText}>
+                  {messages.length === 1 ? 'שיחה פעילה' : 'שיחות פעילות'}
+                </Text>
+                </Badge>
+              </View>
+            {messages.length === 0 ? (
+              <View style={styles.emptyStateContainer}>
+                <LinearGradient
+                  colors={['rgba(255, 223, 110, 0.9)', 'rgba(255, 193, 50, 0.8)']}
+                  style={styles.emptyIconContainer}
+                >
+                  <RNText style={styles.emptyIcon}>💭</RNText>
+                </LinearGradient>
+                <Text style={styles.emptyTitle}>אין צ'אטים פעילים</Text>
+                <Text style={styles.emptySubtitle}>
+                  שיחות חדשות יופיעו כאן
+                </Text>
+              </View>
+            ) : (
+              <ScrollView 
+                style={styles.scrollView}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+              >
+                {messages.map((room, index) => {
+                  // Defensive: ensure participants is an array
+                  if (!room.participants || !Array.isArray(room.participants)) {
+                    return null;
+                  }
+                  
+                  // Find the other participant (not the current user)
+                  const otherParticipant = currentUser ? 
+                    room.participants.find(p => p.id !== currentUser.id) : room.participants[0];
+                  
+                  // Get participant name or default to "Unknown User"
+                  const participantName = otherParticipant ? 
+                    `${otherParticipant.first_name} ${otherParticipant.last_name}` : 'Unknown User';
+                  
+                  // Get the last message content or default to "New match created"
+                  const lastMessageContent = room.last_message && room.last_message.content ? 
+                    room.last_message.content : 'New match created';
+                  
+                  const isLastItem = index === messages.length - 1;
+                  
+                  return (
+                    <TouchableOpacity
+                      key={room.id}
+                      style={[styles.chatItem, isLastItem && styles.lastChatItem]}
+                      onPress={() => navigateToChat(room)}
+                      onLongPress={() => onLongPressChat(room.id, participantName)}
+                      activeOpacity={0.8}
+                    >
+                      <LinearGradient
+                        colors={room.unread_count > 0 ? 
+                          ['rgba(255, 223, 110, 0.95)', 'rgba(255, 193, 50, 0.85)'] : 
+                          ['rgba(255, 255, 255, 0.95)', 'rgba(255, 248, 220, 0.8)']
+                        }
+                        style={styles.chatItemGradient}
+                      >
+  
+                        {/* Avatar with online indicator */}
+                        <View style={styles.avatarContainer}>
+                          {otherParticipant?.photo_url ? (
+                            <Avatar.Image
+                              size={48}
+                              source={{ uri: otherParticipant.photo_url }}
+                              style={styles.avatar}
+                            />
+                          ) : (
+                            <Avatar.Text
+                              size={48}
+                              label={`${otherParticipant?.first_name?.[0] ?? ''}${otherParticipant?.last_name?.[0] ?? ''}`.toUpperCase()}
+                              style={[styles.avatar, styles.avatarText]}
+                              labelStyle={styles.avatarLabel}
+                            />
+                          )}
+                          {/* Online indicator like in ChatScreen */}
+                        </View>
                         
-                        {/* Add checkmarks if the last message was sent by the current user */}
-                        {room.was_last_message_sent_by_me && room.last_message && (
-                          <Text style={[styles.checkmarks, room.last_message_read_at ? styles.read : styles.delivered]}>
-                            ✓✓
-                          </Text>
+
+                        {/* Chat Content */}
+                        <View style={styles.chatContent}>
+                          <View style={styles.chatHeader}>
+                            <Text style={styles.participantName} numberOfLines={1}>
+                              {participantName}
+                            </Text>
+                            <View style={styles.timeAndStatus}>
+                              <Text style={styles.timeText}>
+                                {formatTime(room.last_message?.created_at)}
+                              </Text>
+                            </View>
+                          </View>
+
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              
+                            <Text
+                              style={[
+                                styles.lastMessage,
+                                room.unread_count > 0 && styles.unreadMessage,
+                                { flex: 1 } // Let it fill available space and truncate
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {lastMessageContent}
+                            </Text>
+                            {room.was_last_message_sent_by_me && room.last_message && (
+                              <View style={{ flexShrink: 0, marginRight: 5 }}>
+                                <Ionicons 
+                                  name="checkmark-done" 
+                                  size={16} 
+                                  style={[
+                                    styles.checkmarks,
+                                    room.last_message_read_at ? styles.read : styles.delivered
+                                  ]} 
+                                />
+                              </View>
+                            )}
+                          </View>
+                        </View>
+
+
+                        {/* Right side with badge */}
+                        <View style={styles.rightSection}>
+                          {/* Unread Badge */}
+                          {room.unread_count > 0 && (
+                            <View style={styles.badgeContainer}>
+                              <View style={styles.unreadBadge}>
+                                <Text style={styles.badgeText}>
+                                  {room.unread_count > 99 ? '99+' : room.unread_count}
+                                </Text>
+                              </View>
+                            </View>
+                          )}
+                        </View>
+                        {/* House Icon to open apartment modal */}
+                        {room.connected_apartment && (
+                          <IconButton
+                            icon="home"
+                            size={24}
+                            iconColor="#8B4513"
+                            style={styles.houseIconButton}
+                            onPress={() => {
+                              setSelectedApartment(room.connected_apartment);
+                              setApartmentModalVisible(true);
+                            }}
+                          />
                         )}
-                      </View>
-                      
-                      <Text style={styles.messageText} numberOfLines={1}>
-                        {lastMessageContent}
-                      </Text>
-                    </View>
-
-                    {/* Unread Badge */}
-                    {room.unread_count > 0 && (
-                      <Badge style={styles.unreadBadge}>{room.unread_count}</Badge>
-                    )}
-
-                    {/* House Icon */}
-                    <IconButton
-                      icon="home-outline"
-                      size={24}
-                      onPress={() =>
-                        console.log(`Viewing apartment of ${participantName}`)
-                      }
-                      style={styles.houseIcon}
-                    />
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          )}
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
+          </View>
         </View>
-      </View>
+        
+        {/* Apartment Modal */}
+        <ModalApartmentDisplayer
+          visible={apartmentModalVisible}
+          onClose={() => setApartmentModalVisible(false)}
+          apartment={selectedApartment}
+        />
     </BackgroundImage>
   );
 };
@@ -256,86 +396,258 @@ const AllChatsScreen = () => {
 export default AllChatsScreen;
 
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    padding: 10,
-    paddingTop: 50,
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 20,
   },
-  iconAndTitle: {
-    flexDirection: "column",
-    alignContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  logoContainer: {
+    shadowColor: '#F39C12',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
   },
   logo: {
-    width: 121,
-    height: 121,
-    resizeMode: "contain",
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
+  },
+  titleContainer: {
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#B7860B',
+    textShadowColor: 'rgba(255, 223, 110, 0.6)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+  },
+  subtitleContainer: {
+    flexDirection: 'row', // ← changed from 'column'
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  
+  chatCountBadge: {
+    backgroundColor: 'rgba(160, 82, 45, 0.15)',
+    color: '#8B4513', 
+    fontSize: 17,
+    fontWeight: 'bold',
+    paddingHorizontal: 14,
+    borderRadius: 18,
+  },
+  subtitleText: {
+    fontSize: 17,
+    color: '#A0522D',
+    fontWeight: '500',
+    textAlign: 'center',
   },
   chatContainer: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent background
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#D4AF37',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 15,
+    backgroundColor: 'rgba(255, 248, 220, 0.85)',
+    margin: 8,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingVertical: 12,
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 28,
+    shadowColor: '#F39C12',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  emptyIcon: {
+    fontSize: 52,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#B7860B',
+    textAlign: 'center',
+    marginBottom: 10,
+    textShadowColor: 'rgba(255, 223, 110, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  emptySubtitle: {
+    fontSize: 17,
+    color: '#CD853F',
+    textAlign: 'center',
+    lineHeight: 26,
+    fontWeight: '500',
+  },
+  chatItem: {
+    marginHorizontal: 12,
+    marginVertical: 3,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#D4AF37',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  lastChatItem: {
+    marginBottom: 8,
+  },
+  chatItemGradient: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatar: {
+    shadowColor: '#F39C12',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  avatarText: {
+    backgroundColor: '#4A90E2',
+  },
+  avatarLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  onlineIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#32D74B',
     borderWidth: 2,
-    borderColor: "#333", // Dark border color
-    borderRadius: 10,
-    padding: 10,
+    borderColor: '#FFFFFF',
   },
-  noChatsContainer: {
+  onlineIndicatorInner: {
+    display: 'none',
+  },
+  chatContent: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    marginRight: 12,
   },
-  noChatsText: {
-    fontSize: 18,
-    color: "gray",
+  chatHeader: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
   },
-  messageItem: {
-    flexDirection: "row-reverse", // Align items from right to left
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333", // Dark border color
-  },
-  messageAvatar: {
-    backgroundColor: "#f0f0f0",
-  },
-  messageContent: {
+  participantName: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#8B4513',
     flex: 1,
-    marginRight: 10, // Add margin between the avatar and text
+    textAlign: 'right',
+    textShadowColor: 'rgba(255, 255, 255, 0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
-  nameContainer: {
-    flexDirection: 'row-reverse', // Right to left for Hebrew
+  timeAndStatus: {
+    flexDirection: 'row-reverse',
     alignItems: 'center',
   },
-  messageName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "right", // Align text to the right
-  },
-  messageText: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "right", // Align text to the right
-  },
-  unreadBadge: {
-    backgroundColor: "#FF5864",
-    position: "absolute",
-    left: 5,
-    top: 5,
-  },
-  houseIcon: {
-    marginLeft: 10,
-  },
   checkmarks: {
-    fontSize: 12,
-    marginRight: 5, // Changed from marginLeft for RTL layout
+    fontSize: 13,
     fontWeight: 'bold',
+    marginLeft: 5,
   },
   read: {
-    color: '#3498db', // Blue for read messages
+    color: 'rgba(56, 69, 248, 0.85)',
   },
   delivered: {
-    color: '#95a5a6', // Gray for delivered but unread messages
+    color: '#BDC3C7',
+  },
+  timeText: {
+    fontSize: 13,
+    color: '#A0522D',
+    fontWeight: '600',
+  },
+  lastMessage: {
+    fontSize: 14,
+    color: '#A0522D',
+    textAlign: 'right',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  unreadMessage: {
+    color: '#8B4513',
+    fontWeight: '700',
+  },
+  rightSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    position: 'relative',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    zIndex: 1,
+  },
+  unreadBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 7,
+    backgroundColor: 'rgba(230, 126, 34, 0.85)',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  houseIconButton: {
+    margin: 0,
+    padding: 0,
+    backgroundColor: 'transparent',
+
   },
 });

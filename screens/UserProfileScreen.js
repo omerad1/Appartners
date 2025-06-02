@@ -233,7 +233,7 @@ export default function UserProfileScreen() {
           user={formatUserForPreview()}
           onLike={handleLikeProfile}
           onDislike={handleDislikeProfile}
-          showActions={false} // Hide action buttons when viewing own profile
+          showActions={false} 
         />
         
         {/* Questionnaire Modal */}

@@ -52,10 +52,6 @@ const SwipeScreenWrapper = () => {
     if (!userPreferences) {
       dispatch(fetchUserPreferences())
         .then((result) => {
-          console.log(
-            "SwipeScreenWrapper: Preferences fetched:",
-            JSON.stringify(result, null, 2)
-          );
           // Use the fetched preferences for filtering apartments
           if (result) {
             setFilterPreferences(result);
@@ -121,12 +117,7 @@ const SwipeScreenWrapper = () => {
           ? filters
           : userPreferences || filterPreferences || {};
 
-      console.log(
-        "Fetching apartments with filters:",
-        JSON.stringify(preferencesToUse, null, 2)
-      );
       const data = await getApartments(preferencesToUse);
-      console.log("data", data);
       // Check if we received apartments or an empty array
       if (data && data.apartments && data.apartments.length > 0) {
         setApartments(data.apartments);

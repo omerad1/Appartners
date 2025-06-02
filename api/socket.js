@@ -1,8 +1,12 @@
 import { getTokens } from './client';
 import api from './client';
 
+// Global socket for user-level events
 let socket = null;
 let messageHandlers = {};
+
+// Store for chat room-specific sockets
+let chatSockets = {};
 
 // Function to register message handlers that can be used from any component
 export const registerSocketMessageHandler = (type, handler) => {
@@ -45,10 +49,15 @@ export const initializeSocket = async (userId) => {
       return null;
     }
     
-    console.log('User ID for socket connection:', userId);
+    
+    // Convert HTTP/HTTPS URL to WebSocket URL (ws/wss)
+    const wsProtocol = apiHost.startsWith('https') ? 'wss://' : 'ws://';
+    const hostWithoutProtocol = apiHost.replace(/^https?:\/\//, '');
     
     // Create WebSocket URL with token
-    const wsUrl = `${apiHost}/ws/user/${userId}/?token=${token.accessToken}`;
+    // Make sure this path matches your backend WebSocket endpoint
+    const wsUrl = `${wsProtocol}${hostWithoutProtocol}/ws/user/${userId}/?token=${token.accessToken}`;
+    
     
     console.log('Connecting to WebSocket URL:', wsUrl);
     
@@ -172,5 +181,131 @@ export const disconnectSocket = () => {
     }
     socket = null;
     console.log('Socket disconnected.');
+  }
+  
+  // Also close any chat room sockets
+  Object.keys(chatSockets).forEach(roomId => {
+    disconnectChatSocket(roomId);
+  });
+};
+
+// Initialize a socket connection for a specific chat room
+export const initializeChatSocket = async (roomId) => {
+  if (!roomId) {
+    console.error('No room ID provided for chat socket connection');
+    return null;
+  }
+  
+  // Return existing socket if already connected
+  if (chatSockets[roomId] && (chatSockets[roomId].readyState === 0 || chatSockets[roomId].readyState === 1)) {
+    return chatSockets[roomId];
+  }
+  
+  try {
+    // Get auth token for authentication
+    const token = await getTokens();
+    
+    if (!token) {
+      console.error('No auth token available for chat socket connection');
+      return null;
+    }
+    
+    // Extract host from API URL
+    let apiHost = api.defaults.baseURL;
+    // Remove any trailing slash
+    apiHost = apiHost.endsWith('/') ? apiHost.slice(0, -1) : apiHost;
+    
+    // Convert HTTP/HTTPS URL to WebSocket URL (ws/wss)
+    const wsProtocol = apiHost.startsWith('https') ? 'wss://' : 'ws://';
+    const hostWithoutProtocol = apiHost.replace(/^https?:\/\//, '');
+    
+    // Create WebSocket URL with token
+    const wsUrl = `${wsProtocol}${hostWithoutProtocol}/ws/chat/${roomId}/?token=${token.accessToken}`;
+    
+    console.log('Connecting to chat WebSocket URL:', wsUrl);
+    
+    // Create WebSocket connection
+    const socket = new WebSocket(wsUrl);
+    chatSockets[roomId] = socket;
+    
+    // Set up event listeners
+    socket.onopen = (event) => {
+      console.log('WebSocket connected to chat room:', roomId);
+    };
+    
+    socket.onclose = (event) => {
+      console.log(`Chat WebSocket to room ${roomId} closed. Code:`, event.code, 'Reason:', event.reason);
+      delete chatSockets[roomId];
+    };
+    
+    socket.onerror = (error) => {
+      console.error('Chat WebSocket error:', error);
+    };
+    
+    // Set up message handlers for this specific chat room
+    const roomMessageHandlers = {};
+    
+    // Function to register message handlers for this room
+    socket.registerMessageHandler = (type, handler) => {
+      if (!roomMessageHandlers[type]) {
+        roomMessageHandlers[type] = [];
+      }
+      roomMessageHandlers[type].push(handler);
+      
+      // Return a function to unregister this handler
+      return () => {
+        if (roomMessageHandlers[type]) {
+          roomMessageHandlers[type] = roomMessageHandlers[type].filter(h => h !== handler);
+        }
+      };
+    };
+    
+    // Main message handler
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('Chat WebSocket message received:', data);
+        
+        // Process different message types
+        if (data.type) {
+          if (roomMessageHandlers[data.type]) {
+            roomMessageHandlers[data.type].forEach(handler => handler(data));
+          }
+        } else {
+          // Default handler for messages without a type
+          if (roomMessageHandlers.default) {
+            roomMessageHandlers.default.forEach(handler => handler(data));
+          }
+        }
+      } catch (e) {
+        console.error('Error processing chat WebSocket message:', e, 'Raw message:', event.data);
+      }
+    };
+    
+    return socket;
+  } catch (error) {
+    console.error('Error initializing chat socket:', error);
+    return null;
+  }
+};
+
+// Get a chat socket by room ID
+export const getChatSocket = (roomId) => {
+  return chatSockets[roomId] || null;
+};
+
+// Check if a chat socket is connected
+export const isChatSocketConnected = (roomId) => {
+  return chatSockets[roomId] && chatSockets[roomId].readyState === 1; // 1 = OPEN
+};
+
+// Disconnect a specific chat socket
+export const disconnectChatSocket = (roomId) => {
+  if (chatSockets[roomId]) {
+    if (chatSockets[roomId].readyState === 1 || chatSockets[roomId].readyState === 0) {
+      chatSockets[roomId].close(1000, 'Leaving chat room');
+    }
+    delete chatSockets[roomId];
+    console.log(`Chat socket for room ${roomId} disconnected.`);
   }
 };
