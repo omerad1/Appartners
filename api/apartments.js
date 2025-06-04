@@ -11,7 +11,6 @@ export const getApartments = async (filters = {}) => {
       ? await api.get(endpoints.GET_APARTMENTS, { params: filters })
       : await api.get(endpoints.GET_APARTMENTS);
 
-    console.log("res.data", res.data.apartments[0].user_details);
     return res.data;
   } catch (err) {
     const message = err.response?.data?.detail || err.message;

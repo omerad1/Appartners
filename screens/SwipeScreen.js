@@ -101,7 +101,6 @@ const SwipeScreen = (props) => {
   };
 
   useEffect(() => {
-    console.log("apartmentffsfssfs", apartment);
     // Pulse animation for contact button
     Animated.loop(
       Animated.sequence([
@@ -391,10 +390,6 @@ const SwipeScreen = (props) => {
     try {
       // Check if apartment has user_details - use it directly
       if (apartment && apartment.user_details) {
-        console.log(
-          "[Owner Data] Using user_details from apartment:",
-          apartment.user_details.first_name
-        );
         setOwnerData(apartment.user_details);
       } else {
         // Fallback in case user_details is not available

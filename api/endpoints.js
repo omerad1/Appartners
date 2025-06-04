@@ -28,6 +28,10 @@ const endpoints = {
   usersWhoLikedMyApartment: "/api/v1/apartments/likers/",
   likeApartment: (apartmentId) => `/api/v1/apartments/${apartmentId}/like/`,
   apartmentPreference: "/api/v1/apartments/preference/",
+
+
+  // chat endpoints
+  chatRooms: "/api/v1/chat/rooms/",
 };
 
 export default endpoints;

@@ -1,490 +1,835 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
 import {
+  initializeChatSocket,
+  disconnectChatSocket,
+  getChatSocket,
+  isChatSocketConnected,
+} from '../../api/socket';import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   FlatList,
+  TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Image,
-  Animated,
-  Easing,
   ActivityIndicator,
-} from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
-import BackgroundImage from "../../components/BackgroundImage";
+  SafeAreaView,
+  Image,
+  Modal,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { getRoomMessages, markMessagesAsRead, sendMessage as sendApiMessage } from '../../api/chat'; // Renamed sendMessage to avoid conflict
+import UserDisplayerModal from '../../components/UserDisplayerModal';
 
-// Default user image
-const defaultUserImage = require("../../assets/placeholders/default-user-image.jpg");
-
-// Mock responses for fun chat interactions
-const MOCK_RESPONSES = [
-  "I'd be happy to show you the apartment!",
-  "When would you like to schedule a viewing?",
-  "The apartment is still available!",
-  "Yes, pets are allowed in the building 🐶",
-  "The neighbors are very friendly and quiet.",
-  "Internet and water are included in the rent.",
-  "Sure, I can send you more photos!",
-  "I've been living in this area for 5 years, it's great!",
-  "There's a grocery store just around the corner.",
-  "Public transportation is very convenient from here.",
-  "Feel free to ask me any other questions!",
-  "The apartment was renovated last year.",
-  "Yes, there's parking available for residents.",
-];
-
-const MOCK_GREETINGS = [
-  "Hi there! Thanks for your interest in my apartment.",
-  "Hello! I'm glad you like my apartment listing.",
-  "Hey! I'm happy to answer any questions about the place.",
-  "Hi! Thanks for reaching out about the apartment.",
-];
+// Store WebSocket connections by roomId
+const isHebrew = (text) => /[\u0590-\u05FF]/.test(text);
 
 const ChatScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { owner, apartmentId, apartmentAddress } = route.params || {};
+  const { roomId, otherParticipant: initialOtherParticipant, roomDetails: initialRoomDetails,  } = route.params || {};
+  // Debug log to check what's being passed in route params
+  const currentUser = useSelector((state) => state.user.currentUser);
+  // State for UserDisplayerModal
+  const [userModalVisible, setUserModalVisible] = useState(false);
+
+  // Use the otherParticipant from route params or extract from roomDetails if needed
+  const [otherParticipant, setOtherParticipant] = useState(initialOtherParticipant || null);
+  
+  // If otherParticipant wasn't passed directly, try to extract it from roomDetails
+  useEffect(() => {
+    if (!otherParticipant && initialRoomDetails?.participants && currentUser) {
+      // Find the participant that is not the current user
+      const other = initialRoomDetails.participants.find(
+        p => p.user_id !== currentUser.id || p.id !== currentUser.id
+      );
+      if (other) {
+        setOtherParticipant(other);
+      }
+    }
+  }, [initialRoomDetails, currentUser, otherParticipant]);
+
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPopover, setShowPopover] = useState(false);
+
   const flatListRef = useRef(null);
   const typingDots = useRef(new Animated.Value(0)).current;
 
-  // Current user - you
-  const currentUser = {
-    id: "currentUser",
-    name: "You",
-  };
-
-  // Owner from params
-  const ownerUser = {
-    id: "owner",
-    name: owner?.first_name
-      ? `${owner.first_name} ${owner.last_name || ""}`
-      : "Apartment Owner",
-    photoUrl: owner?.photo_url,
-    occupation: owner?.occupation || "Property Owner",
-  };
-
-  useEffect(() => {
-    // Set up the navigation title
-    navigation.setOptions({
-      title: ownerUser.name,
-    });
-
-    // Add initial greeting message with delay
-    setTimeout(() => {
-      const greeting =
-        MOCK_GREETINGS[Math.floor(Math.random() * MOCK_GREETINGS.length)];
-      addNewMessage(greeting, ownerUser.id);
-    }, 1000);
-  }, []);
-
-  useEffect(() => {
-    // Animate typing dots
-    Animated.loop(
-      Animated.timing(typingDots, {
-        toValue: 1,
-        duration: 1000,
-        easing: Easing.linear,
-        useNativeDriver: false,
-      })
-    ).start();
-  }, []);
-
-  const addNewMessage = (text, senderId) => {
-    const message = {
-      id: Date.now().toString(),
-      text,
-      senderId,
-      timestamp: new Date(),
+  const userDisplayerModalData = useMemo(() => {
+    if (!otherParticipant || !currentUser) return null;
+  
+    return {
+      name: `${otherParticipant.first_name} ${otherParticipant.last_name}`,
+      profile_image: otherParticipant.photo_url,
+      bio: otherParticipant.bio,
+      age: null,
+      occupation: otherParticipant.occupation || null,
+      compatibility_score: null,
+      questionnaire_responses: otherParticipant.questionnaire_responses || [],
+      liked_apartment: {
+        user_details: {
+          questionnaire_responses: currentUser.questionnaire_responses || [],
+        },
+      },
     };
-    setMessages((prevMessages) => [...prevMessages, message]);
-  };
+  }, [otherParticipant, currentUser]);
+  
+  useEffect(() => {
+    
+  })
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // Add user message
-      addNewMessage(newMessage, currentUser.id);
-      setNewMessage("");
+  // --- Header Customization ---
+  useLayoutEffect(() => {
+    
+    navigation.setOptions({
+      headerShown: true,
+      headerTitle: () => (
+        <View style={styles.headerTitleContainer}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerName}>{otherParticipant?.first_name || 'Chat'}</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={() => setUserModalVisible(true)}
+          >
+            {otherParticipant?.photo_url ? (
+              <Image source={{ uri: otherParticipant.photo_url }} style={styles.headerAvatar} />
+            ) : (
+              <View style={styles.defaultAvatarContainer}>
+                <Text style={styles.defaultAvatarText}>
+                  {(otherParticipant?.first_name || 'U').charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+          <View style={styles.headerButtonContainer}>
+            <Ionicons name="chevron-back" size={26} color="rgba(78, 56, 0, 0.91)" />
+          </View>
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity 
+          onPress={() => setShowPopover(true)} 
+          style={styles.headerButton}
+        >
+          <View style={styles.headerButtonContainer}>
+            <Ionicons name="ellipsis-horizontal" size={24} color="rgba(78, 56, 0, 0.91)" />
+          </View>
+        </TouchableOpacity>
+      ),
+      headerTitleAlign: 'center',
+      headerStyle: {
+        backgroundColor: '#FFFFFF',
+        elevation: 0,
+        shadowOpacity: 0,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+        height: 100,
+      },
+    });
+  }, [navigation, otherParticipant]);
 
-      // Simulate owner typing
-      setIsTyping(true);
+  /**
+   * Marks messages as read via WebSocket
+   * @param {Array} messageIds - IDs of messages to mark as read
+   */
+  const markMessagesAsReadViaSocket = useCallback((messageIds) => {
+    if (!roomId || !messageIds.length) {
+      return;
+    }
 
-      // Random response delay between 1-3 seconds
-      const responseDelay = Math.floor(Math.random() * 2000) + 1000;
+    const chatSocket = getChatSocket(roomId);
+    if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+      console.log('Cannot mark messages as read: socket not connected');
+      return;
+    }
 
-      // Simulate owner response
+    // Send read receipt via WebSocket
+    chatSocket.send(JSON.stringify({
+      type: 'mark_read',
+      message_ids: messageIds
+    }));
+  }, [roomId]);
+
+  // Direct WebSocket connection for this chat room
+  useEffect(() => {
+    let socket;
+    
+    const connectSocket = async () => {
+      if (!roomId || !currentUser?.id) return;
+    
+      socket = await initializeChatSocket(roomId);
+    
+      if (socket) {
+        // Handle incoming messages
+        socket.registerMessageHandler('chat_message', (data) => {
+          const messagePayload = data.message || data;
+          setMessages((prevMessages) => {
+            const tempMessage = prevMessages.find(
+              (m) => m.isLocalSending && m.content === messagePayload.content
+            );
+    
+            if (tempMessage) {
+              return prevMessages.map((m) =>
+                m.id === tempMessage.id
+                  ? {
+                      ...messagePayload,
+                      isLocalSending: false,
+                      sender: messagePayload.sender || m.sender,
+                    }
+                  : m
+              );
+            }
+    
+            if (!prevMessages.find((m) => m.id === messagePayload.id)) {
+              return [...prevMessages, messagePayload];
+            }
+    
+            return prevMessages;
+          });
+        });
+
+        // Handle user entered notification
+        socket.registerMessageHandler('chat.user.entered', (data) => {
+          console.log('User entered chat:', data);
+          // If the other participant entered the chat, mark our messages as read
+          if (data.user_id && data.user_id !== currentUser?.id) {
+            // Find unread messages sent by current user
+            const unreadMessageIds = messages
+              .filter(msg => 
+                msg.sender?.id === currentUser?.id && // Message sent by current user
+                !msg.read_at // Message not read yet
+              )
+              .map(msg => msg.id);
+            
+            if (unreadMessageIds.length > 0) {
+              markMessagesAsReadViaSocket(unreadMessageIds);
+            }
+          }
+        });
+
+        // Handle read receipts
+        socket.registerMessageHandler('read_receipt', (data) => {
+          console.log('Read receipt received:', data);
+          if (data.message_ids && data.reader_id !== currentUser?.id) {
+            // Update messages with read status
+            setMessages(prevMessages => 
+              prevMessages.map(msg => 
+                data.message_ids.includes(msg.id) 
+                  ? { ...msg, read_at: new Date().toISOString() }
+                  : msg
+              )
+            );
+          }
+        });
+      }
+    };
+    
+    connectSocket();
+    
+    return () => {
+      if (roomId) {
+        disconnectChatSocket(roomId);
+      }
+    };
+  }, [roomId, currentUser?.id, messages, markMessagesAsReadViaSocket]);
+  
+
+  // --- Fetching and Socket Logic (largely unchanged from previous correct version) ---
+  const fetchMessages = useCallback(async () => {
+    if (!roomId) return;
+  
+    try {
+      const fetchedData = await getRoomMessages(roomId);
+      const fetchedMessages = (fetchedData.results || fetchedData || [])
+  
+      // Only update messages if content actually changed
+      setMessages(prevMessages => {
+        const prevSerialized = JSON.stringify(prevMessages);
+        const fetchedSerialized = JSON.stringify(fetchedMessages);
+        return prevSerialized !== fetchedSerialized ? fetchedMessages : prevMessages;
+      });
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [roomId]);
+  
+  useEffect(() => {
+    const loadInitial = async () => {
+      setIsLoading(true);
+      await fetchMessages();
+      setIsLoading(false);
+    };
+    loadInitial();
+  }, [fetchMessages]);
+  
+
+  // Scroll to bottom when messages change or when loading completes
+  useEffect(() => {
+    if (flatListRef.current) {
+      // Always scroll to bottom without animation when messages change
+      flatListRef.current.scrollToEnd({ animated: false });
+    }
+  }, [messages]);
+  
+  // Also scroll to bottom when loading completes
+  useEffect(() => {
+    if (!isLoading && messages.length > 0 && flatListRef.current) {
+      // Add a small delay to ensure rendering is complete
       setTimeout(() => {
-        setIsTyping(false);
-        const randomResponse =
-          MOCK_RESPONSES[Math.floor(Math.random() * MOCK_RESPONSES.length)];
-        addNewMessage(randomResponse, ownerUser.id);
-      }, responseDelay);
+        flatListRef.current.scrollToEnd({ animated: false });
+      }, 0);
+    }
+  }, [isLoading]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchMessages();
+      
+      // When the current user enters the chat, mark unread messages from the other user as read
+      const markUnreadMessagesAsRead = async () => {
+        if (!roomId || !currentUser?.id) return;
+        
+        // Find unread messages from the other participant
+        const unreadMessageIds = messages
+          .filter(msg => 
+            msg.sender?.id !== currentUser?.id && // Not sent by current user
+            !msg.read_at // Not read yet
+          )
+          .map(msg => msg.id);
+        
+        if (unreadMessageIds.length > 0) {
+          try {
+            // First try the API method
+            await markMessagesAsRead(roomId, unreadMessageIds);
+            
+            // Update local state to reflect read status
+            setMessages(prevMessages => 
+              prevMessages.map(msg => 
+                unreadMessageIds.includes(msg.id) 
+                  ? { ...msg, read_at: new Date().toISOString() }
+                  : msg
+              )
+            );
+            
+            // Also notify via WebSocket if available
+            markMessagesAsReadViaSocket(unreadMessageIds);
+          } catch (error) {
+            console.error('Error marking messages as read:', error);
+            // Fallback to WebSocket only if API fails
+            markMessagesAsReadViaSocket(unreadMessageIds);
+          }
+        }
+      };
+      
+      markUnreadMessagesAsRead();
+      
+      // Send user.entered notification via WebSocket
+      const notifyUserEntered = () => {
+        const chatSocket = getChatSocket(roomId);
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+          chatSocket.send(JSON.stringify({
+            type: 'chat.user.entered',
+            user_id: currentUser?.id,
+            room_id: roomId
+          }));
+          console.log('Sent user.entered notification');
+        }
+      };
+      
+      // Small delay to ensure socket is connected
+      setTimeout(notifyUserEntered, 500);
+      
+      // Scroll to bottom when screen is focused
+      if (flatListRef.current && messages.length > 0) {
+        setTimeout(() => {
+          flatListRef.current.scrollToEnd({ animated: false });
+        }, 100);
+      }
+      
+      return () => {};
+    }, [fetchMessages, roomId, currentUser?.id, messages, markMessagesAsReadViaSocket])
+  );
+
+  const handleSendMessage = async () => {
+    if (inputText.trim() === '' || !currentUser?.id) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage = {
+      id: tempId,
+      content: inputText,
+      sender: {
+        id: currentUser.id,
+        user_id: currentUser.id, 
+        first_name: currentUser.first_name,
+        last_name: currentUser.last_name,
+        photo_url: currentUser.photo_url,
+        email: currentUser.email,
+        phone_number: currentUser.phone_number
+      },
+      is_sender: true, // Add is_sender flag to match server format
+      room: roomId,
+      timestamp: new Date().toISOString(),
+      isLocalSending: true, // Changed from is_sending to avoid collision with server properties
+    };
+
+    // Add new message to the end of the array (for chronological order)
+    setMessages(prevMessages => [...prevMessages, optimisticMessage]);
+    const messageToSend = inputText;
+    setInputText('');
+
+    // Try to send via WebSocket first
+    const socket = getChatSocket(roomId);
+    let messageSentSuccessfully = false;
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      try {
+        socket.send(JSON.stringify({
+          type: 'chat_message',
+          content: messageToSend,
+        }));
+        console.log('Message sent via WebSocket');
+        messageSentSuccessfully = true;
+      
+        // Set a timeout to check if we received a WebSocket confirmation
+        setTimeout(async () => {
+          const messageStillSending = messages.some(m => m.id === tempId && m.isLocalSending);
+          if (messageStillSending) {
+            console.log('No WebSocket confirmation received, using API fallback');
+            try {
+              const sentMessageFromServer = await sendApiMessage(otherParticipant?.id, messageToSend);
+              setMessages(prev =>
+                prev.map(m =>
+                  m.id === tempId ? { ...sentMessageFromServer, isLocalSending: false, error: undefined } : m
+                )
+              );
+            } catch (fallbackError) {
+              console.error('Error sending message via API fallback:', fallbackError);
+              setMessages(prev =>
+                prev.map(m =>
+                  m.id === tempId ? { ...m, isLocalSending: false, error: true } : m
+                )
+              );
+            }
+          }
+        }, 10000);
+      } catch (socketError) {
+        console.error('Error sending via WebSocket:', socketError);
+        messageSentSuccessfully = false;
+      
+        // ✅ Attempt to reconnect the socket
+        try {
+          console.log('Attempting to reconnect socket...');
+          await disconnectChatSocket(roomId); // ensure clean reconnect
+          const newSocket = await initializeChatSocket(roomId);
+      
+          if (newSocket && newSocket.readyState === WebSocket.OPEN) {
+            console.log('✅ Socket reconnected successfully');
+          } else {
+            console.warn('⚠️ Socket reconnect failed or is not open');
+          }
+        } catch (reconnectError) {
+          console.error('Failed to reconnect socket:', reconnectError);
+        }
+      }
+
+    }
+
+    // If WebSocket failed or isn't available, use API
+    if (!messageSentSuccessfully) {
+      try {
+        const sentMessageFromServer = await sendApiMessage(otherParticipant?.id, messageToSend);
+        setMessages(prev =>
+          prev.map(m =>
+            m.id === tempId ? { ...sentMessageFromServer, isLocalSending: false, error: undefined } : m
+          )
+        );
+      } catch (error) {
+        console.error('Error sending message via API:', error);
+        setMessages(prev =>
+          prev.map(m =>
+            m.id === tempId ? { ...m, isLocalSending: false, error: true } : m
+          )
+        );
+      }
     }
   };
 
-  const renderMessage = ({ item }) => {
-    const isSentByMe = item.senderId === currentUser.id;
-    const messageTime = new Date(item.timestamp).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
+  const renderMessageItem = ({ item }) => {
+    // Check both is_sender property and sender.id to determine if message is from current user
+    const isCurrentUser = item.is_sender || item.sender?.id === currentUser?.id || item.sender?.user_id === currentUser?.id;
+    
     return (
-      <View
-        style={[
-          styles.messageContainer,
-          isSentByMe ? styles.sentMessage : styles.receivedMessage,
-        ]}
-      >
-        {!isSentByMe && (
-          <Image
-            source={
-              ownerUser.photoUrl
-                ? { uri: ownerUser.photoUrl }
-                : defaultUserImage
-            }
-            style={styles.avatar}
-          />
-        )}
-
-        <View
-          style={[
-            styles.messageContent,
-            isSentByMe
-              ? styles.sentMessageContent
-              : styles.receivedMessageContent,
-          ]}
-        >
+      <View style={[
+        styles.messageBubbleContainer,
+        isCurrentUser ? styles.currentUserBubble : styles.otherUserBubble
+      ]}>
+        <View style={[
+          styles.messageBubble, 
+          isCurrentUser ? styles.currentUserMessage : styles.otherUserMessage,
+          item.isLocalSending && styles.sendingMessage
+        ]}>
           <Text
             style={[
               styles.messageText,
-              isSentByMe ? styles.sentMessageText : styles.receivedMessageText,
+              isCurrentUser && styles.currentUserMessageText,
+              isHebrew(item.content) && { textAlign: 'right' }
             ]}
           >
-            {item.text}
+            {item.content}
           </Text>
-          <Text
-            style={[
-              styles.timestamp,
-              isSentByMe ? styles.sentTimestamp : styles.receivedTimestamp,
-            ]}
-          >
-            {messageTime}
-          </Text>
+          <View style={styles.messageFooter}>
+            <Text style={[styles.messageTimestamp, isCurrentUser && styles.currentUserMessageTimestamp]}>
+              {item.timestamp ? new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+            </Text>
+            {item.isLocalSending && (
+              <View style={styles.sendingIndicator}>
+                <ActivityIndicator size="small" color={isCurrentUser ? "#FFFFFF" : "#007AFF"} />
+              </View>
+            )}
+            {item.error && (
+              <View style={styles.errorIndicator}>
+                <Ionicons name="alert-circle" size={16} color="#FF3B30" />
+              </View>
+            )}
+            {!item.isLocalSending && !item.error && isCurrentUser && (
+              <View style={styles.deliveredIndicator}>
+                <Ionicons
+                  name="checkmark-done"
+                  size={16}
+                  color={item.is_read ? 'blue' : 'white'} // blue if read, white-ish if not
+                />
+                </View>
+            )}
+          </View>
         </View>
       </View>
     );
   };
 
-  const renderTypingIndicator = () => {
-    if (!isTyping) return null;
-
-    const translateY = typingDots.interpolate({
-      inputRange: [0, 0.3, 0.6, 1],
-      outputRange: [0, -5, 0, 0],
-    });
-
+  if (isLoading && messages.length === 0) {
     return (
-      <View style={styles.typingContainer}>
-        <Image
-          source={
-            ownerUser.photoUrl ? { uri: ownerUser.photoUrl } : defaultUserImage
-          }
-          style={styles.typingAvatar}
-        />
-        <View style={styles.typingBubble}>
-          <Animated.View style={{ flexDirection: "row" }}>
-            <Animated.Text
-              style={[
-                styles.typingDot,
-                {
-                  transform: [
-                    {
-                      translateY: typingDots.interpolate({
-                        inputRange: [0, 0.5, 1],
-                        outputRange: [0, -4, 0],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              ●
-            </Animated.Text>
-            <Animated.Text
-              style={[
-                styles.typingDot,
-                {
-                  transform: [
-                    {
-                      translateY: typingDots.interpolate({
-                        inputRange: [0, 0.5, 1],
-                        outputRange: [0, -5, 0],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              ●
-            </Animated.Text>
-            <Animated.Text
-              style={[
-                styles.typingDot,
-                {
-                  transform: [
-                    {
-                      translateY: typingDots.interpolate({
-                        inputRange: [0, 0.5, 1],
-                        outputRange: [0, -6, 0],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              ●
-            </Animated.Text>
-          </Animated.View>
+      <View style={styles.loadingContainer}>
+        <View style={styles.loadingContent}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Loading messages...</Text>
         </View>
       </View>
     );
-  };
+  }
 
   return (
-    <BackgroundImage>
-      <LinearGradient
-        colors={["rgba(255, 255, 255, 0.9)", "rgba(245, 245, 245, 0.8)"]}
-        style={styles.container}
+    <SafeAreaView style={styles.safeArea}>
+      {/* Enhanced Dropdown Menu Modal */}
+      <Modal
+        visible={showPopover}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowPopover(false)}
       >
-        {/* Chat Header with Apartment Details */}
-        <View style={styles.header}>
-          <View style={styles.headerContainer}>
-            <View style={styles.avatarContainer}>
-              <Image
-                source={
-                  ownerUser.photoUrl
-                    ? { uri: ownerUser.photoUrl }
-                    : defaultUserImage
-                }
-                style={styles.headerAvatar}
-              />
-            </View>
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>{ownerUser.name}</Text>
-              <Text style={styles.headerSubtitle}>{ownerUser.occupation}</Text>
+        <TouchableWithoutFeedback onPress={() => setShowPopover(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.dropdownContainer}>
+              <TouchableOpacity 
+                style={styles.dropdownItem} 
+                onPress={() => {
+                  console.log("Unmatch pressed for", otherParticipant?.first_name);
+                  setShowPopover(false);
+                }}
+              >
+                <Ionicons name="heart-dislike" size={20} color="#FF3B30" style={styles.dropdownIcon} />
+                <Text style={styles.dropdownItemText}>Unmatch</Text>
+              </TouchableOpacity>
             </View>
           </View>
-          <LinearGradient
-            colors={["#8B4513", "#A0522D"]}
-            style={styles.apartmentBadge}
-          >
-            <MaterialCommunityIcons name="home" size={16} color="#FFF" />
-            <Text style={styles.apartmentAddress}>
-              {apartmentAddress || "Apartment Chat"}
-            </Text>
-          </LinearGradient>
-        </View>
-
+        </TouchableWithoutFeedback>
+      </Modal>
+      
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
         <FlatList
           ref={flatListRef}
           data={messages}
-          renderItem={renderMessage}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.messagesList}
-          onContentSizeChange={() =>
-            flatListRef.current?.scrollToEnd({ animated: true })
-          }
-          onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderMessageItem}
+          contentContainerStyle={[styles.flatlistContentContainer, { flexGrow: 1, justifyContent: 'flex-end' }]}
           ListEmptyComponent={
-            <View style={styles.emptyChat}>
-              <MaterialCommunityIcons name="chat" size={60} color="#8B4513" />
-              <Text style={styles.emptyText}>
-                Send a message to start chatting
-              </Text>
-            </View>
+            isLoading ? null : (
+              <View style={styles.emptyChatContainer}>
+                <View style={styles.emptyChatIcon}>
+                  <Ionicons name="chatbubbles-outline" size={64} color="#E0E0E0" />
+                </View>
+                <Text style={styles.emptyChatTitle}>Start the conversation!</Text>
+                <Text style={styles.emptyChatSubtitle}>Say hello to {otherParticipant?.first_name || 'your match'}</Text>
+              </View>
+            )
           }
-          ListFooterComponent={renderTypingIndicator}
+          onContentSizeChange={() => {
+            if (flatListRef.current) {
+              flatListRef.current.scrollToEnd({ animated: false });
+            }
+          }}
+          onLayout={() => {
+            if (flatListRef.current) {
+              flatListRef.current.scrollToEnd({ animated: false });
+            }
+          }}
+          style={styles.messageList}
+          removeClippedSubviews={false}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
         />
-
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-        >
-          <View style={styles.inputContainer}>
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
             <TextInput
-              style={styles.input}
-              value={newMessage}
-              onChangeText={setNewMessage}
+              style={styles.textInput}
+              value={inputText}
+              onChangeText={setInputText}
               placeholder="Type a message..."
-              multiline
               placeholderTextColor="#999"
+              multiline
             />
-            <TouchableOpacity
-              style={styles.sendButton}
-              onPress={handleSendMessage}
-              disabled={!newMessage.trim()}
+            <TouchableOpacity 
+              onPress={handleSendMessage} 
+              style={[
+                styles.sendButton,
+                inputText.trim() !== '' && styles.sendButtonActive
+              ]} 
+              disabled={inputText.trim() === ''}
             >
-              <LinearGradient
-                colors={["#8B4513", "#A0522D"]}
-                style={[
-                  styles.sendButtonGradient,
-                  !newMessage.trim() && styles.sendButtonDisabled,
-                ]}
-              >
-                <Ionicons name="send" size={20} color="white" />
-              </LinearGradient>
+              <Ionicons 
+                name="send" 
+                size={20} 
+                color={inputText.trim() !== '' ? "#FFFFFF" : "#CCCCCC"} 
+              />
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
-      </LinearGradient>
-    </BackgroundImage>
+        </View>
+      </KeyboardAvoidingView>
+      
+      {/* User Modal */}
+      <UserDisplayerModal
+        visible={userModalVisible}
+        onClose={() => setUserModalVisible(false)}
+        user={userDisplayerModalData}
+        showQuestion={true}
+      />
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFBF0',
+  },
   container: {
     flex: 1,
-    borderRadius: 10,
-    overflow: "hidden",
+    backgroundColor: '#FFFBF0',
   },
-  header: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.1)",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFBF0',
   },
-  headerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
+  loadingContent: {
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#8E8E93',
+    fontWeight: '500',
+  },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   avatarContainer: {
-    borderWidth: 2,
-    borderColor: "#8B4513",
-    borderRadius: 25,
-    padding: 2,
+    position: 'relative',
   },
   headerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  defaultAvatarContainer: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FFB800',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  defaultAvatarText: {
+    color: '#1D1D1F',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  onlineIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#32D74B',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   headerTextContainer: {
-    marginLeft: 10,
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  headerName: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1D1D1F',
+  },
+  headerStatus: {
+    fontSize: 13,
+    color: '#32D74B',
+    fontWeight: '500',
+  },
+  headerButton: {
+    padding: 8,
+  },
+  headerButtonContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 184, 0, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: "comfortaaBold",
-    color: "#333",
+  dropdownContainer: {
+    marginTop: 100,
+    marginRight: 16,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    elevation: 8,
+    shadowColor: 'rgba(255, 184, 0, 0.3)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    minWidth: 140,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    fontFamily: "comfortaa",
-    color: "#666",
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
-  apartmentBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 15,
+  dropdownIcon: {
+    marginRight: 10,
   },
-  apartmentAddress: {
-    color: "#FFF",
-    marginLeft: 5,
-    fontSize: 12,
-    fontFamily: "comfortaaRegular",
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#FF3B30',
+    fontWeight: '600',
   },
-  messagesList: {
-    padding: 15,
-    paddingBottom: 30,
+  messageList: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
-  emptyChat: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 50,
-    opacity: 0.7,
+  flatlistContentContainer: {
+    paddingTop: 16,
+    paddingBottom: 16,
+    flexGrow: 1,
+    justifyContent: 'flex-end',
   },
-  emptyText: {
-    marginTop: 10,
-    color: "#8B4513",
-    fontFamily: "comfortaaRegular",
-    textAlign: "center",
+  messageBubbleContainer: {
+    marginVertical: 3,
+    maxWidth: '85%',
   },
-  messageContainer: {
-    flexDirection: "row",
-    marginVertical: 5,
-    maxWidth: "80%",
+  currentUserBubble: {
+    alignSelf: 'flex-end',
+    marginLeft: 'auto',
   },
-  avatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    marginRight: 8,
-    alignSelf: "flex-end",
-    marginBottom: 15,
+  otherUserBubble: {
+    alignSelf: 'flex-start',
+    marginRight: 'auto',
   },
-  messageContent: {
+  messageBubble: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 20,
-    padding: 12,
+    maxWidth: '100%',
+    shadowColor: 'rgba(255, 184, 0, 0.3)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  sentMessage: {
-    alignSelf: "flex-end",
-    marginLeft: "auto",
+  currentUserMessage: {
+    backgroundColor: '#FFB800',
+    borderBottomRightRadius: 6,
   },
-  sentMessageContent: {
-    backgroundColor: "#8B4513",
-    borderTopRightRadius: 5,
+  otherUserMessage: {
+    backgroundColor: '#FFFFFF',
+    borderBottomLeftRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
   },
-  receivedMessage: {
-    alignSelf: "flex-start",
-  },
-  receivedMessageContent: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderTopLeftRadius: 5,
+  sendingMessage: {
+    opacity: 0.7,
   },
   messageText: {
     fontSize: 16,
-    fontFamily: "comfortaaRegular",
-    lineHeight: 22,
+    lineHeight: 20,
+    color: '#1D1D1F',
   },
-  sentMessageText: {
-    color: "#fff",
+  currentUserMessageText: {
+    color: '#1D1D1F',
   },
-  receivedMessageText: {
-    color: "#333",
+  messageFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: 6,
   },
-  timestamp: {
+  messageTimestamp: {
     fontSize: 11,
-    marginTop: 4,
+    color: '#999999',
+    fontWeight: '500',
   },
-  sentTimestamp: {
-    color: "rgba(255, 255, 255, 0.7)",
-    alignSelf: "flex-end",
+  currentUserMessageTimestamp: {
+    color: 'rgba(29, 29, 31, 0.7)',
   },
-  receivedTimestamp: {
-    color: "#888",
-    alignSelf: "flex-end",
+  sendingIndicator: {
+    marginLeft: 6,
+  },
+  errorIndicator: {
+    marginLeft: 6,
+  },
+  deliveredIndicator: {
+    marginLeft: 6,
   },
   typingContainer: {
     flexDirection: "row",
@@ -510,40 +855,75 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.1)",
+    borderTopColor: 'rgba(0, 0, 0, 0.1)',
   },
-  input: {
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    backgroundColor: '#FFF8E1',
+    borderRadius: 24,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  textInput: {
     flex: 1,
     minHeight: 40,
     maxHeight: 100,
-    borderRadius: 20,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
     paddingVertical: 10,
-    marginRight: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    fontFamily: "comfortaaRegular",
-    borderWidth: 1,
-    borderColor: "rgba(139, 69, 19, 0.3)",
+    fontSize: 16,
+    color: '#1D1D1F',
+    lineHeight: 20,
   },
   sendButton: {
-    overflow: "hidden",
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#E0E0E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
   },
-  sendButtonGradient: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
+  sendButtonActive: {
+    backgroundColor: '#FFB800',
+    shadowColor: 'rgba(255, 184, 0, 0.3)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  emptyChatContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyChatIcon: {
+    marginBottom: 24,
+    opacity: 0.5,
+  },
+  emptyChatTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1D1D1F',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyChatSubtitle: {
+    fontSize: 16,
+    color: '#8E8E93',
+    textAlign: 'center',
   },
   sendButtonDisabled: {
     opacity: 0.5,
   },
 });
+
 
 export default ChatScreen;

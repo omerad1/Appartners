@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux';
 import { login, logout } from '../store/redux/user';
 import endpoints from '../api/endpoints';
 import { fetchUserData } from '../api/user';
+import { initializeSocket, disconnectSocket } from '../api/socket';
+import store from '../store/redux/store';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -89,10 +91,38 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     verifyTokens();
   }, []);
+  
+  // Initialize socket when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Get the current user from Redux store
+      const currentUser = store.getState().user.currentUser;
+      console.log("checking auth user: ", currentUser)
+      
+      if (currentUser && currentUser.id) {
+        console.log('User is authenticated, initializing socket with user ID:', currentUser.id);
+        initializeSocket(currentUser.id)
+          .then(socket => {
+            if (socket) {
+              console.log('Socket initialized successfully');
+            } else {
+              console.error('Failed to initialize socket');
+            }
+          })
+          .catch(error => {
+            console.error('Error initializing socket:', error);
+          });
+      } else {
+        console.error('User is authenticated but no user ID available');
+      }
+    }
+  }, [isAuthenticated]);
 
   // Function to handle logout
   const handleLogout = async () => {
     setIsLoading(true);
+    // Disconnect socket when user logs out
+    disconnectSocket();
     await clearTokens();
     dispatch(logout());
     setIsAuthenticated(false);
@@ -100,8 +130,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Function to handle successful login
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = async () => {
     setIsAuthenticated(true);
+    // Initialize socket connection after successful login
+    try {
+      const currentUser = store.getState().user.currentUser;
+      const socket = await initializeSocket(currentUser.id);
+      if (socket) {
+        console.log('Socket initialized after login');
+      } else {
+        console.error('Failed to initialize socket after login');
+      }
+    } catch (error) {
+      console.error('Error initializing socket after login:', error);
+    }
   };
 
   // Context value

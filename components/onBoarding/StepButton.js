@@ -16,7 +16,6 @@ const StepButton = ({ text, next, direction, onPress }) => {
     try {
       if (onPress) {
         const result = await onPress();
-        console.log("Button pressed, onPress result:", result);
         
         if (result === false) {
           // Only prevent navigation if onPress explicitly returns false

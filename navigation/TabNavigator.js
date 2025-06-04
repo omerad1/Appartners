@@ -6,7 +6,7 @@ import UserProfileScreen from "../screens/UserProfileScreen";
 import LikesScreen from "../screens/LikesScreen";
 
 import ApartmentScreen from "../screens/apartmentScreens/ApartmentScreen";
-import AllChatsScreen from "../screens/chatScreens/AllChatsScreen";
+import ChatNavigator from "./ChatNavigator";
 
 const Tab = createBottomTabNavigator();
 
@@ -75,7 +75,7 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="Chat"
-        component={AllChatsScreen}
+        component={ChatNavigator}
         options={{ title: "Chat" }}
       />
       <Tab.Screen

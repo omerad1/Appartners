@@ -254,7 +254,7 @@ const LikesScreen = () => {
       setUsersError(null);
 
       const data = await getUsersWhoLikedMyApartment();
-      console.log("Fetched users who liked my apartment:", data);
+      console.log("Fetched users who liked my apartment:", JSON.stringify(data, null, 2));
 
       // Check if the data is in the expected format
       if (Array.isArray(data)) {
@@ -469,6 +469,7 @@ const LikesScreen = () => {
           user={selectedUser}
           onLike={handleLikeUser}
           onDislike={handleDislikeUser}
+          showQuestion={true}
         />
       </SafeAreaView>
     </BackgroundImage>

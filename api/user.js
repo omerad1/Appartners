@@ -3,6 +3,21 @@ import api from "./client";
 import endpoints from "./endpoints";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Change password
+export const changePassword = async (currentPassword, newPassword) => {
+  try {
+    const response = await api.put(`${endpoints.users}update-password/`, {
+      current_password: currentPassword,
+      new_password: newPassword
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error changing password:', error);
+    throw error;
+  }
+};
+
 // Save user data to AsyncStorage
 export const saveUserDataToStorage = async (userData) => {
   try {
@@ -35,7 +50,6 @@ export const fetchUserData = async (forceRefresh = false) => {
   try {
     // First try to get from AsyncStorage (unless forceRefresh is true)
     if (!forceRefresh) {
-      console.log("Trying to get user data from AsyncStorage...");
       const localUserData = await getUserDataFromStorage();
 
       if (localUserData) {
