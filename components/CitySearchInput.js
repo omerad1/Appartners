@@ -11,26 +11,28 @@ import {
 import { usePreferencesPayload } from "../context/PreferencesPayloadContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-
 /**
  * City search input component with autocomplete functionality
  * Uses the PreferencesPayload context to access available cities
  */
 const CitySearchInput = ({ value, onChange, initialValue }) => {
-  
   // Initialize searchText based on value (object or string) or initialValue
   const [searchText, setSearchText] = useState(() => {
     // If initialValue is provided, use it
-    if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+    if (
+      initialValue !== undefined &&
+      initialValue !== null &&
+      initialValue !== ""
+    ) {
       return initialValue;
     }
     // Otherwise fall back to value
-    if (value && typeof value === 'object' && value.name) {
+    if (value && typeof value === "object" && value.name) {
       return value.name;
-    } else if (typeof value === 'string' && value.trim() !== '') {
+    } else if (typeof value === "string" && value.trim() !== "") {
       return value;
     }
-    return '';
+    return "";
   });
   const [showResults, setShowResults] = useState(false);
   const [filteredCities, setFilteredCities] = useState([]);
@@ -39,28 +41,29 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
   );
 
   // If value changes externally, update the internal state
-  useEffect(() => {    
+  useEffect(() => {
     if (!value) {
       // If value is null/undefined/empty, clear the input
-      setSearchText('');
+      setSearchText("");
       setSelectedCity(null);
       return;
     }
-    
-    if (typeof value === 'object' && value.name) {
+
+    if (typeof value === "object" && value.name) {
       // If value is an object with a name property, use that
       setSearchText(value.name);
       setSelectedCity(value);
-    } else if (typeof value === 'string' && value.trim() !== '') {
+    } else if (typeof value === "string" && value.trim() !== "") {
       // If value is a non-empty string, use it directly for display
 
       setSearchText(value);
-      
+
       // Only try to match with a city object if cities are available
       if (cities && cities.length > 0) {
-        const matchingCity = cities.find(city => 
-          city.name && city.name.toLowerCase() === value.toLowerCase());
-          
+        const matchingCity = cities.find(
+          (city) => city.name && city.name.toLowerCase() === value.toLowerCase()
+        );
+
         if (matchingCity) {
           setSelectedCity(matchingCity);
         } else {
@@ -71,7 +74,7 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
       }
     }
   }, [value, cities]);
-  
+
   // Get cities data from context
   const { cities, isLoading, error } = usePreferencesPayload();
 
@@ -97,19 +100,48 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
 
   // Handle city selection
   const handleSelectCity = (city) => {
-    
     setSearchText(city.name);
     setSelectedCity(city); // Store the selected city object
-    
-  
+
     onChange(city);
-    
+
     setShowResults(false);
   };
 
   // Handle text input
   const handleChangeText = (text) => {
-    setSearchText(text);
+    // Map of Hebrew city names to English equivalents
+    const hebrewToEnglish = {
+      "באר שבע": "beer sheva",
+      "תל אביב": "tel aviv",
+      ירושלים: "jerusalem",
+      חיפה: "haifa",
+      "ראשון לציון": "rishon lezion",
+      "פתח תקווה": "petah tikva",
+      אשדוד: "ashdod",
+      נתניה: "netanya",
+      "בני ברק": "bnei brak",
+      חולון: "holon",
+      "רמת גן": "ramat gan",
+      "בת ים": "bat yam",
+      אשקלון: "ashkelon",
+      רחובות: "rehovot",
+      הרצליה: "herzliya",
+      "כפר סבא": "kfar saba",
+      רעננה: "raanana",
+      מודיעין: "modiin",
+      לוד: "lod",
+      רמלה: "ramla",
+    };
+
+    // Check if the input text matches any Hebrew city name
+    const englishName = hebrewToEnglish[text];
+    if (englishName) {
+      setSearchText(englishName);
+    } else {
+      setSearchText(text);
+    }
+
     // When text changes, we're no longer using a selected city
     if (selectedCity) {
       setSelectedCity(null);
@@ -118,16 +150,16 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
     }
     setShowResults(true);
   };
-  
+
   // Show all cities when input is focused
   const handleFocus = () => {
     // Set filtered cities to all cities if search text is empty
-    if (searchText.trim() === '') {
+    if (searchText.trim() === "") {
       setFilteredCities(cities);
     }
     setShowResults(true);
   };
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -139,19 +171,28 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
           onFocus={handleFocus}
           autoCapitalize="words"
         />
-        {searchText ? (
-          <TouchableOpacity
-            style={styles.clearButton}
-            onPress={() => {
-              setSearchText("");
-              setSelectedCity(null); // Clear the selected city object
-              onChange(null); // Pass null to parent to clear the city
-              setShowResults(false);
-            }}
-          >
-            <Ionicons name="close-circle" size={20} color="#888" />
+        <View style={styles.buttonsContainer}>
+          {searchText ? (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => {
+                setSearchText("");
+                setSelectedCity(null); // Clear the selected city object
+                onChange(null); // Pass null to parent to clear the city
+                setShowResults(false);
+              }}
+            >
+              <Ionicons name="close-circle" size={20} color="#888" />
+            </TouchableOpacity>
+          ) : null}
+          <TouchableOpacity style={styles.dropdownButton} onPress={handleFocus}>
+            <Ionicons
+              name={showResults ? "chevron-up" : "chevron-down"}
+              size={20}
+              color="#888"
+            />
           </TouchableOpacity>
-        ) : null}
+        </View>
       </View>
 
       {showResults && searchText.trim() !== "" && (
@@ -195,16 +236,15 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
     borderWidth: 2,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 10,
     paddingHorizontal: 15,
-    backgroundColor: '#fff',
-    position: 'relative',
-
+    backgroundColor: "#fff",
+    position: "relative",
   },
   input: {
     flex: 1,
@@ -216,11 +256,26 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     paddingLeft: 10,
     fontSize: 20,
-    color: '#333',
-    fontFamily: 'comfortaaSemiBold',
+    color: "#333",
+    fontFamily: "comfortaaSemiBold",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    height: 50, // Match the input height
   },
   clearButton: {
-    padding: 5,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
+  },
+  dropdownButton: {
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
   },
   resultsContainer: {
     position: "absolute",

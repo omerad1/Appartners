@@ -39,15 +39,17 @@ const PhotoUploader = ({ onChange, initialPhotos = [] }) => {
       return;
     }
 
-    // Launch the image picker
+    // Launch the image picker with multiselect enabled
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: false,
+      allowsMultipleSelection: true,
       quality: 0.8,
+      selectionLimit: 10, // Limit to 10 photos at a time
     });
 
     if (!result.canceled) {
-      setPhotos([...photos, result.assets[0]]); // Add selected photo to the state
+      // Add all selected photos to the state
+      setPhotos([...photos, ...result.assets]);
     }
   };
 
@@ -80,6 +82,7 @@ const PhotoUploader = ({ onChange, initialPhotos = [] }) => {
             size={30}
             color="rgb(104, 104, 104)"
           />
+          <Text style={styles.placeholderText}>Add Photos</Text>
         </TouchableOpacity>
       );
     }
@@ -94,22 +97,26 @@ const PhotoUploader = ({ onChange, initialPhotos = [] }) => {
         data={data}
         keyExtractor={(_, index) => index.toString()}
         renderItem={renderPhotoItem}
-        numColumns={3} // Show 3 items per row
+        numColumns={3}
         columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
       />
     </View>
   );
 };
 
-export default PhotoUploader;
-
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
+    flex: 1,
+  },
+  listContent: {
+    paddingBottom: 20,
   },
   row: {
     justifyContent: "flex-start",
     marginBottom: 10,
+    gap: 10,
   },
   placeholder: {
     width: 100,
@@ -120,12 +127,18 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 10,
     backgroundColor: "#f9f9f9",
+    padding: 10,
+  },
+  placeholderText: {
+    marginTop: 5,
+    fontSize: 12,
+    color: "#666",
+    textAlign: "center",
   },
   photoContainer: {
     width: 100,
     height: 100,
     position: "relative",
-    marginRight: 10, // Space between photos
   },
   photo: {
     width: "100%",
@@ -134,7 +147,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     position: "absolute",
-    bottom: 3,
+    top: 3,
     right: 3,
     backgroundColor: "rgba(54, 54, 54, 0.3)",
     borderRadius: 10,
@@ -149,3 +162,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 });
+
+export default PhotoUploader;

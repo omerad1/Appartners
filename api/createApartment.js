@@ -3,6 +3,7 @@ import endpoints from "./endpoints";
 
 export const createApartment = async (formData) => {
   try {
+    console.log("formData", formData);
     const res = await api.post(endpoints.newApartment, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
