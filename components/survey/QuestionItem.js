@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput } from 'react-native';
-import QuestionScale from './survey/QuestionScale';
+import QuestionScale from './QuestionScale';
 
 const QuestionItem = ({ question, index, initialValue, onSelect, disabled = false }) => {
 

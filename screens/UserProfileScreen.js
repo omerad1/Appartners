@@ -9,15 +9,15 @@ import {
 } from "react-native";
 import { ProgressBar, Colors } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import BackgroundImage from "../components/BackgroundImage";
+import BackgroundImage from "../components/layouts/BackgroundImage";
 import FilterScreen from "./FilterScreen";
 import { useSelector, useDispatch } from "react-redux";
 import { saveUserPreferences, fetchUserPreferences, loadUserData } from "../store/redux/userThunks";
 import { getUserDataFromStorage } from "../api/user";
-import QuestionnaireModal from "../components/QuestionnaireModal";
-import EditProfileModal from "../components/EditProfileModal";
-import UserDisplayerModal from "../components/UserDisplayerModal";
-import SettingsDrawerModal from "../components/SettingsDrawerModal";
+import QuestionnaireModal from "../components/userProfileComp/QuestionnaireModal";
+import EditProfileModal from "../components/userProfileComp/EditProfileModal";
+import UserDisplayerModal from "../components/userProfileComp/UserDisplayerModal";
+import SettingsDrawerModal from "../components/userProfileComp/SettingsDrawerModal";
 
 export default function UserProfileScreen() {
   const [preferencesVisible, setPreferencesVisible] = useState(false);

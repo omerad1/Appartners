@@ -13,20 +13,20 @@ import {
   Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import BackgroundImage from "../components/BackgroundImage";
+import BackgroundImage from "../components/layouts/BackgroundImage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import ApartmentLike from "../components/ApartmentLike";
-import ModalApartmentDisplayer from "../components/ModalApartmentDisplayer";
-import UserDisplayer from "../components/UserDisplayer";
-import UserDisplayerModal from "../components/UserDisplayerModal";
+import ApartmentLike from "../components/apartmentsComp/ApartmentLike";
+import ModalApartmentDisplayer from "../components/apartmentsComp/ModalApartmentDisplayer";
+import UserDisplayer from "../components/userProfileComp/UserDisplayer";
+import UserDisplayerModal from "../components/userProfileComp/UserDisplayerModal";
 import {
   getLikedApartments,
   getUsersWhoLikedMyApartment,
   likeApartment,
   unlikeApartment,
 } from "../api/likes";
-import AppartnersLoader from "../components/ApartnersLoader";
+import AppartnersLoader from "../components/general/ApartnersLoader";
 
 const ApartmentsILiked = ({
   apartments,

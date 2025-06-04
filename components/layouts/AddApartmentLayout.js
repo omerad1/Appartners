@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Image } from "react-native";
 import StepButton from "../onBoarding/StepButton";
-import Title from "../Title";
+import Title from "../general/Title";
 
 const AddApartmentLayout = ({ title, children, direction, next, onPress }) => {
   return (

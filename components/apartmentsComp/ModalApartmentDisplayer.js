@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import ImageDisplayer from "./ImageDisplayer";
+import ImageDisplayer from "../general/ImageDisplayer";
 import SearchTags from "./SearchTags";
 
 // Minimalist color scheme

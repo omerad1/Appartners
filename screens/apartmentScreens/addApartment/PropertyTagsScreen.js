@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   StyleSheet,
   View,
@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Searchbar } from "react-native-paper";
-import SearchTags from "../../../components/SearchTags";
-import { propertyTags } from "../../../data/tags/propertyTags";
+import SearchTags from "../../../components/apartmentsComp/SearchTags";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import BackgroundImage from "../../../components/BackgroundImage";
+import BackgroundImage from "../../../components/layouts/BackgroundImage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { usePreferencesPayload } from "../../../context/PreferencesPayloadContext";
 
 const PropertyTagsScreen = () => {
   const navigation = useNavigation();
@@ -20,6 +20,15 @@ const PropertyTagsScreen = () => {
   const { formData, entryDay, isEditing, apartmentId } = route.params || {};
   const editingApartment =
     route.params?.apartment || route.params?.formData?.apartment;
+
+  // Get tags from context
+  const { tags: propertyTagsRaw, isLoading } = usePreferencesPayload();
+  
+  // Process tags to ensure we're working with strings
+  const propertyTags = useMemo(() => {
+    if (!propertyTagsRaw) return [];
+    return propertyTagsRaw.map(tag => typeof tag === 'object' ? tag.name : tag);
+  }, [propertyTagsRaw]);
 
   // Get existing tags if editing
   const [existingTags, setExistingTags] = useState([]);
@@ -65,7 +74,14 @@ const PropertyTagsScreen = () => {
   const [selectedTags, setSelectedTags] = useState([]); // Store selected tags
   const [showAll, setShowAll] = useState(false); // Control showing all tags
   const [searchQuery, setSearchQuery] = useState(""); // Track the search query
-  const [filteredTags, setFilteredTags] = useState(propertyTags.slice(0, 10)); // Filtered tags
+  const [filteredTags, setFilteredTags] = useState([]); // Filtered tags
+
+  // Initialize filteredTags once propertyTags are loaded
+  useEffect(() => {
+    if (propertyTags && propertyTags.length > 0) {
+      setFilteredTags(propertyTags.slice(0, 10));
+    }
+  }, [propertyTags]);
 
   const handleTagToggle = (tag) => {
     if (selectedTags.includes(tag)) {
@@ -93,7 +109,7 @@ const PropertyTagsScreen = () => {
     } else {
       // Filter tags based on the search query
       const filtered = propertyTags.filter((tag) =>
-        tag.toLowerCase().includes(text.toLowerCase())
+        typeof tag === 'string' && tag.toLowerCase().includes(text.toLowerCase())
       );
       setFilteredTags(filtered);
     }
@@ -169,24 +185,30 @@ const PropertyTagsScreen = () => {
           />
           <ScrollView contentContainerStyle={styles.scrollContent}>
             <View>
-              <SearchTags
-                tags={filteredTags}
-                selectedTags={selectedTags}
-                onTagToggle={handleTagToggle}
-              />
-              {!searchQuery.trim() && propertyTags.length > 10 && (
-                <TouchableOpacity
-                  style={[
-                    styles.showMoreButton,
-                    isShowMoreDisabled && styles.disabledButton,
-                  ]}
-                  onPress={handleShowMore}
-                  disabled={isShowMoreDisabled}
-                >
-                  <Text style={styles.showMoreText}>
-                    {showAll ? "Show Less" : "Show More"}
-                  </Text>
-                </TouchableOpacity>
+              {isLoading ? (
+                <Text style={styles.instruction}>Loading property features...</Text>
+              ) : (
+                <>
+                  <SearchTags
+                    tags={filteredTags}
+                    selectedTags={selectedTags}
+                    onTagToggle={handleTagToggle}
+                  />
+                  {!searchQuery.trim() && propertyTags.length > 10 && (
+                    <TouchableOpacity
+                      style={[
+                        styles.showMoreButton,
+                        isShowMoreDisabled && styles.disabledButton,
+                      ]}
+                      onPress={handleShowMore}
+                      disabled={isShowMoreDisabled}
+                    >
+                      <Text style={styles.showMoreText}>
+                        {showAll ? "Show Less" : "Show More"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </>
               )}
             </View>
           </ScrollView>

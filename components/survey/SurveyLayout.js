@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, Image } from "react-native";
 import React from "react";
 import { ProgressBar, MD3Colors } from "react-native-paper";
-import Title from "../Title";
+import Title from "../general/Title";
 import InputField from "../onBoarding/InputField";
 import LikertScale from "./LikertScale";
-import BackgroundImage from "../BackgroundImage";
+import BackgroundImage from "../layouts/BackgroundImage";
 
 // input is an array of objects with placeholder and type and onChange
 // radioBarOptions is an array of 2 objects with labels for the first and last radio buttons

@@ -27,7 +27,7 @@ const ApartmentLike = ({ apartment, onPress }) => {
         source={
           apartment.image_url 
             ? { uri: apartment.image_url } 
-            : require('../assets/icons/avi-avatar.jpg')
+            : require('../../assets/icons/avi-avatar.jpg')
         } 
         style={styles.image}
       />

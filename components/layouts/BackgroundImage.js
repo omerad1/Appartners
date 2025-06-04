@@ -5,7 +5,7 @@ const BackgroundImage = ({ children, opacity = 0.3 }) => {
   return (
     <View style={styles.container}>
       <ImageBackground 
-        source={require('../assets/background.jpg')} 
+        source={require('../../assets/background.jpg')} 
         style={styles.backgroundImage}
         resizeMode="cover"
       />

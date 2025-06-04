@@ -23,7 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { getRoomMessages, markMessagesAsRead, sendMessage as sendApiMessage } from '../../api/chat'; // Renamed sendMessage to avoid conflict
-import UserDisplayerModal from '../../components/UserDisplayerModal';
+import UserDisplayerModal from '../../components/userProfileComp/UserDisplayerModal';
 
 // Store WebSocket connections by roomId
 const isHebrew = (text) => /[\u0590-\u05FF]/.test(text);

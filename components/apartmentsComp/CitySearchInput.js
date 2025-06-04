@@ -8,7 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { usePreferencesPayload } from "../context/PreferencesPayloadContext";
+import { usePreferencesPayload } from "../../context/PreferencesPayloadContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 /**

@@ -20,7 +20,7 @@ import CreateApartmentNavigator from "./navigation/CreateApartmentNavigator";
 import FilterScreenPage from "./screens/FilterScreenPage";
 import { PreferencesPayloadProvider } from "./context/PreferencesPayloadContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import AppartnersLoader from "./components/ApartnersLoader";
+import AppartnersLoader from "./components/general/ApartnersLoader";
 
 const Stack = createStackNavigator();
 

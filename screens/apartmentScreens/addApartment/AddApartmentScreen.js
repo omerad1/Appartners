@@ -9,19 +9,19 @@ import {
   Alert,
 } from "react-native";
 import InputField from "../../../components/onBoarding/InputField";
-import DatePicker from "../../../components/DatePicker";
+import DatePicker from "../../../components/general/DatePicker";
 import dayjs from "dayjs";
-import NumberSlider from "../../../components/NumberSlider";
+import NumberSlider from "../../../components/general/NumberSlider";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import BackgroundImage from "../../../components/BackgroundImage";
+import BackgroundImage from "../../../components/layouts/BackgroundImage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { createApartment } from "../../../api/createApartment";
 import { updateApartment } from "../../../api/updateApartment";
 import { Card } from "react-native-paper";
-import CitySearchInput from "../../../components/CitySearchInput";
-import AreaSearchInput from "../../../components/AreaSearchInput";
+import CitySearchInput from "../../../components/apartmentsComp/CitySearchInput";
+import AreaSearchInput from "../../../components/apartmentsComp/AreaSearchInput";
 
 const AddApartmentScreen = () => {
   const navigation = useNavigation();

@@ -1,9 +1,9 @@
 import { StyleSheet, View, Image } from "react-native";
 import React from "react";
-import Title from "../Title";
+import Title from "../general/Title";
 import StepButton from "./StepButton";
-import KeyboardAwareWrapper from "../KeyboardAwareWrapper";
-import BackgroundImage from "../BackgroundImage";
+import KeyboardAwareWrapper from "../layouts/KeyboardAwareWrapper";
+import BackgroundImage from "../layouts/BackgroundImage";
 const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
   return (
     <BackgroundImage>

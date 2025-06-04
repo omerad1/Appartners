@@ -20,7 +20,7 @@ const THUMBNAIL_SIZE = 80;
 const ACTIVE_THUMBNAIL_SIZE = 100;
 
 // Import a default placeholder image
-const placeholderImage = require("../assets/placeholders/apartment-placeholder.jpg");
+const placeholderImage = require("../../assets/placeholders/apartment-placeholder.jpg");
 
 const ImageDisplayer = ({ images, isLocal }) => {
   const [activeIndex, setActiveIndex] = useState(0);

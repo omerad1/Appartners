@@ -10,13 +10,13 @@ import {
 import { Avatar, Text, Badge, IconButton } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import Title from "../../components/Title";
-import BackgroundImage from "../../components/BackgroundImage";
+import Title from "../../components/general/Title";
+import BackgroundImage from "../../components/layouts/BackgroundImage";
 import {getUserChatRooms} from "../../api/chat";
 import { useSelector } from "react-redux";
 import { registerSocketMessageHandler, isSocketConnected } from "../../api/socket";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import ModalApartmentDisplayer from "../../components/ModalApartmentDisplayer";
+import ModalApartmentDisplayer from "../../components/apartmentsComp/ModalApartmentDisplayer";
 
 
 const AllChatsScreen = () => {
