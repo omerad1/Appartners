@@ -35,7 +35,7 @@ const AppartnersLoader = () => {
     <View style={styles.container}>
       {/* Logo above the text */}
       <Image 
-        source={require('../assets/icons/logo-no-title.png')} 
+        source={require('../../assets/icons/logo-no-title.png')} 
         style={styles.logo} 
         resizeMode="contain"
       />

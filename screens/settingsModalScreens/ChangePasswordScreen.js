@@ -13,7 +13,7 @@ import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Snackbar } from 'react-native-paper';
-import { changePassword } from '../api/user';
+import { changePassword } from '../../api/user';
 
 // Yup schema for password validation
 const schema = yup.object().shape({
@@ -32,7 +32,7 @@ const schema = yup.object().shape({
     .required('Please confirm your new password'),
 });
 
-const ChangePasswordTab = ({ onGoBack }) => {
+const ChangePasswordScreen = ({ onGoBack }) => {
   const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
   const [newPasswordVisible, setNewPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -316,4 +316,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChangePasswordTab;
+export default ChangePasswordScreen;

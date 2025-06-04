@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
-import TextArea from "../../components/TextArea";
+import TextArea from "../../components/general/TextArea";
 import { useDispatch, useSelector } from 'react-redux';
 import { updateOnboardingData } from '../../store/redux/slices/onboardingSlice';
 

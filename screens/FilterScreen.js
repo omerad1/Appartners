@@ -8,14 +8,14 @@ import {
   Text,
   Keyboard,
 } from "react-native";
-import DrawerModal from "../components/DrawerModal";
-import DatePicker from "../components/DatePicker";
+import DrawerModal from "../components/layouts/DrawerModal";
+import DatePicker from "../components/general/DatePicker";
 import InputField from "../components/onBoarding/InputField";
-import PriceRangePicker from "../components/PriceRangePicker";
-import FilterSection from "../components/FilterSection";
-import CitySearchInput from "../components/CitySearchInput";
-import AreaSearchInput from "../components/AreaSearchInput";
-import TagsSelector from "../components/TagsSelector";
+import PriceRangePicker from "../components/general/PriceRangePicker";
+import FilterSection from "../components/apartmentsComp/FilterSection";
+import CitySearchInput from "../components/apartmentsComp/CitySearchInput";
+import AreaSearchInput from "../components/apartmentsComp/AreaSearchInput";
+import TagsSelector from "../components/apartmentsComp/TagsSelector";
 import { usePreferencesPayload } from "../context/PreferencesPayloadContext";
 
 const roommateOptions = [1, 2, 3, 4];

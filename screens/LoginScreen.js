@@ -1,5 +1,5 @@
 import React from "react";
-import KeyboardAwareWrapper from "../components/KeyboardAwareWrapper";
+import KeyboardAwareWrapper from "../components/layouts/KeyboardAwareWrapper";
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   Image,
   Alert,
 } from "react-native";
-import Title from "../components/Title";
+import Title from "../components/general/Title";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { login as apiLogin } from "../api/auth";
 import InputField from "../components/onBoarding/InputField";
-import BackgroundImage from "../components/BackgroundImage";
+import BackgroundImage from "../components/layouts/BackgroundImage";
 import { useDispatch } from "react-redux";
 import { login } from "../store/redux/user";
 import { useAuth } from "../context/AuthContext";

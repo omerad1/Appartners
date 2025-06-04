@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Alert, Text, Platform } from "react-native";
-import PhotoUploader from "../../../components/PhotoUploader";
+import PhotoUploader from "../../../components/general/PhotoUploader";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import BackgroundImage from "../../../components/BackgroundImage";
+import BackgroundImage from "../../../components/layouts/BackgroundImage";
 import { createApartment } from "../../../api/createApartment";
 import { updateApartment } from "../../../api/updateApartment";
 import { Card, ActivityIndicator, Chip, Button } from "react-native-paper";

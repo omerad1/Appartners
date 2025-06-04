@@ -10,7 +10,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import QuestionCompatibilityDrawer from './QuestionCompatibilityDrawer';
+import QuestionCompatibilityDrawer from '../survey/QuestionCompatibilityDrawer';
 
 const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showActions = true, showQuestion = false}) => {
   const [showDrawer, setShowDrawer] = useState(false);
@@ -59,7 +59,7 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showAct
             </TouchableOpacity>
 
             <Image
-              source={profile_image ? { uri: profile_image } : require('../assets/icons/crime.png')}
+              source={profile_image ? { uri: profile_image } : require('../../assets/icons/crime.png')}
               style={styles.userImage}
               resizeMode="cover"
             />

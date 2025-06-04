@@ -19,13 +19,13 @@ import {
   Surface,
 } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import Title from "../../components/Title"; // Import your custom Title component
+import Title from "../../components/general/Title"; // Import your custom Title component
 import { useNavigation } from "@react-navigation/native";
-import ModalApartmentDisplayer from "../../components/ModalApartmentDisplayer"; // Import the modal
+import ModalApartmentDisplayer from "../../components/apartmentsComp/ModalApartmentDisplayer"; // Import the modal
 
 import { getUserApartments } from "../../api/myApartments"; // Import the function to fetch apartments
 import { deleteApartment } from "../../api/deleteApartment"; // Import the function to delete apartments
-import BackgroundImage from "../../components/BackgroundImage";
+import BackgroundImage from "../../components/layouts/BackgroundImage";
 
 const { width } = Dimensions.get("window");
 

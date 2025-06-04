@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { usePreferencesPayload } from '../context/PreferencesPayloadContext';
-import DrawerModal from './DrawerModal';
-import QuestionItem from './QuestionItem';
-import { getUserAnswers, submitAnswer, submitMultipleAnswers } from '../api/questions';
+import { usePreferencesPayload } from '../../context/PreferencesPayloadContext';
+import DrawerModal from '../layouts/DrawerModal';
+import QuestionItem from '../survey/QuestionItem';
+import { getUserAnswers, submitAnswer, submitMultipleAnswers } from '../../api/questions';
 
 
 const QuestionnaireModal = ({ visible, onClose }) => {

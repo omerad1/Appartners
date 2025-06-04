@@ -14,18 +14,18 @@ import Animated, {
   SlideOutRight,
 } from 'react-native-reanimated';
 
-import DrawerModal from './DrawerModal';
-import ChangePasswordTab from './ChangePasswordTab';
-import HelpModalScreen from '../screens/settingsModalScreens/HelpModalScreen';
-import PrivacyModalScreen from '../screens/settingsModalScreens/PrivacyModalScreen';
-import NotificationsModalScreen from '../screens/settingsModalScreens/NotificationsModalScreen';
-import AccountSettingsModalScreen from '../screens/settingsModalScreens/AccountSettingsModalScreen';
+import DrawerModal from '../layouts/DrawerModal';
+import ChangePasswordScreen from '../../screens/settingsModalScreens/ChangePasswordScreen';
+import HelpModalScreen from '../../screens/settingsModalScreens/HelpModalScreen';
+import PrivacyModalScreen from '../../screens/settingsModalScreens/PrivacyModalScreen';
+import NotificationsModalScreen from '../../screens/settingsModalScreens/NotificationsModalScreen';
+import AccountSettingsModalScreen from '../../screens/settingsModalScreens/AccountSettingsModalScreen';
 import TermsModal from './TermsModal';
 
 import { useDispatch } from 'react-redux';
-import { logout as logoutAction } from '../store/redux/user';
-import { logout as apiLogout } from '../api/auth';
-import { useAuth } from '../context/AuthContext';
+import { logout as logoutAction } from '../../store/redux/user';
+import { logout as apiLogout } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
 
 const SettingsDrawerModal = ({ visible, onClose }) => {
   const dispatch = useDispatch();
@@ -124,7 +124,7 @@ const SettingsDrawerModal = ({ visible, onClose }) => {
   const renderScreen = () => {
     switch (screen) {
       case 'changePassword':
-        return <ChangePasswordTab onGoBack={handleBack} />;
+        return <ChangePasswordScreen onGoBack={handleBack} />;
       case 'help':
         return <HelpModalScreen />;
       case 'privacy':

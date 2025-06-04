@@ -21,9 +21,9 @@ import {
   FontAwesome,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import ImageDisplayer from "../components/ImageDisplayer";
-import SearchTags from "../components/SearchTags";
-import UserDisplayer from "../components/UserDisplayer";
+import ImageDisplayer from "../components/general/ImageDisplayer";
+import SearchTags from "../components/apartmentsComp/SearchTags";
+import UserDisplayer from "../components/userProfileComp/UserDisplayer";
 import { likeApartment, unlikeApartment } from "../api/likes";
 import { getUser } from "../api/users";
 import { useNavigation } from "@react-navigation/native";

@@ -13,20 +13,21 @@ import {
   Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import BackgroundImage from "../components/BackgroundImage";
+import BackgroundImage from "../components/layouts/BackgroundImage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import ApartmentLike from "../components/ApartmentLike";
-import ModalApartmentDisplayer from "../components/ModalApartmentDisplayer";
-import UserDisplayer from "../components/UserDisplayer";
-import UserDisplayerModal from "../components/UserDisplayerModal";
+import ApartmentLike from "../components/apartmentsComp/ApartmentLike";
+import ModalApartmentDisplayer from "../components/apartmentsComp/ModalApartmentDisplayer";
+import UserDisplayer from "../components/userProfileComp/UserDisplayer";
+import UserDisplayerModal from "../components/userProfileComp/UserDisplayerModal";
 import {
   getLikedApartments,
   getUsersWhoLikedMyApartment,
   likeApartment,
   unlikeApartment,
+  likeUser,
 } from "../api/likes";
-import AppartnersLoader from "../components/ApartnersLoader";
+import AppartnersLoader from "../components/general/ApartnersLoader";
 
 const ApartmentsILiked = ({
   apartments,
@@ -317,6 +318,7 @@ const LikesScreen = () => {
   const handleLikeUser = async () => {
     if (!selectedUser || !selectedUser.id) {
       console.error("No user selected or user ID missing");
+
       setUserModalVisible(false);
       return;
     }
@@ -329,7 +331,7 @@ const LikesScreen = () => {
         `You've sent a match request to ${selectedUser.name}!`,
         [{ text: "OK" }]
       );
-
+      await likeUser(selectedUser.id, true);
       // Refresh the users list after matching
       fetchUsersWhoLikedMyApartment();
       setUserModalVisible(false);
@@ -347,10 +349,7 @@ const LikesScreen = () => {
     }
 
     try {
-      // Here you would call the API to reject the user
-      // For now, we'll just close the modal
-
-      // Refresh the users list after rejecting
+      await likeUser(selectedUser.id, false);
       fetchUsersWhoLikedMyApartment();
       setUserModalVisible(false);
     } catch (error) {

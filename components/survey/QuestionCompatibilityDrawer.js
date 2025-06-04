@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import DrawerModal from './DrawerModal';
-import QuestionScale from '../components/survey/QuestionScale';
-import { usePreferencesPayload } from '../context/PreferencesPayloadContext';
+import DrawerModal from '../layouts/DrawerModal';
+import QuestionScale from './QuestionScale';
+import { usePreferencesPayload } from '../../context/PreferencesPayloadContext';
 
 const QuestionCompatibilityDrawer = ({
   visible,

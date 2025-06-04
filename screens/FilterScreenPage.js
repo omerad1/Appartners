@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useSelector, useDispatch } from "react-redux";
 import { saveUserPreferences } from "../store/redux/userThunks";
 import FilterScreen from "./FilterScreen";
-import BackgroundImage from "../components/BackgroundImage";
+import BackgroundImage from "../components/layouts/BackgroundImage";
 
 const FilterScreenPage = () => {
   const navigation = useNavigation();

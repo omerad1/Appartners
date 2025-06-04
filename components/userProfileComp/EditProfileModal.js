@@ -12,9 +12,9 @@ import {
   Alert,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import DrawerModal from './DrawerModal';
-import { updateUserProfileData } from '../store/redux/userThunks';
-import { saveUserDataToStorage } from '../api/user';
+import DrawerModal from '../layouts/DrawerModal';
+import { updateUserProfileData } from '../../store/redux/userThunks';
+import { saveUserDataToStorage } from '../../api/user';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
