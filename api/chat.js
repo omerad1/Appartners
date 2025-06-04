@@ -41,7 +41,7 @@ export const getRoomMessages = async (roomId) => {
 // Send a message via REST API (fallback if WebSocket fails)
 export const sendMessage = async ( recipient_id, content) => {
   try {
-    const res = await api.post(`${endpoints.chatRooms}send_message_to_user`, { recipient_id, content});
+    const res = await api.post(`${endpoints.chatRooms}send_message_to_user/`, { recipient_id, content});
     console.log("invoked")
     return res.data;
   } catch (err) {
@@ -59,6 +59,17 @@ export const markMessagesAsRead = async (roomId, messageIds) => {
   } catch (err) {
     const message = err.response?.data?.detail || err.message;
     console.error("❌ Failed to mark messages as read", message);
+    throw new Error(message);
+  }
+};
+
+export const deleteChatRoom = async (roomId) => {
+  try {
+    const res = await api.delete(`${endpoints.chatRooms}${roomId}/`);
+    return res.data;
+  } catch (err) {
+    const message = err.response?.data?.detail || err.message;
+    console.error("❌ Failed to delete chat room", message);
     throw new Error(message);
   }
 };

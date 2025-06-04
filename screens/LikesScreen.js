@@ -25,6 +25,7 @@ import {
   getUsersWhoLikedMyApartment,
   likeApartment,
   unlikeApartment,
+  likeUser,
 } from "../api/likes";
 import AppartnersLoader from "../components/general/ApartnersLoader";
 
@@ -317,6 +318,7 @@ const LikesScreen = () => {
   const handleLikeUser = async () => {
     if (!selectedUser || !selectedUser.id) {
       console.error("No user selected or user ID missing");
+
       setUserModalVisible(false);
       return;
     }
@@ -329,7 +331,7 @@ const LikesScreen = () => {
         `You've sent a match request to ${selectedUser.name}!`,
         [{ text: "OK" }]
       );
-
+      await likeUser(selectedUser.id, true);
       // Refresh the users list after matching
       fetchUsersWhoLikedMyApartment();
       setUserModalVisible(false);
@@ -347,10 +349,7 @@ const LikesScreen = () => {
     }
 
     try {
-      // Here you would call the API to reject the user
-      // For now, we'll just close the modal
-
-      // Refresh the users list after rejecting
+      await likeUser(selectedUser.id, false);
       fetchUsersWhoLikedMyApartment();
       setUserModalVisible(false);
     } catch (error) {

@@ -10,10 +10,11 @@ const endpoints = {
   DeleteApartment: (apartmentId) => `/api/v1/apartments/${apartmentId}/`,
 
   profile: "/api/v1/users/me/",
-  users: "/api/v1/users", // Base endpoint for users
+  users: "/api/v1/users", 
   GET_APARTMENTS: "/api/v1/apartments/recommendations/",
   filters: "/api/v1/users/preferences/",
   newApartment: "/api/v1/apartments/new/",
+  likeUser: "/api/v1/users/like/",
 
   // app data
   preferencesPayload: "/api/v1/users/preferences/payload/",

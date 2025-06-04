@@ -20,9 +20,10 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Animated } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
-import { getRoomMessages, markMessagesAsRead, sendMessage as sendApiMessage } from '../../api/chat'; // Renamed sendMessage to avoid conflict
+import { getRoomMessages, markMessagesAsRead, sendMessage as sendApiMessage, deleteChatRoom } from '../../api/chat'; // Renamed sendMessage to avoid conflict
 import UserDisplayerModal from '../../components/userProfileComp/UserDisplayerModal';
 
 // Store WebSocket connections by roomId
@@ -174,27 +175,31 @@ const ChatScreen = () => {
         // Handle incoming messages
         socket.registerMessageHandler('chat_message', (data) => {
           const messagePayload = data.message || data;
+          const messageId = messagePayload.id;
           setMessages((prevMessages) => {
             const tempMessage = prevMessages.find(
               (m) => m.isLocalSending && m.content === messagePayload.content
             );
-    
+
             if (tempMessage) {
+              console.log('Replacing temp message with confirmed message');
               return prevMessages.map((m) =>
                 m.id === tempMessage.id
                   ? {
                       ...messagePayload,
                       isLocalSending: false,
+                      error: undefined,
                       sender: messagePayload.sender || m.sender,
                     }
                   : m
               );
             }
-    
-            if (!prevMessages.find((m) => m.id === messagePayload.id)) {
+
+            if (!prevMessages.find((m) => m.id === messageId)) {
+              console.log('Adding new message from socket');
               return [...prevMessages, messagePayload];
             }
-    
+
             return prevMessages;
           });
         });
@@ -367,9 +372,11 @@ const ChatScreen = () => {
     if (inputText.trim() === '' || !currentUser?.id) return;
 
     const tempId = `temp-${Date.now()}`;
+    const messageToSend = inputText;
+    
     const optimisticMessage = {
       id: tempId,
-      content: inputText,
+      content: messageToSend,
       sender: {
         id: currentUser.id,
         user_id: currentUser.id, 
@@ -383,11 +390,11 @@ const ChatScreen = () => {
       room: roomId,
       timestamp: new Date().toISOString(),
       isLocalSending: true, // Changed from is_sending to avoid collision with server properties
+      _clientMessageId: tempId, // Add a client-side ID to help with matching later
     };
 
     // Add new message to the end of the array (for chronological order)
     setMessages(prevMessages => [...prevMessages, optimisticMessage]);
-    const messageToSend = inputText;
     setInputText('');
 
     // Try to send via WebSocket first
@@ -404,40 +411,53 @@ const ChatScreen = () => {
       
         // Set a timeout to check if we received a WebSocket confirmation
         setTimeout(async () => {
-          const messageStillSending = messages.some(m => m.id === tempId && m.isLocalSending);
-          if (messageStillSending) {
-            console.log('No WebSocket confirmation received, using API fallback');
-            try {
-              const sentMessageFromServer = await sendApiMessage(otherParticipant?.id, messageToSend);
-              setMessages(prev =>
-                prev.map(m =>
-                  m.id === tempId ? { ...sentMessageFromServer, isLocalSending: false, error: undefined } : m
-                )
-              );
-            } catch (fallbackError) {
-              console.error('Error sending message via API fallback:', fallbackError);
-              setMessages(prev =>
-                prev.map(m =>
-                  m.id === tempId ? { ...m, isLocalSending: false, error: true } : m
-                )
-              );
+          setMessages(prevMessages => {
+            const messageStillSending = prevMessages.some(m => m.id === tempId && m.isLocalSending);
+            
+            if (messageStillSending) {
+              console.log('No WebSocket confirmation received, using API fallback');
+              (async () => {
+                try {
+                  const sentMessageFromServer = await sendApiMessage(otherParticipant?.id, messageToSend);
+                  
+                  setMessages(prev =>
+                    prev.map(m =>
+                      m.id === tempId ? { 
+                        ...sentMessageFromServer, 
+                        isLocalSending: false, 
+                        error: undefined,
+                        _clientMessageId: tempId // Keep the client ID for reference
+                      } : m
+                    )
+                  );
+                } catch (fallbackError) {
+                  console.error('Error sending message via API fallback:', fallbackError);
+                  setMessages(prev =>
+                    prev.map(m =>
+                      m.id === tempId ? { ...m, isLocalSending: false, error: true } : m
+                    )
+                  );
+                }
+              })();
             }
-          }
-        }, 10000);
+            
+            return prevMessages;
+          });
+        }, 5000); // Reduced timeout for faster fallback
       } catch (socketError) {
         console.error('Error sending via WebSocket:', socketError);
         messageSentSuccessfully = false;
       
-        // ✅ Attempt to reconnect the socket
+        // Attempt to reconnect the socket
         try {
           console.log('Attempting to reconnect socket...');
           await disconnectChatSocket(roomId); // ensure clean reconnect
           const newSocket = await initializeChatSocket(roomId);
       
           if (newSocket && newSocket.readyState === WebSocket.OPEN) {
-            console.log('✅ Socket reconnected successfully');
+            console.log('Socket reconnected successfully');
           } else {
-            console.warn('⚠️ Socket reconnect failed or is not open');
+            console.warn('Socket reconnect failed or is not open');
           }
         } catch (reconnectError) {
           console.error('Failed to reconnect socket:', reconnectError);
@@ -446,15 +466,27 @@ const ChatScreen = () => {
 
     }
 
-    // If WebSocket failed or isn't available, use API
+    // If WebSocket failed or isn't available, use API immediately
     if (!messageSentSuccessfully) {
       try {
         const sentMessageFromServer = await sendApiMessage(otherParticipant?.id, messageToSend);
-        setMessages(prev =>
-          prev.map(m =>
-            m.id === tempId ? { ...sentMessageFromServer, isLocalSending: false, error: undefined } : m
-          )
-        );
+        
+        setMessages(prev => {
+          const messageExists = prev.some(m => m.id === tempId);
+          
+          if (messageExists) {
+            return prev.map(m =>
+              m.id === tempId ? { 
+                ...sentMessageFromServer, 
+                isLocalSending: false, 
+                error: undefined,
+                _clientMessageId: tempId // Keep the client ID for reference
+              } : m
+            );
+          }
+          
+          return prev;
+        });
       } catch (error) {
         console.error('Error sending message via API:', error);
         setMessages(prev =>
@@ -465,7 +497,14 @@ const ChatScreen = () => {
       }
     }
   };
-
+  const handleUnmatch = async () => {
+    try {
+      await deleteChatRoom(roomId);
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error deleting chat room:', error);
+    }
+  }
   const renderMessageItem = ({ item }) => {
     // Check both is_sender property and sender.id to determine if message is from current user
     const isCurrentUser = item.is_sender || item.sender?.id === currentUser?.id || item.sender?.user_id === currentUser?.id;
@@ -543,7 +582,7 @@ const ChatScreen = () => {
             <View style={styles.dropdownContainer}>
               <TouchableOpacity 
                 style={styles.dropdownItem} 
-                onPress={() => {
+                onPress={() => {handleUnmatch();
                   console.log("Unmatch pressed for", otherParticipant?.first_name);
                   setShowPopover(false);
                 }}
