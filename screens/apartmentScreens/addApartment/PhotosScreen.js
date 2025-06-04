@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Alert, Text } from "react-native";
+import { StyleSheet, View, Alert, Text, Platform } from "react-native";
 import PhotoUploader from "../../../components/PhotoUploader";
 import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -43,7 +43,7 @@ const PhotosScreen = () => {
     loadSavedFormData();
   }, []);
 
-  // Load form data from AsyncStorage as a backup
+  // Load form data from AsyncStorage as a backupf
   const loadSavedFormData = async () => {
     try {
       const savedFormData = await AsyncStorage.getItem("apartmentFormData");
@@ -188,85 +188,104 @@ const PhotosScreen = () => {
     // Create a FormData object for multipart/form-data submission
     const apiFormData = new FormData();
 
-    // Log exactly what's being submitted
-    console.log("Preparing form data with values:", {
-      city: formData.city,
-      street: formData.street,
-      floor: formData.floor,
-      totalPrice: formData.totalPrice,
-    });
-
-    // Add basic apartment details with strict checking for required fields
-    apiFormData.append("city", formData.city);
+    // Add required fields with proper type conversion
+    apiFormData.append("city", parseInt(formData.city, 10));
     apiFormData.append("street", formData.street);
-    apiFormData.append("floor", formData.floor);
-    apiFormData.append("total_price", formData.totalPrice);
-
-    // Add other fields with fallbacks
     apiFormData.append("type", formData.apartmentType || "apartment");
-    apiFormData.append("number_of_rooms", formData.rooms || 1);
-    apiFormData.append("available_rooms", formData.availableRooms || 1);
-    apiFormData.append("available_entry_date", entryDay);
+    apiFormData.append("floor", parseInt(formData.floor, 10));
+    apiFormData.append("number_of_rooms", parseInt(formData.rooms || 1, 10));
+    apiFormData.append(
+      "available_rooms",
+      parseInt(formData.availableRooms || 1, 10)
+    );
+    apiFormData.append("total_price", parseFloat(formData.totalPrice));
+    apiFormData.append("available_entry_date", entryDay.split("T")[0]);
 
     // Add optional fields if they exist
-    if (formData.buildingNumber) {
-      apiFormData.append("house_number", formData.buildingNumber);
+    if (formData.about) {
+      apiFormData.append("about", formData.about);
     }
 
     if (formData.area) {
       apiFormData.append("area", formData.area);
     }
 
-    if (formData.about) {
-      apiFormData.append("about", formData.about);
+    if (formData.buildingNumber) {
+      apiFormData.append("house_number", parseInt(formData.buildingNumber, 10));
     }
 
-    // Add features/tags
+    // Add features/tags if they exist
     if (selectedTags && selectedTags.length > 0) {
       selectedTags.forEach((tag, index) => {
-        apiFormData.append(`features[${index}]`, tag);
+        const tagId = typeof tag === "number" ? tag : parseInt(tag, 10);
+        apiFormData.append(`features[${index}]`, tagId);
       });
     }
 
-    // Keep existing photos if editing
+    // Handle photos
+    // First, add existing photos if editing
     if (isEditing && existingPhotos && existingPhotos.length > 0) {
       existingPhotos.forEach((url, index) => {
         apiFormData.append(`existing_photos[${index}]`, url);
       });
     }
 
-    // Add new photos
+    // Then add new photos
     if (photos && photos.length > 0) {
       photos.forEach((photo, index) => {
-        // Skip photos that are already in existingPhotos (have isExisting flag)
+        // Skip photos that are already in existingPhotos
         if (photo.isExisting) return;
 
         // Create file object from URI
-        const fileType = photo.uri.split(".").pop();
-        const fileName = `photo_${index}.${fileType}`;
+        const photoFile = {
+          uri:
+            Platform.OS === "ios"
+              ? photo.uri.replace("file://", "")
+              : photo.uri,
+          type: photo.mimeType || "image/jpeg",
+          name: photo.fileName || `photo_${index}.jpg`,
+        };
 
-        apiFormData.append("photos", {
-          uri: photo.uri,
-          type: `image/${fileType}`,
-          name: fileName,
-        });
+        // Log the photo file for debugging
+        console.log(`Appending photo ${index}:`, photoFile);
+
+        // Append the photo file to FormData
+        apiFormData.append("photos", photoFile);
       });
     }
 
-    // Log the form data for debugging
-    console.log("Form data prepared for submission:", {
-      city: formData.city,
+    // Log the complete form data for debugging
+    console.log("Complete form data:", {
+      city: parseInt(formData.city, 10),
       street: formData.street,
-      floor: formData.floor,
-      totalPrice: formData.totalPrice,
-      type: formData.apartmentType,
-      rooms: formData.rooms,
-      availableRooms: formData.availableRooms,
-      entryDate: entryDay,
-      features: selectedTags,
+      type: formData.apartmentType || "apartment",
+      floor: parseInt(formData.floor, 10),
+      number_of_rooms: parseInt(formData.rooms || 1, 10),
+      available_rooms: parseInt(formData.availableRooms || 1, 10),
+      total_price: parseFloat(formData.totalPrice),
+      available_entry_date: entryDay.split("T")[0],
+      about: formData.about || undefined,
+      area: formData.area || undefined,
+      house_number: formData.buildingNumber
+        ? parseInt(formData.buildingNumber, 10)
+        : undefined,
+      features:
+        selectedTags?.map((tag) =>
+          typeof tag === "number" ? tag : parseInt(tag, 10)
+        ) || [],
       existingPhotoCount: existingPhotos?.length || 0,
       newPhotoCount: photos?.filter((p) => !p.isExisting)?.length || 0,
+      photos: photos
+        ?.filter((p) => !p.isExisting)
+        ?.map((p) => ({
+          uri: Platform.OS === "ios" ? p.uri.replace("file://", "") : p.uri,
+          type: p.mimeType || "image/jpeg",
+          name: p.fileName || "photo.jpg",
+        })),
     });
+
+    // Log the actual FormData contents
+    console.log("FormData contents:", apiFormData._parts);
 
     return apiFormData;
   };
@@ -345,6 +364,7 @@ const PhotosScreen = () => {
       </BackgroundImage>
     );
   }
+  7;
 
   return (
     <BackgroundImage>
@@ -375,7 +395,7 @@ const PhotosScreen = () => {
               formData.street &&
               formData.floor &&
               formData.totalPrice
-                ? `Adding apartment on ${formData.street}, ${formData.city}`
+                ? `Adding apartment on ${formData.street}`
                 : "Some required apartment details are missing"}
             </Text>
             {(!formData.city ||

@@ -79,11 +79,10 @@ const ApartmentScreen = () => {
   }, []);
 
   const handleAddApartment = () => {
-    navigation.navigate("CreateApartment");
+    navigation.navigate("CreateApartment", { loadSavedData: false });
   };
 
   const handleDelete = async (id) => {
-
     Alert.alert(
       "Confirm Deletion",
       "Are you sure you want to delete this apartment?",

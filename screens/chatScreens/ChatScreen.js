@@ -59,6 +59,7 @@ const ChatScreen = () => {
   const [showPopover, setShowPopover] = useState(false);
 
   const flatListRef = useRef(null);
+  const typingDots = useRef(new Animated.Value(0)).current;
 
   const userDisplayerModalData = useMemo(() => {
     if (!otherParticipant || !currentUser) return null;
@@ -830,6 +831,29 @@ const styles = StyleSheet.create({
   deliveredIndicator: {
     marginLeft: 6,
   },
+  typingContainer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    marginVertical: 5,
+  },
+  typingAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 8,
+  },
+  typingBubble: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 20,
+    padding: 12,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+  },
+  typingDot: {
+    fontSize: 10,
+    color: "#8B4513",
+    marginHorizontal: 2,
+  },
   inputContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -895,6 +919,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#8E8E93',
     textAlign: 'center',
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
   },
 });
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -7,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 import { usePreferencesPayload } from "../context/PreferencesPayloadContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -18,6 +18,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 const AreaSearchInput = ({ value, onChange, selectedCity }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedArea, setSelectedArea] = useState(value || null);
+  const [searchText, setSearchText] = useState(value || "");
 
   // Get cities data from context
   const { cities, isLoading, error } = usePreferencesPayload();
@@ -31,89 +32,99 @@ const AreaSearchInput = ({ value, onChange, selectedCity }) => {
     return city && city.areas ? city.areas : [];
   };
 
+  // Filter areas based on search text
+  const filteredAreas = getAvailableAreas().filter((area) =>
+    area.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   // Update selectedArea when value changes externally
   useEffect(() => {
     if (value) {
       setSelectedArea(value);
+      setSearchText(value);
     } else {
       setSelectedArea(null);
+      setSearchText("");
     }
   }, [value]);
 
   // Handle area selection
   const handleSelectArea = (area) => {
     setSelectedArea(area);
+    setSearchText(area);
     onChange(area);
     setShowDropdown(false);
   };
 
-  // Toggle dropdown visibility
-  const toggleDropdown = () => {
-    if (selectedCity) {
-      setShowDropdown(!showDropdown);
-    }
+  // Handle text input
+  const handleChangeText = (text) => {
+    setSearchText(text);
+    setShowDropdown(true);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={[styles.dropdownButton, !selectedCity && styles.disabledButton]}
-        onPress={toggleDropdown}
-        disabled={!selectedCity}
-      >
-        <Text
-          style={[styles.selectedText, !selectedArea && styles.placeholderText]}
-        >
-          {selectedArea || "Select area"}
-        </Text>
-        <Ionicons
-          name={showDropdown ? "chevron-up" : "chevron-down"}
-          size={20}
-          color="#666"
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={searchText}
+          onChangeText={handleChangeText}
+          placeholder="Enter area name"
+          onFocus={() => setShowDropdown(true)}
+          editable={!!selectedCity}
         />
-      </TouchableOpacity>
+        <View style={styles.buttonsContainer}>
+          {searchText ? (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => {
+                setSearchText("");
+                setSelectedArea(null);
+                onChange(null);
+                setShowDropdown(false);
+              }}
+            >
+              <Ionicons name="close-circle" size={20} color="#888" />
+            </TouchableOpacity>
+          ) : null}
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            onPress={() => setShowDropdown(!showDropdown)}
+            disabled={!selectedCity}
+          >
+            <Ionicons
+              name={showDropdown ? "chevron-up" : "chevron-down"}
+              size={20}
+              color={selectedCity ? "#888" : "#ccc"}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      {selectedArea && (
-        <TouchableOpacity
-          style={styles.clearButton}
-          onPress={() => {
-            setSelectedArea(null);
-            onChange(null);
-          }}
-        >
-          <Ionicons name="close-circle" size={20} color="#888" />
-        </TouchableOpacity>
-      )}
-
-      {showDropdown && (
-        <View style={styles.dropdown}>
+      {showDropdown && selectedCity && (
+        <View style={styles.resultsContainer}>
           {isLoading ? (
             <ActivityIndicator size="small" color="#000" />
           ) : error ? (
             <Text style={styles.errorText}>Error loading areas</Text>
-
-          ) : (
+          ) : filteredAreas.length > 0 ? (
             <ScrollView
-              style={styles.dropdownScroll}
+              style={styles.resultsList}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={true}
             >
-              {getAvailableAreas().length > 0 ? (
-                getAvailableAreas().map((area, index) => (
-                  <TouchableOpacity
-                    key={index.toString()}
-                    style={styles.dropdownItem}
-                    onPress={() => handleSelectArea(area)}
-                  >
-                    <Text style={styles.dropdownItemText}>{area}</Text>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text style={styles.noResultsText}>
-                  No areas available for this city
-                </Text>
-              )}
+              {filteredAreas.map((area, index) => (
+                <TouchableOpacity
+                  key={index.toString()}
+                  style={styles.resultItem}
+                  onPress={() => handleSelectArea(area)}
+                >
+                  <Text style={styles.resultText}>{area}</Text>
+                </TouchableOpacity>
+              ))}
             </ScrollView>
+          ) : (
+            <Text style={styles.noResultsText}>No matching areas found</Text>
           )}
         </View>
       )}
@@ -132,31 +143,42 @@ const styles = StyleSheet.create({
     zIndex: 998,
     marginVertical: 10,
   },
-  dropdownButton: {
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     width: "100%",
-    height: 50,
     borderWidth: 2,
     borderColor: "#ccc",
     borderRadius: 10,
     paddingHorizontal: 15,
     backgroundColor: "#fff",
+    position: "relative",
   },
-  disabledButton: {
-    backgroundColor: "#f0f0f0",
-    borderColor: "#ddd",
-  },
-  selectedText: {
+  input: {
+    flex: 1,
+    height: 50,
     fontSize: 16,
     fontFamily: "comfortaaRegular",
-    color: "#333",
   },
-  placeholderText: {
-    color: "#999",
+  buttonsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    height: 50,
   },
-  dropdown: {
+  clearButton: {
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
+  },
+  dropdownButton: {
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
+  },
+  resultsContainer: {
     position: "absolute",
     top: 55,
     left: 0,
@@ -175,24 +197,23 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     zIndex: 999,
   },
-  dropdownScroll: {
+  resultsList: {
     width: "100%",
     maxHeight: 200,
   },
-  dropdownItem: {
+  resultItem: {
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
-  dropdownItemText: {
+  resultText: {
     fontSize: 16,
     fontFamily: "comfortaaRegular",
   },
   noResultsText: {
     padding: 15,
     fontSize: 14,
-
     fontFamily: "comfortaaRegular",
     color: "#666",
     textAlign: "center",
@@ -200,7 +221,6 @@ const styles = StyleSheet.create({
   errorText: {
     padding: 15,
     fontSize: 14,
-
     fontFamily: "comfortaaRegular",
     color: "red",
     textAlign: "center",
@@ -211,13 +231,6 @@ const styles = StyleSheet.create({
     fontFamily: "comfortaaRegular",
     color: "#666",
     textAlign: "center",
-  },
-  clearButton: {
-    position: "absolute",
-    right: 45,
-    top: 15,
-    padding: 5,
-    zIndex: 1000,
   },
 });
 

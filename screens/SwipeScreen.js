@@ -26,6 +26,7 @@ import SearchTags from "../components/SearchTags";
 import UserDisplayer from "../components/UserDisplayer";
 import { likeApartment, unlikeApartment } from "../api/likes";
 import { getUser } from "../api/users";
+import { useNavigation } from "@react-navigation/native";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = 120;
 const defaultUserImage = require("../assets/placeholders/default-user-image.jpg");
@@ -65,6 +66,8 @@ const SwipeScreen = (props) => {
   const [ownerLoaded, setOwnerLoaded] = useState(false);
   const [ownerData, setOwnerData] = useState(null);
   const compatibilityScore = Math.floor(Math.random() * 40) + 60; // Random score between 60-99%
+
+  const navigation = useNavigation();
 
   // Fetch apartment owner details when the contact button is pressed
   const fetchOwnerDetails = async () => {
@@ -371,24 +374,28 @@ const SwipeScreen = (props) => {
     }
   };
 
-  const handleOpenFacebook = (url) => {
-    Linking.openURL(url).catch((err) =>
-      Alert.alert("Could not open Facebook profile")
-    );
+  const handleOpenFacebook = () => {
+    // Navigate to ChatScreen passing the owner data
+    navigation.navigate("ChatScreen", {
+      owner: ownerData,
+      apartmentId: apartment.id,
+      apartmentAddress: address,
+    });
   };
 
   const loadOwnerData = async () => {
-    if (ownerLoaded || loadingOwner) return;
+    if (ownerLoaded) return; // Already loaded, don't reload
 
     setLoadingOwner(true);
     try {
       // Check if apartment has user_details - use it directly
       if (apartment && apartment.user_details) {
         setOwnerData(apartment.user_details);
-        setOwnerLoaded(true);
       } else {
         // Fallback in case user_details is not available
-        console.log("No user_details found in apartment data, using fallback");
+        console.log(
+          "[Owner Data] No user_details found in apartment data, using fallback"
+        );
         setOwnerData({
           first_name: "Apartment",
           last_name: "Owner",
@@ -398,25 +405,42 @@ const SwipeScreen = (props) => {
         });
       }
     } catch (error) {
-      console.error("Error processing owner data:", error);
+      console.error("[Owner Data] Error processing owner data:", error);
     } finally {
+      setOwnerLoaded(true);
       setLoadingOwner(false);
     }
   };
 
-  // Call loadOwnerData when the apartment changes
+  // Modify the useEffect to have better dependency handling and preserve data
   useEffect(() => {
-    if (apartment) {
+    // Only run if we have apartment data and haven't loaded the owner yet
+    if (apartment && !ownerLoaded) {
+      console.log(
+        "[Owner Data] Loading owner data for apartment:",
+        apartment.id
+      );
       loadOwnerData();
     }
-    return () => {
-      setOwnerLoaded(false);
-      setOwnerData(null);
-    };
-  }, [apartment]);
 
+    // Clean up function that only runs when apartment changes, not on every re-render
+    return () => {
+      if (apartment?.id !== prevApartmentRef.current?.id) {
+        console.log("[Owner Data] Apartment changed, resetting owner data");
+        setOwnerLoaded(false);
+        setOwnerData(null);
+        prevApartmentRef.current = apartment;
+      }
+    };
+  }, [apartment, ownerLoaded]);
+
+  // Add a ref to track previous apartment
+  const prevApartmentRef = useRef(null);
+
+  // Update the renderContactSection function to handle data more consistently
   const renderContactSection = () => {
-    if (loadingOwner) {
+    // Don't show loading if we already have data
+    if (loadingOwner && !ownerData) {
       return (
         <LinearGradient
           colors={["rgba(139, 69, 19, 0.85)", "rgba(160, 82, 45, 0.8)"]}
@@ -429,9 +453,12 @@ const SwipeScreen = (props) => {
 
     // Use a default URL if none exists
     const facebookUrl = "https://facebook.com";
-    const fullName = ownerData
-      ? `${ownerData.first_name || ""} ${ownerData.last_name || ""}`.trim()
-      : "Property Owner";
+
+    // Only use fallback name if we actually don't have owner data
+    const fullName =
+      ownerData && (ownerData.first_name || ownerData.last_name)
+        ? `${ownerData.first_name || ""} ${ownerData.last_name || ""}`.trim()
+        : "Property Owner";
 
     return (
       <LinearGradient
@@ -472,7 +499,7 @@ const SwipeScreen = (props) => {
 
             <TouchableOpacity
               style={styles.facebookButton}
-              onPress={() => handleOpenFacebook(facebookUrl)}
+              onPress={handleOpenFacebook}
             >
               <FontAwesome name="facebook-square" size={20} color="#3b5998" />
               <Text style={styles.facebookButtonText}>Facebook Profile</Text>
@@ -599,7 +626,7 @@ const SwipeScreen = (props) => {
 
                 <TouchableOpacity
                   style={styles.contactOption}
-                  onPress={() => handleOpenFacebook(ownerDetails.facebook_link)}
+                  onPress={() => handleOpenFacebook()}
                   disabled={!ownerDetails.facebook_link}
                 >
                   <LinearGradient
