@@ -1,5 +1,4 @@
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
-import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
 const StepEight = () => {
@@ -15,4 +14,3 @@ const StepEight = () => {
 
 export default StepEight;
 
-const styles = StyleSheet.create({});

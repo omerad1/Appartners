@@ -60,8 +60,14 @@ export const submitAnswer = async (questionId, answer) => {
  */
 export const submitMultipleAnswers = async (answers) => {
   try {
-    // Filter out null answers
-    const validAnswers = answers.filter(a => a.answer !== null);
+    // Filter out null answers and empty strings
+    const validAnswers = answers.filter(a => {
+      // Treat empty strings as null
+      if (a.answer === "" || a.answer === null) {
+        return false;
+      }
+      return true;
+    });
     
     if (validAnswers.length === 0) {
       console.log("No valid answers to submit");

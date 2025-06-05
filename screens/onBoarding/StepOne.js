@@ -10,6 +10,7 @@ import { validateUnique } from "../../api/registration";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateOnboardingData } from "../../store/redux/slices/onboardingSlice";
+import { usePreferencesPayload } from "../../context/PreferencesPayloadContext";
 
 // Yup schema for required email & phone
 const schema = yup.object().shape({
@@ -66,7 +67,7 @@ const StepOne = () => {
         resolve(result);
       })();
     });
-
+  
   return (
     <>
       <OnBoardingLayout
