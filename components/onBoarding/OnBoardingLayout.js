@@ -8,7 +8,7 @@ const OnBoardingLayout = ({ title, children, direction, next, onPress }) => {
   return (
     <BackgroundImage>
       <KeyboardAwareWrapper
-        scrollEnabled={false}
+        scrollEnabled={true}
         style={styles.keyboardWrapper}
       >
         <View style={styles.container}>

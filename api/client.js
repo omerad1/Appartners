@@ -15,7 +15,7 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: api_base_tom_comp,
+  baseURL: API_BASE_URL_Production,
   timeout: 30000, // 30 seconds timeout
   headers: {
     "Content-Type": "application/json",

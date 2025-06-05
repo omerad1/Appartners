@@ -6,7 +6,6 @@ import SimpleDropDown from "../../components/general/SimpleDropDown";
 import DatePicker from "../../components/general/DatePicker";
 import dayjs from "dayjs";
 import ProfileImagePicker from "../../components/onBoarding/ProfileImagePicker";
-import { ScrollView } from "react-native-gesture-handler";
 import { useDispatch, useSelector } from 'react-redux';
 import { updateOnboardingData } from '../../store/redux/slices/onboardingSlice';
 
@@ -57,36 +56,34 @@ const StepFour = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <OnBoardingLayout
-        direction="StepFive"
-        next={true}
-        title={`Let's Start With The Basics`}
-        onPress={handleNext}
-      >
-        <ProfileImagePicker
-          profileImage={localProfileImage}
-          setProfileImage={handleProfileImageChange}
-        />
-        <SimpleDropDown
-          data={genderOptions}
-          onChange={handleGenderChange}
-          value={localGender}
-          placeholder="Gender"
-        />
-        <InputField
-          placeholder="Occupation"
-          type="text"
-          value={localOccupation}
-          onChange={handleOccupationChange}
-        />
-        <DatePicker
-          title={"Select Birth Date"}
-          date={localBirthDay}
-          setDate={handleBirthDateChange}
-        />
-      </OnBoardingLayout>
-    </ScrollView>
+    <OnBoardingLayout
+      direction="StepFive"
+      next={true}
+      title={`Let's Start With The Basics`}
+      onPress={handleNext}
+    >
+      <ProfileImagePicker
+        profileImage={localProfileImage}
+        setProfileImage={handleProfileImageChange}
+      />
+      <SimpleDropDown
+        data={genderOptions}
+        onChange={handleGenderChange}
+        value={localGender}
+        placeholder="Gender"
+      />
+      <InputField
+        placeholder="Occupation"
+        type="text"
+        value={localOccupation}
+        onChange={handleOccupationChange}
+      />
+      <DatePicker
+        title={"Select Birth Date"}
+        date={localBirthDay}
+        setDate={handleBirthDateChange}
+      />
+    </OnBoardingLayout>
   );
 };
 
