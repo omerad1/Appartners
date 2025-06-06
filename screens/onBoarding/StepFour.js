@@ -79,9 +79,10 @@ const StepFour = () => {
         onChange={handleOccupationChange}
       />
       <DatePicker
-        title={"Select Birth Date"}
-        date={localBirthDay}
-        setDate={handleBirthDateChange}
+        placeholder="Select Birth Date"
+        value={localBirthDay.toDate ? null : localBirthDay}
+        onChange={handleBirthDateChange}
+        mode="birthdate"
       />
     </OnBoardingLayout>
   );

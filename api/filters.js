@@ -19,16 +19,13 @@ export const postUserFilters = async (filtersData) => {
         const cityId = filtersData.city && typeof filtersData.city === 'object' && filtersData.city.id
             ? filtersData.city.id  // Use the ID from the city object
             : (filtersData.city || null);  // Use the city value as is or null if not present
-            
-        console.log("City object:", filtersData.city);
-        console.log("Extracted city ID:", cityId);
         
-        // Ensure features are IDs (they should already be IDs from the TagsSelector)
-        console.log("Features/tags:", filtersData.features);
+        // Log the incoming data to debug
+        console.log("Filters data received:", filtersData);
         
         // Convert from app format to API format if needed
         const apiFormatData = {
-            move_in_date: filtersData.moveInDate,
+            move_in_date: filtersData.move_in_date, // Use move_in_date instead of moveInDate
             price_range: {
                 min_price: filtersData.priceRange?.min || null,
                 max_price: filtersData.priceRange?.max || null

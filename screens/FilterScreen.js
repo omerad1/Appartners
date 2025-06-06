@@ -152,7 +152,33 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   }, [visible, safePreferences]);
   
   // Accessor functions for temporary form state
-  const setMoveInDate = (value) => setTempForm(prev => ({ ...prev, moveInDate: value }));
+  const setMoveInDate = (value) => {
+    // Log the received date value
+    console.log('Move-in date selected:', value);
+    console.log('Type of move-in date:', typeof value);
+    console.log('Is Date instance:', value instanceof Date);
+    
+    if (value instanceof Date) {
+      console.log('Date string representation:', value.toString());
+      console.log('Date ISO string:', value.toISOString());
+    }
+    
+    // Ensure we have a valid date object
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      console.log('Setting valid date in state');
+      setTempForm(prev => {
+        const newState = { ...prev, moveInDate: value };
+        console.log('New moveInDate state:', newState.moveInDate);
+        return newState;
+      });
+    } else if (value === null || value === undefined) {
+      // Clear the date if null/undefined
+      console.log('Clearing date (null/undefined)');
+      setTempForm(prev => ({ ...prev, moveInDate: null }));
+    } else {
+      console.log('Invalid date value, not updating state');
+    }
+  };
   const setPriceRange = (value) => setTempForm(prev => ({ ...prev, priceRange: value }));
   
   // Special handling for roommates to ensure we always get an array
@@ -251,6 +277,16 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   };
 
   const handleApplyFilters = () => {
+    // Debug the current state of moveInDate before creating filters
+    console.log('moveInDate before creating filters:', moveInDate);
+    console.log('moveInDate type:', typeof moveInDate);
+    console.log('moveInDate is Date instance:', moveInDate instanceof Date);
+    console.log('tempForm state:', tempForm);
+    
+    // Get moveInDate directly from tempForm to ensure we're using the latest value
+    const { moveInDate: currentMoveInDate } = tempForm;
+    console.log('moveInDate from tempForm:', currentMoveInDate);
+    
     // Create the filters object with the temporary form data
     const filters = {
       area: area || null,
@@ -258,16 +294,25 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
       // Send features as an array of IDs
       features: selectedFeatures,
       max_floor: maxFloor ? parseInt(maxFloor, 10) : null,
-      move_in_date: moveInDate ? moveInDate.format('YYYY-MM-DD') : null,
+      // Handle both dayjs objects and native Date objects
+      move_in_date: currentMoveInDate ? (
+        currentMoveInDate.format ? 
+          currentMoveInDate.format('YYYY-MM-DD') : 
+          `${currentMoveInDate.getFullYear()}-${String(currentMoveInDate.getMonth() + 1).padStart(2, '0')}-${String(currentMoveInDate.getDate()).padStart(2, '0')}`
+      ) : null,
       number_of_roommates: selectedRoommates,
       price_range: {
         min: priceRange.min,
         max: priceRange.max
       }
     };
+    
+    console.log('Final filters object with move_in_date:', filters);
 
     // Call the onApply callback with the filters to save them on the backend
     if (onApply) {
+      // Log the filters being sent to the backend
+      console.log('Sending filters to backend:', filters);
       onApply(filters);
     }
 
@@ -353,7 +398,7 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
             hasValue={!!moveInDate}
             onClear={() => setMoveInDate(null)}
           >
-            <DatePicker date={moveInDate} setDate={setMoveInDate} />
+          <DatePicker placeholder={"Move in Date"} value={moveInDate} onDateConfirm={setMoveInDate} mode="entryDate" />
           </FilterSection>
           <FilterSection
             title="Features (e.g. balcony, parking)"

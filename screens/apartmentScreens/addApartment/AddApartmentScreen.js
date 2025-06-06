@@ -316,9 +316,10 @@ const AddApartmentScreen = () => {
                 <View style={styles.datePickerContainer}>
                   <Text style={styles.label}>Entry Date</Text>
                   <DatePicker
-                    title="Select Entry Date"
-                    date={entryDay}
-                    setDate={setEntryDay}
+                    placeholder="Select Entry Date"
+                    value={entryDay}
+                    onDateConfirm={setEntryDay}
+                    mode="entryDate"
                   />
                 </View>
               </Card.Content>
