@@ -1,9 +1,15 @@
+// endpoints.js
+const withBase = (base, paths) =>
+  Object.fromEntries(Object.entries(paths).map(([key, path]) => [key, `${base}${path}`]));
+
 const endpoints = {
-  login: "/api/v1/authenticate/login/",
-  register: "/api/v1/authenticate/register/",
-  validateUnique: "/api/v1/authenticate/validate-unique/",
-  refreshToken: "/api/v1/authenticate/token/refresh/",
-  logout: "/api/v1/authenticate/logout/",
+  auth: withBase("/api/v1/authenticate/", {
+    login: "login/",
+    register: "register/",
+    validateUnique: "validate-unique/",
+    refreshToken: "token/refresh/",
+    logout: "logout/",
+  }),
 
   //my apartments
   myApartments: "/api/v1/apartments/my/",

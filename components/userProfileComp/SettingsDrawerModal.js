@@ -24,7 +24,7 @@ import TermsModal from './TermsModal';
 
 import { useDispatch } from 'react-redux';
 import { logout as logoutAction } from '../../store/redux/user';
-import { logout as apiLogout } from '../../api/auth';
+import { logout as apiLogout } from '../../api/auth/auth';
 import { useAuth } from '../../context/AuthContext';
 
 const SettingsDrawerModal = ({ visible, onClose }) => {

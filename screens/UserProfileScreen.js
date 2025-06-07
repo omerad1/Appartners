@@ -1,4 +1,4 @@
-import React, { useState, useEffect, cache } from "react";
+import React, { useState, useEffect} from "react";
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import { ProgressBar, Colors } from "react-native-paper";
+import { ProgressBar } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import BackgroundImage from "../components/layouts/BackgroundImage";
 import FilterScreen from "./FilterScreen";

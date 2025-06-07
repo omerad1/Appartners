@@ -12,7 +12,7 @@ import Title from "../components/general/Title";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { login as apiLogin } from "../api/auth";
+import { login as apiLogin } from "../api/auth/auth";
 import InputField from "../components/onBoarding/InputField";
 import BackgroundImage from "../components/layouts/BackgroundImage";
 import { useDispatch } from "react-redux";
