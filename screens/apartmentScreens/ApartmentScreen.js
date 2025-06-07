@@ -23,8 +23,7 @@ import Title from "../../components/general/Title"; // Import your custom Title 
 import { useNavigation } from "@react-navigation/native";
 import ModalApartmentDisplayer from "../../components/apartmentsComp/ModalApartmentDisplayer"; // Import the modal
 
-import { getUserApartments } from "../../api/myApartments"; // Import the function to fetch apartments
-import { deleteApartment } from "../../api/deleteApartment"; // Import the function to delete apartments
+import { deleteApartment, getUserApartments} from "../../api/apartments/index"; // Import the function to delete apartments
 import BackgroundImage from "../../components/layouts/BackgroundImage";
 
 const { width } = Dimensions.get("window");

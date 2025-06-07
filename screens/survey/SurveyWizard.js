@@ -4,7 +4,7 @@ import SurveyLayout from "../../components/survey/SurveyLayout";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { usePreferencesPayload } from "../../context/PreferencesPayloadContext";
 import { Ionicons } from "@expo/vector-icons";
-import { submitMultipleAnswers } from "../../api/questions";
+import { submitMultipleAnswers } from "../../api/questions/index";
 
 
 const Wizard = () => {

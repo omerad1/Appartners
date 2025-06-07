@@ -17,8 +17,6 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import BackgroundImage from "../../../components/layouts/BackgroundImage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { createApartment } from "../../../api/createApartment";
-import { updateApartment } from "../../../api/updateApartment";
 import { Card } from "react-native-paper";
 import CitySearchInput from "../../../components/apartmentsComp/CitySearchInput";
 import AreaSearchInput from "../../../components/apartmentsComp/AreaSearchInput";

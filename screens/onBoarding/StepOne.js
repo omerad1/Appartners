@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import InputField from "../../components/onBoarding/InputField";
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
 import { Snackbar } from "react-native-paper";
-import { validateUnique } from "../../api/registration";
+import { validateUnique } from "../../api/auth/auth";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateOnboardingData } from "../../store/redux/slices/onboardingSlice";

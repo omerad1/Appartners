@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { updateOnboardingData, resetOnboarding } from "../../store/redux/slices/onboardingSlice";
-import { registerUser } from "../../api/registration";
+import { registerUser } from "../../api/auth/auth";
 
 const StepSeven = () => {
   const dispatch = useDispatch();

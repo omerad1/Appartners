@@ -147,4 +147,12 @@ export const getNewAcessToken = async () => {
     catch (error){
       consol.log(res.error)
     }
-}
+    
+};
+// For checking if email and phone are unique
+export const validateUnique = async (email, phone) => {
+  const res = await api.post(endpoints.auth.validateUnique, { email, phone });
+  console.log("Validation successful:", res.data);
+  return res.data;
+};
+

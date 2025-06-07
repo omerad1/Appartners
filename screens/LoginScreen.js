@@ -18,7 +18,7 @@ import BackgroundImage from "../components/layouts/BackgroundImage";
 import { useDispatch } from "react-redux";
 import { login } from "../store/redux/user";
 import { useAuth } from "../context/AuthContext";
-import { fetchUserData } from "../api/user";
+import { fetchUserData } from "../api/users/index";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");

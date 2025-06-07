@@ -1,8 +1,9 @@
-import api from "./client";
+import endpoints from "../endpoints";
+import api from "../client";
 
 export const deleteApartment = async (apartmentId) => {
   try {
-    const res = await api.delete(`/api/v1/apartments/${apartmentId}/`);
+    const res = await api.delete(endpoints.aparments.delete(apartmentId));
     console.log("🗑️ Apartment deleted successfully:", res.data);
     return res.data;
   } catch (err) {

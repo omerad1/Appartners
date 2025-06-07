@@ -3,7 +3,7 @@ import { getTokens, clearTokens } from '../api/client';
 import {getNewAcessToken} from "../api/auth/auth"
 import { useDispatch } from 'react-redux';
 import { login, logout } from '../store/redux/user';
-import { fetchUserData } from '../api/user';
+import { fetchUserData } from '../api/users/index';
 import { initializeSocket, disconnectSocket } from '../api/socket';
 import store from '../store/redux/store';
 

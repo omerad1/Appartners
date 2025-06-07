@@ -2,14 +2,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   FlatList,
-  Image,
   StyleSheet,
   Text,
-  Dimensions,
   TouchableOpacity,
-  ActivityIndicator,
   SafeAreaView,
-  Linking,
   Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -23,10 +19,8 @@ import UserDisplayerModal from "../components/userProfileComp/UserDisplayerModal
 import {
   getLikedApartments,
   getUsersWhoLikedMyApartment,
-  likeApartment,
-  unlikeApartment,
   likeUser,
-} from "../api/likes";
+} from "../api/apartments/index";
 import AppartnersLoader from "../components/general/ApartnersLoader";
 
 const ApartmentsILiked = ({

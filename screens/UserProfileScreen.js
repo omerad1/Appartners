@@ -13,7 +13,7 @@ import BackgroundImage from "../components/layouts/BackgroundImage";
 import FilterScreen from "./FilterScreen";
 import { useSelector, useDispatch } from "react-redux";
 import { saveUserPreferences, fetchUserPreferences, loadUserData } from "../store/redux/userThunks";
-import { getUserDataFromStorage } from "../api/user";
+import { getUserDataFromStorage } from "../api/users/index";
 import QuestionnaireModal from "../components/userProfileComp/QuestionnaireModal";
 import EditProfileModal from "../components/userProfileComp/EditProfileModal";
 import UserDisplayerModal from "../components/userProfileComp/UserDisplayerModal";

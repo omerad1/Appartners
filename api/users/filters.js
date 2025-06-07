@@ -1,9 +1,9 @@
-import endpoints from "./endpoints";
-import api from "./client"
+import endpoints from "../endpoints";
+import api from "../client"
 
 export const getUserFilters = async () => {
     try {
-      const res = await api.get(endpoints.filters);
+      const res = await api.get(endpoints.users.filters);
       console.log("🏠 Fetched filters", res.data);
       return res.data;
     } catch (err) {
@@ -38,7 +38,7 @@ export const postUserFilters = async (filtersData) => {
         };
         console.log("API format data:", apiFormatData);
         // Make the POST request to save filters
-        const res = await api.post(endpoints.filters, apiFormatData);
+        const res = await api.post(endpoints.users.filters, apiFormatData);
         console.log("🏠 Saved user filters", res.data);
         return res.data;
     }
