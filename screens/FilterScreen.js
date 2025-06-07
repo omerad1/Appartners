@@ -46,9 +46,10 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   const initTempForm = () => {
     // Move-in date
     const tempMoveInDate = (() => {
-      if (!originalPrefs.current.move_in_date) return null;
+      if (!originalPrefs.current.moveInDate) return null;
       try {
-        const date = new Date(originalPrefs.current.move_in_date);
+        const date = new Date(originalPrefs.current.moveInDate);
+        console.log(date)
         return !isNaN(date.getTime()) ? date : null;
       } catch (error) {
         return null;
@@ -153,16 +154,6 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   
   // Accessor functions for temporary form state
   const setMoveInDate = (value) => {
-    // Log the received date value
-    console.log('Move-in date selected:', value);
-    console.log('Type of move-in date:', typeof value);
-    console.log('Is Date instance:', value instanceof Date);
-    
-    if (value instanceof Date) {
-      console.log('Date string representation:', value.toString());
-      console.log('Date ISO string:', value.toISOString());
-    }
-    
     // Ensure we have a valid date object
     if (value instanceof Date && !isNaN(value.getTime())) {
       console.log('Setting valid date in state');
@@ -217,8 +208,8 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   useEffect(() => {
     if (visible && !initializedRef.current) {
       const sectionsToOpen = {};
-      
-      if (originalPrefs.current.move_in_date) sectionsToOpen[SECTION_KEYS.MOVE_IN_DATE] = true;
+      console.log(originalPrefs.current.move_in_date)
+      if (safePreferences.moveInDate) sectionsToOpen[SECTION_KEYS.MOVE_IN_DATE] = true; 
       if (originalPrefs.current.price_range && 
           (originalPrefs.current.price_range.min !== defaultPriceRange.min || 
            originalPrefs.current.price_range.max !== defaultPriceRange.max)) {
@@ -277,11 +268,7 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   };
 
   const handleApplyFilters = () => {
-    // Debug the current state of moveInDate before creating filters
-    console.log('moveInDate before creating filters:', moveInDate);
-    console.log('moveInDate type:', typeof moveInDate);
-    console.log('moveInDate is Date instance:', moveInDate instanceof Date);
-    console.log('tempForm state:', tempForm);
+
     
     // Get moveInDate directly from tempForm to ensure we're using the latest value
     const { moveInDate: currentMoveInDate } = tempForm;
@@ -398,7 +385,7 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
             hasValue={!!moveInDate}
             onClear={() => setMoveInDate(null)}
           >
-          <DatePicker placeholder={"Move in Date"} value={moveInDate} onDateConfirm={setMoveInDate} mode="entryDate" />
+          <DatePicker placeholder={"Move in Date"} value={tempForm.moveInDate} initialDate={tempForm.moveInDate} onDateConfirm={setMoveInDate} mode="entryDate" />
           </FilterSection>
           <FilterSection
             title="Features (e.g. balcony, parking)"

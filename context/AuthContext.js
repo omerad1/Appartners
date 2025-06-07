@@ -56,7 +56,6 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
           }
         } catch (refreshError) {
-
           await clearTokens();
           dispatch(logout());
           setIsAuthenticated(false);

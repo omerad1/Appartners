@@ -7,7 +7,7 @@ const API_BASE_URL = "http://10.0.0.3:8000/";
 const API_BASE_URL_Production =
   "https://appartners-backend-production.up.railway.app";
 
-const api_base_tom_comp ="https://583d-2a06-c701-97c3-dc00-dd11-3549-ddf0-e166.ngrok-free.app";
+const api_base_tom_comp ="https://77e3-94-159-248-65.ngrok-free.app";
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -156,6 +156,7 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
 
         // Clear tokens and redirect to login
+        console.log("this is invoked 100")
         await clearTokens();
 
         // You might want to trigger a navigation to login screen here

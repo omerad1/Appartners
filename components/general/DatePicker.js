@@ -18,7 +18,6 @@ const DatePicker = ({
 }) => {
   const hasValidDate = value instanceof Date;
   const hasValidInitialDate = initialDate instanceof Date;
-
   const [date, setDate] = useState(hasValidDate ? value : (hasValidInitialDate ? initialDate : null));
   const [tempDate, setTempDate] = useState(date || new Date());
   const [visible, setVisible] = useState(false);
@@ -89,7 +88,7 @@ const DatePicker = ({
   const formattedDate = date instanceof Date 
     ? date.toLocaleDateString('en-GB')
     : '';
-
+  console.log(formattedDate)
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity 

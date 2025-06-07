@@ -40,7 +40,6 @@ const StepOne = () => {
 
   const onSubmit = async (data) => {
     const { email, phoneNumber } = data;
-    console.log("Form data submitted:", data);
 
     try {
       await validateUnique(email, phoneNumber);
@@ -61,10 +60,21 @@ const StepOne = () => {
 
   const submitAndValidate = () =>
     new Promise((resolve) => {
-      handleSubmit(async (data) => {
+      // This will run if validation passes
+      const onValid = async (data) => {
         const result = await onSubmit(data);
         resolve(result);
-      })();
+      };
+      
+      // This will run if validation fails
+      const onInvalid = (errors) => {
+        console.log('Validation errors:', errors);
+        // Immediately resolve with false to prevent the loader
+        resolve(false);
+      };
+      
+      // Pass both callbacks to handleSubmit
+      handleSubmit(onValid, onInvalid)();
     });
   
   return (

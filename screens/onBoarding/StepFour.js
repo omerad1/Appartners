@@ -15,8 +15,9 @@ const StepFour = () => {
 
   const [localOccupation, setLocalOccupation] = useState(occupation || "");
   const [localGender, setLocalGender] = useState(gender || null);
-  const [localBirthDay, setLocalBirthDay] = useState(birthDate ? dayjs(birthDate) : dayjs());
-  const [localProfileImage, setLocalProfileImage] = useState(savedProfileImage || null);
+  const [localBirthDay, setLocalBirthDay] = useState(
+    birthDate ? dayjs(birthDate) : null
+  );  const [localProfileImage, setLocalProfileImage] = useState(savedProfileImage || null);
 
   const genderOptions = [
     { label: "Male", value: "Male" },
@@ -36,7 +37,7 @@ const StepFour = () => {
 
   const handleBirthDateChange = (date) => {
     setLocalBirthDay(date);
-    dispatch(updateOnboardingData({ birthDate: date.format('YYYY-MM-DD') }));
+    dispatch(updateOnboardingData({ birthDate: new Date(date).toISOString() }));
   };
 
   const handleProfileImageChange = (image) => {
@@ -80,7 +81,7 @@ const StepFour = () => {
       />
       <DatePicker
         placeholder="Select Birth Date"
-        value={localBirthDay.toDate ? null : localBirthDay}
+        value={localBirthDay}
         onChange={handleBirthDateChange}
         mode="birthdate"
       />

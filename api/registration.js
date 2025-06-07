@@ -1,6 +1,5 @@
-import api from "./client";
+import api, { saveTokens } from "./client";
 import endpoints from "./endpoints";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // For checking if email and phone are unique
 export const validateUnique = async (email, phone) => {
@@ -42,11 +41,11 @@ export const registerUser = async (details) => {
     console.log("Sending registration with FormData");
     const res = await api.post(endpoints.register, formData, config);
     
-    console.log("Registration response:", res.data);
-    if (res.status !== 200) {
-      return res.data;
+    if (res.data && res.data.UserAuth && res.data.RefreshToken) {
+      console.log('Received both access and refresh tokens');
+      // Save both tokens securely
+      await saveTokens(res.data.UserAuth, res.data.RefreshToken);
     }
-    await AsyncStorage.setItem("authToken", res.data.UserAuth);
     return res.data;
   } catch (error) {
     // Extract and log the error response body

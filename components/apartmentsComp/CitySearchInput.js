@@ -167,7 +167,7 @@ const CitySearchInput = ({ value, onChange, initialValue }) => {
           style={styles.input}
           value={searchText}
           onChangeText={handleChangeText}
-          placeholder="Enter city name"
+          placeholder="Enter city name *"
           onFocus={handleFocus}
           autoCapitalize="words"
         />

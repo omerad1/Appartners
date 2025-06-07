@@ -76,7 +76,8 @@ const Wizard = () => {
   const onFinish = async () => {
     // Format answers to match backend expectations
     const formattedAnswers = [];
-    console.log(answers)
+    console.log("Current answers:", answers);
+    
     Object.entries(answers).forEach(([index, value]) => {
       const step = formattedSteps[parseInt(index)];
       
@@ -88,7 +89,7 @@ const Wizard = () => {
         }
         
         formattedAnswers.push({
-          question_id: step.id,
+          questionId: step.id, // Use questionId to match the API expectation
           answer: finalValue
         });
       } else if (step && step.ids && Array.isArray(step.ids)) {
@@ -106,7 +107,7 @@ const Wizard = () => {
               }
               
               formattedAnswers.push({
-                question_id: qId,
+                questionId: qId, // Use questionId to match the API expectation
                 answer: finalValue
               });
             }
@@ -129,6 +130,8 @@ const Wizard = () => {
       }
     });
     
+    console.log("Formatted answers for submission:", formattedAnswers);
+    
     try {
       // Show loading state or disable buttons here if needed
       
@@ -146,7 +149,7 @@ const Wizard = () => {
         "There was a problem submitting your survey. Please try again.",
         [{ text: "OK" }]
       );
-    }
+    }  
   };
   
   // Initialize default answers based on the formatted steps

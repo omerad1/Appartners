@@ -97,8 +97,10 @@ export const submitMultipleAnswers = async (answers) => {
       })
     };
     
-    console.log('Submitting answers payload:', JSON.stringify(payload, null, 2));
+  
     const res = await api.post(endpoints.answers, payload);
+    
+    // Remove the interceptor after the request is complete
     console.log("Submitted multiple answers:", res.data);
     return res.data;
   } catch (err) {
