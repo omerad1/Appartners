@@ -17,7 +17,7 @@ const endpoints = {
   }),
 
   //apartments related endpoints
-  aparments: withBase("/api/v1/apartments/",{
+  apartments: withBase("/api/v1/apartments/",{
     getMy: "my/",
     create: "new/",
     getSwipes: "recommendations/",

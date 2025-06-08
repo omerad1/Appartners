@@ -32,7 +32,7 @@ const isHebrew = (text) => /[\u0590-\u05FF]/.test(text);
 const ChatScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { roomId, otherParticipant: initialOtherParticipant, roomDetails: initialRoomDetails,  } = route.params || {};
+  const { roomId, otherParticipant: initialOtherParticipant, roomDetails: initialRoomDetails, match: compatibility_score  } = route.params || {};
   // Debug log to check what's being passed in route params
   const currentUser = useSelector((state) => state.user.currentUser);
   // State for UserDisplayerModal
@@ -69,9 +69,9 @@ const ChatScreen = () => {
       name: `${otherParticipant.first_name} ${otherParticipant.last_name}`,
       profile_image: otherParticipant.photo_url,
       bio: otherParticipant.bio,
-      age: null,
+      age: otherParticipant.age || null, 
       occupation: otherParticipant.occupation || null,
-      compatibility_score: null,
+      compatibility_score: compatibility_score || null,
       questionnaire_responses: otherParticipant.questionnaire_responses || [],
       liked_apartment: {
         user_details: {
@@ -177,16 +177,19 @@ const ChatScreen = () => {
           const messagePayload = data.message || data;
           const messageId = messagePayload.id;
           setMessages((prevMessages) => {
+            // Find any temporary message that matches this confirmed message
             const tempMessage = prevMessages.find(
               (m) => m.isLocalSending && m.content === messagePayload.content
             );
 
             if (tempMessage) {
-              console.log('Replacing temp message with confirmed message');
+              console.log('Updating temp message with confirmed message');
               return prevMessages.map((m) =>
                 m.id === tempMessage.id
                   ? {
-                      ...messagePayload,
+                      ...m, // Keep existing message properties
+                      ...messagePayload, // Add server properties
+                      id: messagePayload.id, // Use server ID
                       isLocalSending: false,
                       error: undefined,
                       sender: messagePayload.sender || m.sender,
@@ -250,19 +253,32 @@ const ChatScreen = () => {
   }, [roomId, currentUser?.id, messages, markMessagesAsReadViaSocket]);
   
 
-  // --- Fetching and Socket Logic (largely unchanged from previous correct version) ---
+  // --- Fetching and Socket Logic ---
   const fetchMessages = useCallback(async () => {
     if (!roomId) return;
   
     try {
       const fetchedData = await getRoomMessages(roomId);
       const fetchedMessages = (fetchedData.results || fetchedData || [])
-  
-      // Only update messages if content actually changed
+      
+      // Preserve any pending messages that are still sending
       setMessages(prevMessages => {
-        const prevSerialized = JSON.stringify(prevMessages);
-        const fetchedSerialized = JSON.stringify(fetchedMessages);
-        return prevSerialized !== fetchedSerialized ? fetchedMessages : prevMessages;
+        // Find any messages that are still in sending state
+        const pendingMessages = prevMessages.filter(msg => msg.isLocalSending);
+        
+        // If we have pending messages, merge them with fetched messages
+        if (pendingMessages.length > 0) {
+          // Get all fetched message IDs to avoid duplicates
+          const fetchedIds = new Set(fetchedMessages.map(msg => msg.id));
+          
+          // Only keep pending messages that haven't been confirmed by server yet
+          const stillPendingMessages = pendingMessages.filter(msg => !fetchedIds.has(msg.id));
+          
+          // Return merged messages with pending ones at the end
+          return [...fetchedMessages, ...stillPendingMessages];
+        }
+        
+        return fetchedMessages;
       });
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -273,12 +289,14 @@ const ChatScreen = () => {
   
   useEffect(() => {
     const loadInitial = async () => {
-      setIsLoading(true);
+      if (!messages.length) { // Only show loading on initial load
+        setIsLoading(true);
+      }
       await fetchMessages();
       setIsLoading(false);
     };
     loadInitial();
-  }, [fetchMessages]);
+  }, [fetchMessages, messages.length]);
   
 
   // Scroll to bottom when messages change or when loading completes
@@ -301,7 +319,10 @@ const ChatScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchMessages();
+      // Only fetch if we don't have messages or if it's been a while since last fetch
+      if (messages.length === 0) {
+        fetchMessages();
+      }
       
       // When the current user enters the chat, mark unread messages from the other user as read
       const markUnreadMessagesAsRead = async () => {
@@ -420,16 +441,19 @@ const ChatScreen = () => {
                 try {
                   const sentMessageFromServer = await sendApiMessage(otherParticipant?.id, messageToSend);
                   
-                  setMessages(prev =>
-                    prev.map(m =>
+                  // Update the message without causing a flicker
+                  setMessages(prev => {
+                    return prev.map(m =>
                       m.id === tempId ? { 
-                        ...sentMessageFromServer, 
+                        ...m, // Keep existing message properties
+                        ...sentMessageFromServer, // Add server properties
+                        id: sentMessageFromServer.id, // Use server ID
                         isLocalSending: false, 
                         error: undefined,
                         _clientMessageId: tempId // Keep the client ID for reference
                       } : m
-                    )
-                  );
+                    );
+                  });
                 } catch (fallbackError) {
                   console.error('Error sending message via API fallback:', fallbackError);
                   setMessages(prev =>
@@ -477,7 +501,9 @@ const ChatScreen = () => {
           if (messageExists) {
             return prev.map(m =>
               m.id === tempId ? { 
-                ...sentMessageFromServer, 
+                ...m, // Keep existing message properties
+                ...sentMessageFromServer, // Add server properties
+                id: sentMessageFromServer.id, // Use server ID
                 isLocalSending: false, 
                 error: undefined,
                 _clientMessageId: tempId // Keep the client ID for reference
@@ -666,6 +692,7 @@ const ChatScreen = () => {
         onClose={() => setUserModalVisible(false)}
         user={userDisplayerModalData}
         showQuestion={true}
+        showActions={false}
       />
     </SafeAreaView>
   );

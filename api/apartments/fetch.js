@@ -20,8 +20,8 @@ export const getApartments = async (filters = {}) => {
   
       // If we have filters, add them as query parameters
       const res = hasFilters
-        ? await api.get(endpoints.aparments.getSwipes, { params: filters })
-        : await api.get(endpoints.aparments.getSwipes);
+        ? await api.get(endpoints.apartments.getSwipes, { params: filters })
+        : await api.get(endpoints.apartments.getSwipes);
   
       return res.data;
     } catch (err) {

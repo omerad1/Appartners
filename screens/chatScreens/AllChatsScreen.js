@@ -183,7 +183,6 @@ const AllChatsScreen = () => {
 
   // Navigate to chat screen with the selected room
   const navigateToChat = (room) => {
-    console.log(JSON.stringify(room, null, 2))
     // Find the other participant (not the current user)
     const otherParticipant = currentUser ? 
       room.participants.find(p => p.id !== currentUser.id) : room.participants[0];
@@ -191,6 +190,7 @@ const AllChatsScreen = () => {
     navigation.navigate('ChatScreen', { 
       roomId: room.id,
       otherParticipant: otherParticipant,
+      match: room.compatibility_score,
     });
     
     // If there are unread messages, they will be marked as read in the ChatScreen
@@ -648,6 +648,5 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
     backgroundColor: 'transparent',
-
   },
 });

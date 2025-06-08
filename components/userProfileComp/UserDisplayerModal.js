@@ -12,16 +12,16 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import QuestionCompatibilityDrawer from '../survey/QuestionCompatibilityDrawer';
 
-const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showActions = true, showQuestion = false}) => {
+const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showActions = true, showQuestion = false }) => {
   const [showDrawer, setShowDrawer] = useState(false);
   const [modalVisible, setModalVisible] = useState(visible);
-  // Update modalVisible when visible prop changes
+
   useEffect(() => {
     setModalVisible(visible);
   }, [visible]);
 
   if (!user) return null;
-  
+
   const {
     name,
     profile_image,
@@ -36,8 +36,8 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showAct
       } = {},
     } = {},
   } = user;
-  const isStudent =
-    occupation && (occupation.toLowerCase() === 'student' || occupation === 'סטודנט');
+
+  const isStudent = occupation && (occupation.toLowerCase() === 'student' || occupation === 'סטודנט');
 
   const formatNameWithAge = (name, age) => {
     if (!age) return name;
@@ -59,7 +59,7 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showAct
             </TouchableOpacity>
 
             <Image
-              source={profile_image ? { uri: profile_image } : require('../../assets/icons/crime.png')}
+              source={profile_image ? { uri: profile_image } : require('../../assets/userFallbackSquare.jpg')}
               style={styles.userImage}
               resizeMode="cover"
             />
@@ -88,35 +88,34 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showAct
                 <View style={styles.matchBadgeContainer}>
                   <TouchableOpacity
                     style={[
-                      styles.matchBadge,
+                      styles.matchCircle,
                       {
-                        backgroundColor: 
-                          (compatibility_score >= 75) ? '#E8F5E9' : // Light green bg for high match
-                          (compatibility_score >= 335) ? '#FFF8E1' : // Light yellow bg for medium match
-                          "#F44336"
-                      }
+                        borderColor:
+                          compatibility_score >= 75 ? '#4CAF50' :
+                          compatibility_score >= 35 ? '#FFC107' :
+                          '#F44336',
+                      },
                     ]}
                     onPress={() => {
-                      setModalVisible(false); // Hide the Modal
+                      setModalVisible(false);
                       setTimeout(() => {
-                        setShowDrawer(true); // Open drawer after modal unmounts
+                        setShowDrawer(true);
                       }, 50);
                     }}
                   >
-                    <Text 
-                      style={[
-                        styles.matchBadgeText, 
-                        {
-                          color: 
-                            (compatibility_score >= 75) ? '#4CAF50' : // Green for high match
-                            (compatibility_score >= 35) ? '#FFC107' : // Yellow for medium match
-                            '#F44336'
-                        }
-                      ]}
-                    >
+                    <MaterialCommunityIcons
+                      name="heart-pulse"
+                      size={20}
+                      color={
+                        compatibility_score >= 75 ? '#4CAF50' :
+                        compatibility_score >= 35 ? '#FFC107' :
+                        '#F44336'
+                      }
+                      style={{ marginBottom: 4 }}
+                    />
+                    <Text style={styles.matchCircleText}>
                       {compatibility_score ?? 0}%
                     </Text>
-                    <MaterialCommunityIcons name="help-circle-outline" size={18} color="#000" />
                   </TouchableOpacity>
                 </View>
               )}
@@ -143,7 +142,6 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showAct
           visible={showDrawer}
           onClose={() => {
             setShowDrawer(false);
-            // Reopen the modal after drawer closes
             setTimeout(() => {
               setModalVisible(true);
             }, 100);
@@ -249,31 +247,28 @@ const styles = StyleSheet.create({
   matchBadgeContainer: {
     position: 'absolute',
     top: 0,
-    left: 0,
+    left: 15,
     zIndex: 10,
   },
-  matchBadge: {
-    flexDirection: 'row',
+  matchCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    backgroundColor: '#fff',
     alignItems: 'center',
-    backgroundColor: '#e0f7fa',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderBottomRightRadius: 16,
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
-    borderTopRightRadius: 0,
-    borderRadius: 0,
-    elevation: 3,
+    justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  matchBadgeText: {
-    marginRight: 5,
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#00796B',
+  matchCircleText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
   },
   actionButtonsContainer: {
     flexDirection: 'row',

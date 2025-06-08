@@ -143,6 +143,7 @@ const AddApartmentScreen = () => {
   const handleCityChange = (city) => {
     console.log("City selection changed:", city);
     setSelectedCity(city);
+  
     if (city) {
       setFormData((prev) => ({ ...prev, city: city.id }));
       // Reset area when city changes

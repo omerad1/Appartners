@@ -75,7 +75,6 @@ const ApartmentsILiked = ({
 const PeopleLikedMyApartment = ({
   users,
   loading,
-  error,
   onUserPress,
   onRefresh,
   onApartmentPress,
@@ -84,14 +83,6 @@ const PeopleLikedMyApartment = ({
     return (
       <View style={styles.placeholderContainer}>
         <AppartnersLoader />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.placeholderContainer}>
-        <Text style={styles.hebrewText}>שגיאה: {error}</Text>
       </View>
     );
   }
@@ -118,7 +109,9 @@ const PeopleLikedMyApartment = ({
             <View style={styles.userSection}>
               <UserDisplayer
                 avatarSource={
-                  item.profile_image || "../assets/icons/avi-avatar.jpg"
+                  item.profile_image
+                    ? { uri: item.profile_image }
+                    : require("../assets/userFallback.png")
                 }
                 name={item.name}
                 facebookLink={item.facebook_link}
@@ -431,20 +424,6 @@ const LikesScreen = () => {
           </LinearGradient>
         </View>
 
-        <View style={styles.headerContainer}>
-          <TouchableOpacity
-            style={styles.refreshButton}
-            onPress={() => {
-              if (activeTab === "apartments") {
-                fetchLikedApartments();
-              } else {
-                fetchUsersWhoLikedMyApartment();
-              }
-            }}
-          >
-            <Ionicons name="refresh-outline" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
 
         <View style={styles.contentContainer}>{renderTab()}</View>
 
@@ -556,19 +535,7 @@ const styles = StyleSheet.create({
     color: "#888",
     fontSize: 16,
   },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    paddingHorizontal: 15,
-    paddingTop: 5,
-    paddingBottom: 5,
-  },
-  refreshButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: "rgba(91, 89, 85, 0.6)",
-  },
+
   // New styles for enhanced UI
   likeCardContainer: {
     marginVertical: 10,

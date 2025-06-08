@@ -142,7 +142,7 @@ export const getNewAcessToken = async () => {
     });
     if (res.data && res.data.UserAuth && res.data.RefreshToken)
       // Save the new tokens
-      await saveTokens(UserAuth, RefreshToken);
+      await saveTokens(res.data.UserAuth, res.data.RefreshToken);
     }
     catch (error){
       consol.log(res.error)
