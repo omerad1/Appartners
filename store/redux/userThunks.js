@@ -1,7 +1,6 @@
-import { getUserFilters, postUserFilters } from '../../api/filters';
 import { getPreferencesPayload } from '../../api/appDataPayload';
 import { setLoading, setError, setPreferences, updatePreferences, updateUserProfile, setProfileUpdating, setProfileUpdateError } from './user';
-import { saveUserDataToStorage, updateUserProfile as apiUpdateUserProfile, fetchUserData } from '../../api/user';
+import { saveUserDataToStorage, updateUserProfile as apiUpdateUserProfile, fetchUserData, getUserFilters, postUserFilters  } from '../../api/users/index';
 
 // Thunk action to fetch user preferences
 export const fetchUserPreferences = () => async (dispatch) => {

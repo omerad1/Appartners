@@ -23,6 +23,7 @@ const SimpleDropDown = ({ data, onChange, placeholder = "Select an item" }) => {
           setValue(val);
           onChange(val);
         }}
+        listMode="SCROLLVIEW"
       />
     </View>
   );

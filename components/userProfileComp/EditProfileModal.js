@@ -14,7 +14,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import DrawerModal from '../layouts/DrawerModal';
 import { updateUserProfileData } from '../../store/redux/userThunks';
-import { saveUserDataToStorage } from '../../api/user';
+import { saveUserDataToStorage } from '../../api/users/index';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 

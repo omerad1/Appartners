@@ -9,8 +9,8 @@ import {
 import React, { useState } from "react";
 import OnBoardingLayout from "../../components/onBoarding/OnBoardingLayout";
 import { useDispatch, useSelector } from "react-redux";
-import { updateOnboardingData } from "../../store/redux/slices/onboardingSlice";
-import { registerUser } from "../../api/registration";
+import { updateOnboardingData, resetOnboarding } from "../../store/redux/slices/onboardingSlice";
+import { registerUser } from "../../api/auth/auth";
 
 const StepSeven = () => {
   const dispatch = useDispatch();
@@ -33,13 +33,14 @@ const StepSeven = () => {
 
     try {
       // Prepare registration data
+      const stringDate = onboardingData.birthDate.split("T")[0]
       const registrationData = {
         email: onboardingData.email,
         phone_number: onboardingData.phoneNumber,
         first_name: onboardingData.firstName,
         last_name: onboardingData.lastName,
         password: onboardingData.password,
-        birth_date: onboardingData.birthDate,
+        birth_date: stringDate,
         occupation: onboardingData.occupation,
         gender: onboardingData.gender,
         preferred_city: onboardingData.location,
@@ -47,11 +48,13 @@ const StepSeven = () => {
         user_type: onboardingData.userType,
         photo: onboardingData.photo,
       };
-
+      console.log(registrationData)
       // Send registration request
       const response = await registerUser(registrationData);
 
       if (response && !response.error) {
+        // Reset the onboarding state to initial values
+        dispatch(resetOnboarding())
         return true; // Continue to next step
       } else {
         console.log("❌ Registration failed:", response);

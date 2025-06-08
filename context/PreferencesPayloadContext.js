@@ -4,6 +4,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Create the context
 const PreferencesPayloadContext = createContext();
+const retryWithDelay = async (fn, retries = 3, delay = 1000) => {
+  let lastError;
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      console.warn(`Retry ${i + 1}/${retries} failed:`, err.message);
+      await new Promise((res) => setTimeout(res, delay * (i + 1)));
+    }
+  }
+  throw lastError;
+};
 
 /**
  * Provider component that wraps the app and makes preferences payload data
@@ -21,7 +34,7 @@ export const PreferencesPayloadProvider = ({ children }) => {
     const fetchPayload = async () => {
       try {
         setIsLoading(true);
-        const data = await getPreferencesPayload();
+        const data = await retryWithDelay(() => getPreferencesPayload());
         
         // Assuming the API returns an object with cities and tags arrays
         setCities(data.cities || []);
@@ -51,7 +64,7 @@ export const PreferencesPayloadProvider = ({ children }) => {
           console.log('Loaded questions from local storage');
         } else {
           // If not in storage, fetch from API
-          const questionsData = await getQuestions();
+          const questionsData = await retryWithDelay(() => getQuestions());
           setQuestions(questionsData);
           
           // Store in AsyncStorage for future use

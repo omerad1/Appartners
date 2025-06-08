@@ -16,7 +16,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchUserPreferences } from "../store/redux/userThunks";
 import SwipeScreen from "./SwipeScreen";
 import { LinearGradient } from "expo-linear-gradient";
-import { getApartments } from "../api/apartments";
+import { getApartments } from "../api/apartments/index";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;

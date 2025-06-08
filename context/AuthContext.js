@@ -1,11 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getTokens, clearTokens, saveTokens } from '../api/client';
-import api from '../api/client';
-import axios from 'axios';
+import { getTokens, clearTokens } from '../api/client';
+import {getNewAcessToken} from "../api/auth/auth"
 import { useDispatch } from 'react-redux';
 import { login, logout } from '../store/redux/user';
-import endpoints from '../api/endpoints';
-import { fetchUserData } from '../api/user';
+import { fetchUserData } from '../api/users/index';
 import { initializeSocket, disconnectSocket } from '../api/socket';
 import store from '../store/redux/store';
 
@@ -36,18 +34,7 @@ export const AuthProvider = ({ children }) => {
       // If we have a refresh token but no access token or expired access token
       if (refreshToken) {
         try {
-
-          // Call the refresh endpoint directly
-          const refreshResponse = await axios.post(`${api.defaults.baseURL}${endpoints.refreshToken}`, {
-            refresh_token: refreshToken
-          });
-          
-          // Extract tokens from response
-          const { UserAuth, RefreshToken } = refreshResponse.data;
-          
-          // Save the new tokens
-          await saveTokens(UserAuth, RefreshToken);
-          
+          await getNewAcessToken()
           // Now fetch user data with the new access token (force refresh from server)
           const userData = await fetchUserData(true);
           
@@ -56,7 +43,6 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
           }
         } catch (refreshError) {
-
           await clearTokens();
           dispatch(logout());
           setIsAuthenticated(false);

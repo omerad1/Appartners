@@ -1,4 +1,4 @@
-import React, { useState, useEffect, cache } from "react";
+import React, { useState, useEffect} from "react";
 import {
   View,
   Text,
@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import { ProgressBar, Colors } from "react-native-paper";
+import { ProgressBar } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import BackgroundImage from "../components/layouts/BackgroundImage";
 import FilterScreen from "./FilterScreen";
 import { useSelector, useDispatch } from "react-redux";
 import { saveUserPreferences, fetchUserPreferences, loadUserData } from "../store/redux/userThunks";
-import { getUserDataFromStorage } from "../api/user";
+import { getUserDataFromStorage } from "../api/users/index";
 import QuestionnaireModal from "../components/userProfileComp/QuestionnaireModal";
 import EditProfileModal from "../components/userProfileComp/EditProfileModal";
 import UserDisplayerModal from "../components/userProfileComp/UserDisplayerModal";

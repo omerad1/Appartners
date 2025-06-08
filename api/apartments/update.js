@@ -1,8 +1,9 @@
-import api from "./client";
+import endpoints from "../endpoints";
+import api from "../client";
 
 export const updateApartment = async (apartmentId, formData) => {
   try {
-    const res = await api.put(`/api/v1/apartments/${apartmentId}/`, formData, {
+    const res = await api.put(endpoints.apartments.update(apartmentId), formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

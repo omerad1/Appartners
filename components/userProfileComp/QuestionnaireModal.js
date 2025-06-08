@@ -10,7 +10,7 @@ import {
 import { usePreferencesPayload } from '../../context/PreferencesPayloadContext';
 import DrawerModal from '../layouts/DrawerModal';
 import QuestionItem from '../survey/QuestionItem';
-import { getUserAnswers, submitAnswer, submitMultipleAnswers } from '../../api/questions';
+import { getUserAnswers, submitAnswer, submitMultipleAnswers } from '../../api/questions/index';
 
 
 const QuestionnaireModal = ({ visible, onClose }) => {

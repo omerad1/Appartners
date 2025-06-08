@@ -1,20 +1,48 @@
+const withBase = (base, paths) =>
+  Object.fromEntries(
+    Object.entries(paths).map(([key, val]) => [
+      key,
+      typeof val === "function" ? (...args) => base + val(...args) : base + val,
+    ])
+  );
 const endpoints = {
-  login: "/api/v1/authenticate/login/",
-  register: "/api/v1/authenticate/register/",
-  validateUnique: "/api/v1/authenticate/validate-unique/",
-  refreshToken: "/api/v1/authenticate/token/refresh/",
-  logout: "/api/v1/authenticate/logout/",
 
-  //my apartments
-  myApartments: "/api/v1/apartments/my/",
-  DeleteApartment: (apartmentId) => `/api/v1/apartments/${apartmentId}/`,
+  //auth related endpoints login/register/logout
+  auth: withBase("/api/v1/authenticate/", {
+    login: "login/",
+    register: "register/",
+    validateUnique: "validate-unique/",
+    refreshToken: "token/refresh/",
+    logout: "logout/",
+  }),
 
-  profile: "/api/v1/users/me/",
-  users: "/api/v1/users", 
-  GET_APARTMENTS: "/api/v1/apartments/recommendations/",
-  filters: "/api/v1/users/preferences/",
-  newApartment: "/api/v1/apartments/new/",
-  likeUser: "/api/v1/users/like/",
+  //apartments related endpoints
+  apartments: withBase("/api/v1/apartments/",{
+    getMy: "my/",
+    create: "new/",
+    getSwipes: "recommendations/",
+    delete: (apartmentId) => `${apartmentId}/`,
+    update: (apartmentId) => `${apartmentId}/`,
+    preference: "preference/",
+    getLikedMy: "likers/",
+    getMyLikes: "liked/"
+  }),
+
+  // users related endpoints
+  users: withBase("/api/v1/users/",{
+    getMe: "me/",
+    filters: "preferences/" ,
+    likeUser: "like/",
+    updatePassword: "update-password/",
+    updateProfile: "update-details/",
+    fetch: (userId) => `${userId}/`
+
+  }),
+
+  questions: withBase("/api/v1/questionnaire/",{
+    getQuestions: "",
+    answers: "responses/",
+  }),
 
   // app data
   preferencesPayload: "/api/v1/users/preferences/payload/",
@@ -22,13 +50,6 @@ const endpoints = {
 
   //users answers
   answers: "/api/v1/questionnaire/responses/",
-  updateUserProfile: "/api/v1/users/update-details/",
-
-  // Likes endpoints
-  likedApartments: "/api/v1/apartments/liked/",
-  usersWhoLikedMyApartment: "/api/v1/apartments/likers/",
-  likeApartment: (apartmentId) => `/api/v1/apartments/${apartmentId}/like/`,
-  apartmentPreference: "/api/v1/apartments/preference/",
 
 
   // chat endpoints

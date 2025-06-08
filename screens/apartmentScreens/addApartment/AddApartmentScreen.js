@@ -17,8 +17,6 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import BackgroundImage from "../../../components/layouts/BackgroundImage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { createApartment } from "../../../api/createApartment";
-import { updateApartment } from "../../../api/updateApartment";
 import { Card } from "react-native-paper";
 import CitySearchInput from "../../../components/apartmentsComp/CitySearchInput";
 import AreaSearchInput from "../../../components/apartmentsComp/AreaSearchInput";
@@ -145,6 +143,7 @@ const AddApartmentScreen = () => {
   const handleCityChange = (city) => {
     console.log("City selection changed:", city);
     setSelectedCity(city);
+  
     if (city) {
       setFormData((prev) => ({ ...prev, city: city.id }));
       // Reset area when city changes
@@ -316,9 +315,10 @@ const AddApartmentScreen = () => {
                 <View style={styles.datePickerContainer}>
                   <Text style={styles.label}>Entry Date</Text>
                   <DatePicker
-                    title="Select Entry Date"
-                    date={entryDay}
-                    setDate={setEntryDay}
+                    placeholder="Select Entry Date"
+                    value={entryDay}
+                    onDateConfirm={setEntryDay}
+                    mode="entryDate"
                   />
                 </View>
               </Card.Content>

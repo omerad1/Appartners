@@ -17,15 +17,13 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import {
   Ionicons,
   FontAwesome5,
-  AntDesign,
   FontAwesome,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ImageDisplayer from "../components/general/ImageDisplayer";
 import SearchTags from "../components/apartmentsComp/SearchTags";
-import UserDisplayer from "../components/userProfileComp/UserDisplayer";
-import { likeApartment, unlikeApartment } from "../api/likes";
-import { getUser } from "../api/users";
+import { likeApartment, unlikeApartment } from "../api/apartments/index";
+import { getUser } from "../api/users/index";
 import { useNavigation } from "@react-navigation/native";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = 120;
