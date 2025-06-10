@@ -211,7 +211,9 @@ const AddApartmentScreen = () => {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}
+                showsVerticalScrollIndicator={false}
+>
           <AddApartmentLayout
             title={isEditing ? "Edit Apartment" : "Post An Apartment"}
             direction="PropertyTagsScreen"

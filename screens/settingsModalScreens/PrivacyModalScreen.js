@@ -3,7 +3,9 @@ import { Ionicons } from '@expo/vector-icons';
 
 function PrivacyModalScreen() {
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}
+    showsVerticalScrollIndicator={false}
+>
       <View style={styles.section}>
         <Ionicons name="information-circle-outline" size={22} color="#333" style={styles.icon} />
         <Text style={styles.sectionTitle}>Data Collection</Text>

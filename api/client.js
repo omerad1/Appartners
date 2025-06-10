@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as SecureStore from 'expo-secure-store';
-
+import endpoints from "./endpoints";
 // Base URL for the backend
 // Change this to match your backend URL and port
 const API_BASE_URL = "http://10.0.0.3:8000/";
@@ -130,7 +130,7 @@ api.interceptors.response.use(
 
         // Call refresh token endpoint
         const response = await axios.post(
-          `${api.defaults.baseURL}/api/v1/authenticate/refresh/`,
+          `${endpoints.auth.refreshToken}`,
           {
             refresh_token: refreshToken,
           }

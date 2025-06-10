@@ -10,7 +10,7 @@ import {
 import { usePreferencesPayload } from '../../context/PreferencesPayloadContext';
 import DrawerModal from '../layouts/DrawerModal';
 import QuestionItem from '../survey/QuestionItem';
-import { getUserAnswers, submitAnswer, submitMultipleAnswers } from '../../api/questions/index';
+import { getUserAnswers, submitMultipleAnswers } from '../../api/questions/index';
 
 
 const QuestionnaireModal = ({ visible, onClose }) => {
@@ -265,7 +265,9 @@ const QuestionnaireModal = ({ visible, onClose }) => {
         
         {/* Section description removed as requested */}
         
-        <ScrollView style={styles.questionsScrollView}>
+        <ScrollView style={styles.questionsScrollView}
+                showsVerticalScrollIndicator={false}
+>
           {currentSection.questions.map((question, index) => 
             renderQuestionWithSeparator(
               question, 

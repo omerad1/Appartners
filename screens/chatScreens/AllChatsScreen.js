@@ -218,7 +218,7 @@ const AllChatsScreen = () => {
           {/* Header Section */}
           <View style={styles.header}>
             <View style={styles.titleContainer}>
-              <Title style={styles.title}>צ'אטים</Title>
+              <Title style={styles.title}>Chats</Title>
               
             </View>
           </View>
@@ -228,7 +228,7 @@ const AllChatsScreen = () => {
               <View style={styles.subtitleContainer}>
                 <Badge style={styles.chatCountBadge}>{messages.length} {" "}
                   <Text style={styles.subtitleText}>
-                  {messages.length === 1 ? 'שיחה פעילה' : 'שיחות פעילות'}
+                  {messages.length === 1 ? 'Active chat' : 'Active chats'}
                 </Text>
                 </Badge>
               </View>
@@ -240,9 +240,9 @@ const AllChatsScreen = () => {
                 >
                   <RNText style={styles.emptyIcon}>💭</RNText>
                 </LinearGradient>
-                <Text style={styles.emptyTitle}>אין צ'אטים פעילים</Text>
+                <Text style={styles.emptyTitle}>There are no chats available</Text>
                 <Text style={styles.emptySubtitle}>
-                  שיחות חדשות יופיעו כאן
+                  New chats will be displayed here
                 </Text>
               </View>
             ) : (

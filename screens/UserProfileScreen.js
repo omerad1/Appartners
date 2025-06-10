@@ -32,8 +32,7 @@ export default function UserProfileScreen() {
   // Get preferences and user data from Redux store
   const preferences = useSelector(state => state.user.preferences);
   const currentUser = useSelector(state => state.user.currentUser);
-  const isLoading = useSelector(state => state.user.isLoading);
-  const error = useSelector(state => state.user.error);
+
   
   // Fetch preferences and user data when component mounts if they're not already loaded
   useEffect(() => {

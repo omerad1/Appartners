@@ -18,6 +18,7 @@ const KeyboardAwareWrapper = ({
       contentContainerStyle={[styles.scrollContent, style]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="none"
+      showsVerticalScrollIndicator={false}
       style={styles.transparentBackground}
     >
       {children}

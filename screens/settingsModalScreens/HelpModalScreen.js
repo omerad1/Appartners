@@ -3,7 +3,9 @@ import { Ionicons } from '@expo/vector-icons';
 
 function HelpModalScreen() {
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}
+    showsVerticalScrollIndicator={false}
+>
 
       <View style={styles.section}>
         <Ionicons name="information-circle-outline" size={22} color="#333" />

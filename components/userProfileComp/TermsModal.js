@@ -17,7 +17,9 @@ const TermsModal = ({ visible, onClose }) => {
             <IconButton icon="close" onPress={onClose} />
           </View>
 
-          <ScrollView style={styles.content}>
+          <ScrollView style={styles.content}
+                  showsVerticalScrollIndicator={false}
+>
             <Text style={styles.paragraph}>
               Welcome to Appartners! By using our app, you agree to the following terms. Please read them carefully.
             </Text>
