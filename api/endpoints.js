@@ -46,10 +46,6 @@ const endpoints = {
 
   // app data
   preferencesPayload: "/api/v1/users/preferences/payload/",
-  questions: "/api/v1/questionnaire/",
-
-  //users answers
-  answers: "/api/v1/questionnaire/responses/",
 
 
   // chat endpoints
