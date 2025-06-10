@@ -183,7 +183,9 @@ const PropertyTagsScreen = () => {
             onChangeText={handleSearch}
             style={styles.searchBar}
           />
-          <ScrollView contentContainerStyle={styles.scrollContent}>
+          <ScrollView contentContainerStyle={styles.scrollContent}
+                  showsVerticalScrollIndicator={false}
+>
             <View>
               {isLoading ? (
                 <Text style={styles.instruction}>Loading property features...</Text>

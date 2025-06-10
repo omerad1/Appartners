@@ -154,6 +154,8 @@ const ApartmentScreen = () => {
 
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
@@ -205,9 +207,7 @@ const ApartmentScreen = () => {
                       </View>
                       <View style={styles.detailItem}>
                         <Ionicons name="cash-outline" size={16} color="#555" />
-                        <Text style={styles.detailText}>
-                          ${apartment.total_price}
-                        </Text>
+                        <Text style={styles.detailText}>₪{parseInt(apartment.total_price)}</Text>
                       </View>
                     </View>
                     <Paragraph style={styles.descriptionText}>

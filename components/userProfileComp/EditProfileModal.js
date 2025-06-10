@@ -184,7 +184,9 @@ const EditProfileModal = ({ visible, onClose, onProfileUpdated }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
-        <ScrollView style={styles.scrollContainer}>
+        <ScrollView style={styles.scrollContainer}
+                showsVerticalScrollIndicator={false}
+>
           {error && (
             <View style={styles.errorContainer}>
               <Text style={styles.errorText}>{error}</Text>

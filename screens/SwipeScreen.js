@@ -8,23 +8,23 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
-  Linking,
   Image,
-  Modal,
-  Alert,
 } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
-  Ionicons,
-  FontAwesome5,
   FontAwesome,
+  FontAwesome5,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ImageDisplayer from "../components/general/ImageDisplayer";
 import SearchTags from "../components/apartmentsComp/SearchTags";
 import { likeApartment, unlikeApartment } from "../api/apartments/index";
-import { getUser } from "../api/users/index";
-import { useNavigation } from "@react-navigation/native";
+import QuestionCompatibilityDrawer from "../components/survey/QuestionCompatibilityDrawer";
+import { useSelector } from 'react-redux';
+import {calculateAge} from '../api/utils'
+
+
+
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = 120;
 const defaultUserImage = require("../assets/placeholders/default-user-image.jpg");
@@ -37,19 +37,14 @@ const SwipeScreen = (props) => {
     images,
     aboutApartment,
     tags,
-    user,
     price,
     rooms,
     availableRooms,
     entryDate,
-    id: apartmentId,
-    owner_id: ownerId,
   } = apartment;
-
-  const [ownerDetails, setOwnerDetails] = useState(null);
-  const [contactModalVisible, setContactModalVisible] = useState(false);
   const [loadingOwner, setLoadingOwner] = useState(false);
-
+  // Inside your component
+  const currentUser = useSelector((state) => state.user.currentUser);
   const position = useRef(new Animated.ValueXY()).current;
   const [currentSwipe, setCurrentSwipe] = useState(null); // 'like' or 'dislike' or null
 
@@ -63,40 +58,9 @@ const SwipeScreen = (props) => {
 
   const [ownerLoaded, setOwnerLoaded] = useState(false);
   const [ownerData, setOwnerData] = useState(null);
+  const [questionDrawerVisible, setQuestionDrawerVisible] = useState(false);
   const compatibilityScore = Math.floor(Math.random() * 40) + 60; // Random score between 60-99%
 
-  const navigation = useNavigation();
-
-  // Fetch apartment owner details when the contact button is pressed
-  const fetchOwnerDetails = async () => {
-    if (ownerDetails) {
-      // Already fetched, just show modal
-      setContactModalVisible(true);
-      return;
-    }
-
-    setLoadingOwner(true);
-    try {
-      // Use either user.id or ownerId depending on what your API expects
-      const ownerId = user?.id || apartment.owner_id;
-      if (!ownerId) {
-        throw new Error("No owner ID available");
-      }
-
-      const ownerData = await getUser(ownerId);
-      console.log("Owner details:", ownerData);
-      setOwnerDetails(ownerData);
-      setContactModalVisible(true);
-    } catch (error) {
-      console.error("Failed to fetch owner details:", error);
-      Alert.alert(
-        "Error",
-        "Could not fetch owner contact information. Please try again later."
-      );
-    } finally {
-      setLoadingOwner(false);
-    }
-  };
 
   useEffect(() => {
     // Pulse animation for contact button
@@ -148,7 +112,6 @@ const SwipeScreen = (props) => {
     rotation.setValue(0);
     contentOpacity.setValue(1);
     setCurrentSwipe(null);
-    setOwnerDetails(null);
   }, [apartment]);
 
   const panResponder = useRef(
@@ -333,57 +296,8 @@ const SwipeScreen = (props) => {
     currentSwipe === "dislike" ? styles.activeDislikeButton : {},
   ];
 
-  const handleContactPress = () => {
-    // Animate the button press
-    Animated.sequence([
-      Animated.timing(contactButtonScale, {
-        toValue: 1.2,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-      Animated.timing(contactButtonScale, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // Fetch owner details and show contact modal
-    fetchOwnerDetails();
-  };
-
-  const handleSendMessage = () => {
-    // Could implement in-app messaging here
-    Alert.alert(
-      "Message Sent",
-      "Your interest has been sent to the apartment owner. They will contact you soon."
-    );
-    setContactModalVisible(false);
-  };
-
-  const handleCallOwner = () => {
-    if (ownerDetails?.phone) {
-      Linking.openURL(`tel:${ownerDetails.phone}`);
-    } else {
-      Alert.alert(
-        "No Phone Number",
-        "The owner did not provide a phone number."
-      );
-    }
-  };
-
-  const handleOpenFacebook = () => {
-    // Navigate to ChatScreen passing the owner data
-    navigation.navigate("ChatScreen", {
-      owner: ownerData,
-      apartmentId: apartment.id,
-      apartmentAddress: address,
-    });
-  };
-
   const loadOwnerData = async () => {
     if (ownerLoaded) return; // Already loaded, don't reload
-
     setLoadingOwner(true);
     try {
       // Check if apartment has user_details - use it directly
@@ -435,6 +349,12 @@ const SwipeScreen = (props) => {
   // Add a ref to track previous apartment
   const prevApartmentRef = useRef(null);
 
+  const handlePress = () => {
+    // Open the QuestionCompatibilityDrawer with the apartment owner's questionnaire responses
+    setQuestionDrawerVisible(true);
+  };
+    
+
   // Update the renderContactSection function to handle data more consistently
   const renderContactSection = () => {
     // Don't show loading if we already have data
@@ -465,6 +385,7 @@ const SwipeScreen = (props) => {
       >
         <View style={styles.ownerHeader}>
           <View style={styles.matchBadgeContainer}>
+          <TouchableOpacity onPress={handlePress} style={styles.matchBadgeContainer}>
             <LinearGradient
               colors={["#FFC107", "#FFD54F"]}
               style={styles.compatibilityBadge}
@@ -473,6 +394,7 @@ const SwipeScreen = (props) => {
                 {compatibilityScore}% Match
               </Text>
             </LinearGradient>
+          </TouchableOpacity>
           </View>
         </View>
 
@@ -490,18 +412,44 @@ const SwipeScreen = (props) => {
 
           <View style={styles.ownerDetails}>
             <Text style={styles.ownerName}>{fullName}</Text>
-
+            
+            {/* Gender and Age Row */}
+            <View style={styles.ownerInfoRow}>
+              {apartment.user_details?.gender && (
+                <View style={styles.ownerInfoItem}>
+                  {apartment.user_details.gender.toLowerCase() === 'male' ? (
+                    <FontAwesome5 name="mars" size={14} color="#4169E1" />
+                  ) : apartment.user_details.gender.toLowerCase() === 'female' ? (
+                    <FontAwesome5 name="venus" size={14} color="#FF69B4" />
+                  ) : (
+                    <FontAwesome5 name="genderless" size={14} color="#808080" />
+                  )}
+                  <Text style={styles.ownerInfoText}>
+                    {apartment.user_details.gender}
+                  </Text>
+                </View>
+              )}
+              
+              {apartment.user_details?.birth_date && (
+                <View style={styles.ownerInfoItem}>
+            <MaterialCommunityIcons name="badge-account-horizontal-outline" size={14} color="#9370DB" />
+            <Text style={styles.ownerInfoText}>
+                    {calculateAge(apartment.user_details.birth_date)}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.check}>
             <Text style={styles.ownerOccupation}>
               {ownerData?.occupation || "Not specified"}
             </Text>
 
             <TouchableOpacity
               style={styles.facebookButton}
-              onPress={handleOpenFacebook}
             >
               <FontAwesome name="facebook-square" size={20} color="#3b5998" />
-              <Text style={styles.facebookButtonText}>Facebook Profile</Text>
             </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -515,146 +463,6 @@ const SwipeScreen = (props) => {
       </LinearGradient>
     );
   };
-
-  // Add helper function to calculate age from birth date
-  const calculateAge = (birthDate) => {
-    if (!birthDate) return "Unknown";
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
-  };
-
-  const renderContactModal = () => (
-    <Modal
-      visible={contactModalVisible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setContactModalVisible(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <LinearGradient
-          colors={["#8B4513", "#A0522D", "#CD853F"]}
-          style={styles.contactModalContainer}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <View style={styles.contactModalHeader}>
-            <Text style={styles.contactModalTitle}>Contact Owner</Text>
-            <TouchableOpacity
-              style={styles.closeModalButton}
-              onPress={() => setContactModalVisible(false)}
-            >
-              <Ionicons name="close-circle-outline" size={28} color="#FFF" />
-            </TouchableOpacity>
-          </View>
-
-          {loadingOwner ? (
-            <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>
-                Loading contact information...
-              </Text>
-            </View>
-          ) : ownerDetails ? (
-            <>
-              <View style={styles.ownerInfoContainer}>
-                <Image
-                  source={{
-                    uri:
-                      ownerDetails.profile_image ||
-                      "https://via.placeholder.com/100",
-                  }}
-                  style={styles.ownerImage}
-                />
-                <View style={styles.ownerTextInfo}>
-                  <Text style={styles.ownerName}>
-                    {ownerDetails.name || "Apartment Owner"}
-                  </Text>
-                  {ownerDetails.bio && (
-                    <Text style={styles.ownerBio}>{ownerDetails.bio}</Text>
-                  )}
-                </View>
-              </View>
-
-              <View style={styles.contactOptionsContainer}>
-                <TouchableOpacity
-                  style={styles.contactOption}
-                  onPress={handleSendMessage}
-                >
-                  <LinearGradient
-                    colors={["#8B4513", "#A0522D"]}
-                    style={styles.contactOptionGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <Ionicons name="chatbox-ellipses" size={24} color="#FFF" />
-                    <Text style={styles.contactOptionText}>Send Message</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.contactOption}
-                  onPress={handleCallOwner}
-                  disabled={!ownerDetails.phone}
-                >
-                  <LinearGradient
-                    colors={[
-                      ownerDetails.phone ? "#8B4513" : "#999",
-                      ownerDetails.phone ? "#A0522D" : "#777",
-                    ]}
-                    style={styles.contactOptionGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <Ionicons name="call" size={24} color="#FFF" />
-                    <Text style={styles.contactOptionText}>
-                      {ownerDetails.phone ? "Call" : "No Phone"}
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.contactOption}
-                  onPress={() => handleOpenFacebook()}
-                  disabled={!ownerDetails.facebook_link}
-                >
-                  <LinearGradient
-                    colors={[
-                      ownerDetails.facebook_link ? "#3b5998" : "#999",
-                      ownerDetails.facebook_link ? "#5f82ce" : "#777",
-                    ]}
-                    style={styles.contactOptionGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <FontAwesome5 name="facebook" size={24} color="#FFF" />
-                    <Text style={styles.contactOptionText}>
-                      Facebook Profile
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <View style={styles.noContactInfo}>
-              <Text style={styles.noContactText}>
-                Could not load contact information. Please try again.
-              </Text>
-            </View>
-          )}
-        </LinearGradient>
-      </View>
-    </Modal>
-  );
 
   return (
     <Animated.View
@@ -694,6 +502,7 @@ const SwipeScreen = (props) => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
       >
         <Animated.View style={{ opacity: contentOpacity }}>
           {/* Address Section */}
@@ -810,11 +619,15 @@ const SwipeScreen = (props) => {
             </TouchableOpacity>
           </View>
         </Animated.View>
+        <QuestionCompatibilityDrawer
+          visible={questionDrawerVisible}
+          onClose={() => setQuestionDrawerVisible(false)}
+          myAnswers={currentUser.questionnaire_responses}
+          otherAnswers={apartment.user_details.questionnaire_responses}
+        ></QuestionCompatibilityDrawer>
       </ScrollView>
-
-      {/* Contact Modal */}
-      {renderContactModal()}
     </Animated.View>
+
   );
 };
 
@@ -1296,8 +1109,36 @@ const styles = StyleSheet.create({
     fontFamily: "comfortaaBold",
     color: "#FFFFFF",
     marginBottom: 5,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
+  },
+  ownerInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    flexWrap: "wrap", // Allow wrapping if needed
+  },
+  ownerInfoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 12,
+    marginBottom: 4,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  ownerInfoText: {
+    color: "#FFFFFF",
+    fontFamily: "comfortaa",
+    fontSize: 14,
+    marginLeft: 6,
+    fontWeight: "500",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0.5, height: 0.5 },
     textShadowRadius: 1,
   },
   ownerOccupation: {
@@ -1309,19 +1150,9 @@ const styles = StyleSheet.create({
   facebookButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 10,
     alignSelf: "flex-start",
-    marginTop: 5,
   },
-  facebookButtonText: {
-    color: "#3b5998",
-    fontFamily: "comfortaaBold",
-    fontSize: 14,
-    marginLeft: 8,
-  },
+
   aboutSection: {
     padding: 15,
     backgroundColor: "rgba(255,255,255,0.1)",
@@ -1347,6 +1178,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontStyle: "italic",
   },
+  check:{
+    display:"flex",
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    alignContent: "center",
+  }
 });
 
 export default SwipeScreen;

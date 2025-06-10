@@ -83,7 +83,9 @@ const UserDisplayerModal = ({ visible, onClose, user, onLike, onDislike, showAct
               </View>
             </View>
 
-            <ScrollView style={styles.bioContainer}>
+            <ScrollView style={styles.bioContainer}
+                    showsVerticalScrollIndicator={false}
+>
               {showQuestion && (
                 <View style={styles.matchBadgeContainer}>
                   <TouchableOpacity
