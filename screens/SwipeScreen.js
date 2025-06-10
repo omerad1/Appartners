@@ -43,6 +43,7 @@ const SwipeScreen = (props) => {
     entryDate,
   } = apartment;
   const [loadingOwner, setLoadingOwner] = useState(false);
+  console.log("user:" ,apartment.user_details)
   // Inside your component
   const currentUser = useSelector((state) => state.user.currentUser);
   const position = useRef(new Animated.ValueXY()).current;

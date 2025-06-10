@@ -1,6 +1,7 @@
 // components/AppartnersLoader.js
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated, Image } from "react-native";
+import BackgroundImage from "../layouts/BackgroundImage";
 
 const AppartnersLoader = () => {
   const letters = "Appartners".split("");
@@ -32,52 +33,55 @@ const AppartnersLoader = () => {
   }, [animations]);
 
   return (
-    <View style={styles.container}>
-      {/* Logo above the text */}
-      <Image 
-        source={require('../../assets/icons/logo-no-title.png')} 
-        style={styles.logo} 
-        resizeMode="contain"
-      />
-      
-      {/* Animated text */}
-      <View style={styles.textContainer}>
-        {letters.map((letter, index) => {
-          // Link color and position to the same animation
-          const animation = animations[index];
-          
-          const colorInterpolation = animation.interpolate({
-            inputRange: [0, 1],
-            outputRange: ["#000000", "#d4af37"], // Black to Gold
-          });
+    <BackgroundImage opacity={0.5}>
+      <View style={styles.container}>
+        {/* Logo above the text */}
+        <Image 
+          source={require('../../assets/icons/logo-no-title.png')} 
+          style={styles.logo} 
+          resizeMode="contain"
+        />
+        
+        {/* Animated text */}
+        <View style={styles.textContainer}>
+          {letters.map((letter, index) => {
+            // Link color and position to the same animation
+            const animation = animations[index];
+            
+            const colorInterpolation = animation.interpolate({
+              inputRange: [0, 1],
+              outputRange: ["#000000", "#d4af37"], // Black to Gold
+            });
 
-          const translateYInterpolation = animation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, -20], // Control bounce height
-          });
+            const translateYInterpolation = animation.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -20], // Control bounce height
+            });
 
-          return (
-            <Animated.Text
-              key={index}
-              style={[
-                styles.letter,
-                {
-                  transform: [{ translateY: translateYInterpolation }],
-                  color: colorInterpolation,
-                },
-              ]}
-            >
-              {letter}
-            </Animated.Text>
-          );
-        })}
+            return (
+              <Animated.Text
+                key={index}
+                style={[
+                  styles.letter,
+                  {
+                    transform: [{ translateY: translateYInterpolation }],
+                    color: colorInterpolation,
+                  },
+                ]}
+              >
+                {letter}
+              </Animated.Text>
+            );
+          })}
+        </View>
       </View>
-    </View>
+    </BackgroundImage>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",

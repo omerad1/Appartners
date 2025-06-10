@@ -4,8 +4,7 @@ import {
   View,
   StatusBar,
   ImageBackground,
-  ActivityIndicator,
-  Text,
+
 } from "react-native";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
@@ -28,15 +27,31 @@ const Stack = createStackNavigator();
 function MainNavigator() {
   // Get auth state from context
   const { isLoading, isAuthenticated } = useAuth();
+  const [shouldShowLoader, setShouldShowLoader] = useState(true);
+  const [hasMinimumTimePassed, setHasMinimumTimePassed] = useState(false);
 
-  // Show loading screen while checking auth state
-  if (isLoading) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasMinimumTimePassed(true);
+    }, 4000); // Minimum 4 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && hasMinimumTimePassed) {
+      setShouldShowLoader(false);
+    }
+  }, [isLoading, hasMinimumTimePassed]);
+
+  if (shouldShowLoader || isLoading) {
     return (
       <View style={styles.loadingScreen}>
         <AppartnersLoader />
       </View>
     );
   }
+  
 
   return (
     <ImageBackground
