@@ -209,7 +209,6 @@ const ChatScreen = () => {
 
         // Handle user entered notification
         socket.registerMessageHandler('chat.user.entered', (data) => {
-          console.log('User entered chat:', data);
           // If the other participant entered the chat, mark our messages as read
           if (data.user_id && data.user_id !== currentUser?.id) {
             // Find unread messages sent by current user
@@ -228,7 +227,6 @@ const ChatScreen = () => {
 
         // Handle read receipts
         socket.registerMessageHandler('read_receipt', (data) => {
-          console.log('Read receipt received:', data);
           if (data.message_ids && data.reader_id !== currentUser?.id) {
             // Update messages with read status
             setMessages(prevMessages => 
@@ -609,7 +607,6 @@ const ChatScreen = () => {
               <TouchableOpacity 
                 style={styles.dropdownItem} 
                 onPress={() => {handleUnmatch();
-                  console.log("Unmatch pressed for", otherParticipant?.first_name);
                   setShowPopover(false);
                 }}
               >

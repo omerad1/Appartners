@@ -11,7 +11,6 @@ const StepThree = () => {
   const [selectedCity, setSelectedCity] = useState(location || "");
 
   const handleCityChange = (city) => {
-    console.log(city)
     if (city) {
       // If a city object is selected
       setSelectedCity(city);

@@ -49,7 +49,6 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
       if (!originalPrefs.current.moveInDate) return null;
       try {
         const date = new Date(originalPrefs.current.moveInDate);
-        console.log(date)
         return !isNaN(date.getTime()) ? date : null;
       } catch (error) {
         return null;
@@ -159,7 +158,6 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
       console.log('Setting valid date in state');
       setTempForm(prev => {
         const newState = { ...prev, moveInDate: value };
-        console.log('New moveInDate state:', newState.moveInDate);
         return newState;
       });
     } else if (value === null || value === undefined) {
@@ -208,7 +206,6 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
   useEffect(() => {
     if (visible && !initializedRef.current) {
       const sectionsToOpen = {};
-      console.log(originalPrefs.current.move_in_date)
       if (safePreferences.moveInDate) sectionsToOpen[SECTION_KEYS.MOVE_IN_DATE] = true; 
       if (originalPrefs.current.price_range && 
           (originalPrefs.current.price_range.min !== defaultPriceRange.min || 
@@ -272,7 +269,6 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
     
     // Get moveInDate directly from tempForm to ensure we're using the latest value
     const { moveInDate: currentMoveInDate } = tempForm;
-    console.log('moveInDate from tempForm:', currentMoveInDate);
     
     // Create the filters object with the temporary form data
     const filters = {
@@ -294,12 +290,10 @@ const FilterScreen = ({ visible = false, onClose, onApply, initialPreferences = 
       }
     };
     
-    console.log('Final filters object with move_in_date:', filters);
 
     // Call the onApply callback with the filters to save them on the backend
     if (onApply) {
       // Log the filters being sent to the backend
-      console.log('Sending filters to backend:', filters);
       onApply(filters);
     }
 

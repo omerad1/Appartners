@@ -88,7 +88,6 @@ const DatePicker = ({
   const formattedDate = date instanceof Date 
     ? date.toLocaleDateString('en-GB')
     : '';
-  console.log(formattedDate)
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity 

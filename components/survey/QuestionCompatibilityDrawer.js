@@ -13,8 +13,7 @@ const QuestionCompatibilityDrawer = ({
 }) => {
   const { questions } = usePreferencesPayload();
   const [allQuestions, setAllQuestions] = useState([]);
-  console.log("my", myAnswers)
-  console.log("other", otherAnswers)
+
 
   useEffect(() => {
     if (questions?.length > 0) {

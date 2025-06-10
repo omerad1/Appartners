@@ -68,7 +68,6 @@ const StepOne = () => {
       
       // This will run if validation fails
       const onInvalid = (errors) => {
-        console.log('Validation errors:', errors);
         // Immediately resolve with false to prevent the loader
         resolve(false);
       };

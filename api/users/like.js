@@ -8,7 +8,6 @@ export const likeUser = async (userId, like) => {
         target_user_id: userId,
         like: like,
       });
-      console.log("❤️ Liked user:", res.data);
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;

@@ -43,7 +43,6 @@ const SwipeScreen = (props) => {
     entryDate,
   } = apartment;
   const [loadingOwner, setLoadingOwner] = useState(false);
-  console.log("user:" ,apartment.user_details)
   // Inside your component
   const currentUser = useSelector((state) => state.user.currentUser);
   const position = useRef(new Animated.ValueXY()).current;
@@ -90,10 +89,8 @@ const SwipeScreen = (props) => {
       }
 
       if (direction === "like") {
-        console.log("👍 Liking apartment", apartment.id);
         await likeApartment(apartment.id);
       } else if (direction === "dislike") {
-        console.log("👎 Disliking apartment", apartment.id);
         await unlikeApartment(apartment.id);
       }
     } catch (error) {
@@ -305,10 +302,6 @@ const SwipeScreen = (props) => {
       if (apartment && apartment.user_details) {
         setOwnerData(apartment.user_details);
       } else {
-        // Fallback in case user_details is not available
-        console.log(
-          "[Owner Data] No user_details found in apartment data, using fallback"
-        );
         setOwnerData({
           first_name: "Apartment",
           last_name: "Owner",
@@ -329,17 +322,13 @@ const SwipeScreen = (props) => {
   useEffect(() => {
     // Only run if we have apartment data and haven't loaded the owner yet
     if (apartment && !ownerLoaded) {
-      console.log(
-        "[Owner Data] Loading owner data for apartment:",
         apartment.id
-      );
       loadOwnerData();
     }
 
     // Clean up function that only runs when apartment changes, not on every re-render
     return () => {
       if (apartment?.id !== prevApartmentRef.current?.id) {
-        console.log("[Owner Data] Apartment changed, resetting owner data");
         setOwnerLoaded(false);
         setOwnerData(null);
         prevApartmentRef.current = apartment;

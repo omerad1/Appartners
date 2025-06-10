@@ -156,7 +156,6 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
 
         // Clear tokens and redirect to login
-        console.log("this is invoked 100")
         await clearTokens();
 
         // You might want to trigger a navigation to login screen here

@@ -5,7 +5,6 @@ import api from "./client"
 export const getUserChatRooms = async () => {
     try {
       const res = await api.get(endpoints.chatRooms);
-      //console.log(JSON.stringify(res.data[0], null, 2));
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;
@@ -17,7 +16,6 @@ export const getUserChatRooms = async () => {
 export const createChatRoomById = async (participant_id) => {
     try {
       const res = await api.post(endpoints.chatRooms, { participant_id });
-      console.log("Created chat room", res.data);
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;
@@ -42,7 +40,6 @@ export const getRoomMessages = async (roomId) => {
 export const sendMessage = async ( recipient_id, content) => {
   try {
     const res = await api.post(`${endpoints.chatRooms}send_message_to_user/`, { recipient_id, content});
-    console.log("invoked")
     return res.data;
   } catch (err) {
     const message = err.response?.data?.detail || err.message;

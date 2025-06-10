@@ -5,7 +5,6 @@ import {transformApartmentData, transformUserData} from "../utils"
 export const getLikedApartments = async () => {
     try {
       const res = await api.get(endpoints.apartments.getMyLikes);
-      console.log("🏠 Liked apartments:", res.data);
       // Transform the data to match the expected format
       let transformedData;
   
@@ -22,7 +21,6 @@ export const getLikedApartments = async () => {
         transformedData = [];
       }
   
-      console.log("Transformed apartment data:", transformedData);
       return transformedData;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;
@@ -51,7 +49,6 @@ export const getLikedApartments = async () => {
         transformedData = [];
       }
   
-      console.log("Transformed user data:", transformedData);
       return transformedData;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;
@@ -67,7 +64,6 @@ export const getLikedApartments = async () => {
         apartment_id: apartmentId,
         like: true,
       });
-      console.log("❤️ Liked apartment:", res.data);
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;
@@ -83,7 +79,6 @@ export const getLikedApartments = async () => {
         apartment_id: apartmentId,
         like: false,
       });
-      console.log("💔 Unliked apartment:", res.data);
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;

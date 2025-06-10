@@ -101,7 +101,6 @@ const SwipeScreenWrapper = () => {
 
   // Watch for when the index reaches 10 to load more apartments
   useEffect(() => {
-    console.log("Current index:", currentIndex);
     if (currentIndex === 10 && !isLoadingMore && !allApartmentsLoaded) {
       console.log("Loading more apartments at index 10");
       loadMoreApartments();

@@ -8,7 +8,6 @@ export const updateApartment = async (apartmentId, formData) => {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log("🏠 Apartment updated successfully:", res.data);
     return res.data;
   } catch (err) {
     const message = err.response?.data?.detail || err.message;

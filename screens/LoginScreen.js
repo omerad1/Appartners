@@ -55,14 +55,12 @@ const LoginScreen = () => {
     try {
       // Call the API login function
       const response = await apiLogin(email, password);
-      console.log("Login successful:", response);
 
       if (response && response.UserAuth && response.RefreshToken) {
         // Fetch user data after successful login
 
         try {
           const userData = await fetchUserData(true); // Force refresh from server
-          console.log("userDATA: ", userData)
           if (userData) {
             // Dispatch user data to Redux store
             dispatch(login(userData));

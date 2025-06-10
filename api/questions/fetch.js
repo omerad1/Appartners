@@ -19,9 +19,7 @@ export const getQuestions = async () => {
  */
 export const getUserAnswers = async () => {
     try {
-      console.log("this is invoked")
       const res = await api.get(endpoints.questions.answers);
-      console.log("Fetched user's responses:", JSON.stringify(res.data, null, 2));
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;
