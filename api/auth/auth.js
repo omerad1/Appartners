@@ -45,7 +45,6 @@ export const login = async (email, password) => {
 
     // Check if tokens exist in the response (UserAuth for access token, RefreshToken for refresh token)
     if (res.data && res.data.UserAuth && res.data.RefreshToken) {
-      console.log('Received both access and refresh tokens');
       // Save both tokens securely
       await saveTokens(res.data.UserAuth, res.data.RefreshToken);
       
@@ -53,7 +52,6 @@ export const login = async (email, password) => {
     else {
       console.warn("Warning: Authentication tokens not found in response", res.data);
     }
-    console.log("this is the data on login: ", res.data)
     return res.data;
   } catch (err) {
     // Log the full error object for debugging
@@ -103,13 +101,11 @@ export const registerUser = async (details) => {
         type: details.photo.type || 'image/jpeg',
         name: details.photo.name || `profile-${Date.now()}.jpg`,
       });
-      console.log("Adding photo to FormData:", details.photo);
     }
     
     const res = await api.post(endpoints.auth.register, formData, config);
     
     if (res.data && res.data.UserAuth && res.data.RefreshToken) {
-      console.log('Received both access and refresh tokens');
       // Save both tokens securely
       await saveTokens(res.data.UserAuth, res.data.RefreshToken);
     }
@@ -152,7 +148,6 @@ export const getNewAcessToken = async () => {
 // For checking if email and phone are unique
 export const validateUnique = async (email, phone) => {
   const res = await api.post(endpoints.auth.validateUnique, { email, phone });
-  console.log("Validation successful:", res.data);
   return res.data;
 };
 

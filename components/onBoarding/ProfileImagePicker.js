@@ -32,7 +32,6 @@ const ProfileImagePicker = ({ profileImage, setProfileImage }) => {
     
     if (!result.canceled) {
       const selectedAsset = result.assets[0];
-      console.log("Selected image:", selectedAsset);
       
       // Create the image object with all necessary information for FormData
       const imageInfo = {

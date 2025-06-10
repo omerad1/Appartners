@@ -165,7 +165,6 @@ export const updateUserProfileData = (updatedData) => async (dispatch, getState)
     const serverResponse = await apiUpdateUserProfile(mergedUserData);
     
     // If server update is successful, then save locally
-    console.log('Server update successful:', serverResponse);
     await saveUserDataToStorage(mergedUserData);
     dispatch(updateUserProfile(updatedData));
     

@@ -4,7 +4,6 @@ import api from "../client"
 export const getUserFilters = async () => {
     try {
       const res = await api.get(endpoints.users.filters);
-      console.log("🏠 Fetched filters", res.data);
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;
@@ -21,7 +20,6 @@ export const postUserFilters = async (filtersData) => {
             : (filtersData.city || null);  // Use the city value as is or null if not present
         
         // Log the incoming data to debug
-        console.log("Filters data received:", filtersData);
         
         // Convert from app format to API format if needed
         const apiFormatData = {
@@ -36,10 +34,8 @@ export const postUserFilters = async (filtersData) => {
             max_floor: filtersData.max_floor || null,
             area: filtersData.area || null
         };
-        console.log("API format data:", apiFormatData);
         // Make the POST request to save filters
         const res = await api.post(endpoints.users.filters, apiFormatData);
-        console.log("🏠 Saved user filters", res.data);
         return res.data;
     }
     catch (err) {

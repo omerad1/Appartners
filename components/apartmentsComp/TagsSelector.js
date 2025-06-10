@@ -33,7 +33,6 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
       return;
     }
     
-    console.log('Normalizing selected tags:', selectedTags);
     
     // Convert any tag names to IDs
     const normalized = selectedTags.map(tag => {
@@ -45,12 +44,10 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
       // If it's a name, find the corresponding ID
       const matchingTag = tags.find(t => t.name === tag);
       if (matchingTag) {
-        console.log(`Converting tag name '${tag}' to ID '${matchingTag.id}'`);
         return matchingTag.id;
       }
       
       // If we can't find a match, keep the original value
-      console.log(`Could not find matching tag for '${tag}'`);
       return tag;
     });
     
@@ -58,7 +55,6 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
     
     // If we made any conversions, update the parent
     if (JSON.stringify(normalized) !== JSON.stringify(selectedTags)) {
-      console.log('Updating parent with normalized tags');
       onTagsChange(normalized);
     }
   }, [selectedTags, tags]);
@@ -88,7 +84,6 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
   
   // Toggle tag selection
   const handleToggleTag = (tag) => {
-    console.log('Toggle tag:', tag);
     if (normalizedSelectedTags.includes(tag.id)) {
       // Remove tag if already selected
       onTagsChange(normalizedSelectedTags.filter(id => id !== tag.id));
@@ -100,7 +95,6 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
   
   // Remove a selected tag
   const handleRemoveTag = (tagId) => {
-    console.log('Remove tag ID:', tagId);
     onTagsChange(normalizedSelectedTags.filter(id => id !== tagId));
   };
   
@@ -116,7 +110,6 @@ const TagsSelector = ({ selectedTags = [], onTagsChange }) => {
     if (tagByName) return tagByName.name;
     
     // If all else fails
-    console.log(`Could not find tag name for ID: ${tagId}`);
     return 'Unknown';
   };
   

@@ -215,7 +215,6 @@ const LikesScreen = () => {
       setApartmentsError(null);
 
       const data = await getLikedApartments();
-      console.log("Fetched liked apartments:", data.length);
 
       // Check if the data is in the expected format
       if (Array.isArray(data)) {

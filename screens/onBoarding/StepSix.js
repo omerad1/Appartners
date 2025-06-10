@@ -68,7 +68,6 @@ const StepSix = () => {
   });
 
   const onSubmit = (data) => {
-    console.log("Form data submitted:", data);
     dispatch(updateOnboardingData({ password: data.password }));
     return true;
   };

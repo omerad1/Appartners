@@ -76,7 +76,6 @@ const Wizard = () => {
   const onFinish = async () => {
     // Format answers to match backend expectations
     const formattedAnswers = [];
-    console.log("Current answers:", answers);
     
     Object.entries(answers).forEach(([index, value]) => {
       const step = formattedSteps[parseInt(index)];
@@ -130,14 +129,12 @@ const Wizard = () => {
       }
     });
     
-    console.log("Formatted answers for submission:", formattedAnswers);
     
     try {
       // Show loading state or disable buttons here if needed
       
       // Submit answers to the API
       const result = await submitMultipleAnswers(formattedAnswers);
-      console.log('Survey answers submitted successfully:', result);
       
       // Navigate to the login screen after successful submission
       navigation.navigate("Login");

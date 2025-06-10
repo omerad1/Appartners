@@ -29,7 +29,6 @@ export const submitAnswer = async (questionId, answer) => {
       };
       
       const res = await api.post(endpoints.questions.answers, payload);
-      console.log("Submitted answer for question", questionId, res.data);
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;
@@ -66,14 +65,12 @@ export const submitAnswer = async (questionId, answer) => {
         responses: validAnswers.map(item => {
           // Check if it's question ID 1
           if (item.questionId === 1 || item.questionId === 2) {
-            console.log(`Question ID 1 sending text_response: ${item.answer}`);
             return {
               question: item.questionId,
               text_response: String(item.answer) // Ensure it's a string
             };
           } else {
             // For all other questions, use numeric_response
-            console.log(`Question ID ${item.questionId} sending numeric_response: ${item.answer}`);
             return {
               question: item.questionId,
               numeric_response: Number(item.answer) // Ensure it's a number
@@ -86,7 +83,6 @@ export const submitAnswer = async (questionId, answer) => {
       const res = await api.post(endpoints.questions.answers, payload);
       
       // Remove the interceptor after the request is complete
-      console.log("Submitted multiple answers:", res.data);
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;

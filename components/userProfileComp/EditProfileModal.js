@@ -65,7 +65,6 @@ const EditProfileModal = ({ visible, onClose, onProfileUpdated }) => {
   // Handle image selection
   const handleImagePick = async () => {
     try {
-      console.log('Image picker triggered');
       
       // Request permission to access the media library
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -80,7 +79,6 @@ const EditProfileModal = ({ visible, onClose, onProfileUpdated }) => {
       }
 
       // Launch the image picker with improved options
-      console.log('Launching image picker...');
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -89,11 +87,9 @@ const EditProfileModal = ({ visible, onClose, onProfileUpdated }) => {
         // Remove the presentationStyle parameter that was causing the error
       });
       
-      console.log('Image picker result:', result);
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedAsset = result.assets[0];
-        console.log('Selected image:', selectedAsset);
         
         // Create the image object with all necessary information for FormData
         const imageInfo = {

@@ -159,14 +159,12 @@ const QuestionnaireModal = ({ visible, onClose }) => {
         Object.entries(combinedAnswers).forEach(([questionId, answer]) => {
           // Skip null, undefined, or empty string answers
           if (answer === null || answer === undefined || answer === '') {
-            console.log(`Skipping question ${questionId} with empty/null answer`);
             return;
           }
           
           // For questions 1 and 2 (text inputs), skip if they're empty strings
           if ((parseInt(questionId) === 1 || parseInt(questionId) === 2) && 
               (typeof answer === 'string' && answer.trim() === '')) {
-            console.log(`Skipping question ${questionId} with empty text`);
             return;
           }
           
@@ -180,7 +178,6 @@ const QuestionnaireModal = ({ visible, onClose }) => {
           answer
         }));
         
-        console.log(`Submitting ${allAnswersToSubmit.length} total valid answers (filtered from ${Object.keys(combinedAnswers).length} total)`);
         
         if (allAnswersToSubmit.length > 0) {
           // Submit all valid answers at once
