@@ -160,7 +160,6 @@ api.interceptors.response.use(
 
         // You might want to trigger a navigation to login screen here
         // For now, we'll just log the error and reject the promise
-        console.error("Token refresh failed:", refreshError);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
