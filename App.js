@@ -17,6 +17,7 @@ import LoginScreen from "./screens/LoginScreen";
 import OnBoardingNavigator from "./navigation/OnBoardingNavigator";
 import CreateApartmentNavigator from "./navigation/CreateApartmentNavigator";
 import FilterScreenPage from "./screens/FilterScreenPage";
+import ForgotPasswordNavigation from "./navigation/ForgotPasswordNavigation";
 import { PreferencesPayloadProvider } from "./context/PreferencesPayloadContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AppartnersLoader from "./components/general/ApartnersLoader";
@@ -74,6 +75,7 @@ function MainNavigator() {
             <>
               <Stack.Screen name="Login" component={LoginScreen} />
               <Stack.Screen name="OnBoarding" component={OnBoardingNavigator} />
+              <Stack.Screen name="ForgotPassword" component={ForgotPasswordNavigation} />
             </>
           ) : (
             // App screens
