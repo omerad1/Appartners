@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   Text as RNText,
-  ActivityIndicator,
 } from "react-native";
 import { Avatar, Text, Badge, IconButton } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,7 +18,7 @@ import { registerSocketMessageHandler, isSocketConnected } from "../../api/socke
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { deleteChatRoom } from "../../api/chat";
 import ModalApartmentDisplayer from "../../components/apartmentsComp/ModalApartmentDisplayer";
-
+import { ChatSkeletonList } from "../../components/skeletons/ChatSkeleton";
 
 const AllChatsScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -244,14 +243,13 @@ const AllChatsScreen = () => {
                 </Badge>
               </View>
             {isLoading ? (
-              <View style={styles.emptyStateContainer}>
-                  <ActivityIndicator 
-                    size="large" 
-                    color="#8B4513" 
-                    style={styles.loadingSpinner}
-                  />
-                <Text style={styles.emptyTitle}>Loading chats...</Text>
-              </View>
+              <ScrollView 
+                style={styles.scrollView}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+              >
+                <ChatSkeletonList count={4} />
+              </ScrollView>
             ) : messages.length === 0 ? (
               <View style={styles.emptyStateContainer}>
                 <LinearGradient
@@ -540,11 +538,11 @@ const styles = StyleSheet.create({
     marginVertical: 3,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#D4AF37',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#8B4513',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   lastChatItem: {
     marginBottom: 8,
@@ -669,8 +667,4 @@ const styles = StyleSheet.create({
     padding: 0,
     backgroundColor: 'transparent',
   },
-  loadingSpinner: {
-    transform: [{ scale: 1.5 }],
-    marginBottom: 7
-  }
 });
