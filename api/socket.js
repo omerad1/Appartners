@@ -34,7 +34,7 @@ export const initializeSocket = async (userId) => {
     const token = await getTokens();
     
     if (!token) {
-      console.error('No auth token available for socket connection');
+      console.log('No auth token available for socket connection');
       return null;
     }
     
@@ -45,7 +45,7 @@ export const initializeSocket = async (userId) => {
     
     // Check if userId is provided
     if (!userId) {
-      console.error('No user ID provided for socket connection');
+      console.log('No user ID provided for socket connection');
       return null;
     }
     
@@ -74,7 +74,7 @@ export const initializeSocket = async (userId) => {
     };
     
     socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.log('WebSocket error:', error);
     };
     
     // Set up message handlers
@@ -149,7 +149,7 @@ export const initializeSocket = async (userId) => {
             }
         }
       } catch (e) {
-        console.error('Error processing WebSocket message:', e, 'Raw message:', event.data);
+        console.log('Error processing WebSocket message:', e, 'Raw message:', event.data);
       }
     };
     
@@ -158,7 +158,7 @@ export const initializeSocket = async (userId) => {
     
     return socket;
   } catch (error) {
-    console.error('Error initializing socket:', error);
+    console.log('Error initializing socket:', error);
     return null;
   }
 };
@@ -192,7 +192,7 @@ export const disconnectSocket = () => {
 // Initialize a socket connection for a specific chat room
 export const initializeChatSocket = async (roomId) => {
   if (!roomId) {
-    console.error('No room ID provided for chat socket connection');
+    console.log('No room ID provided for chat socket connection');
     return null;
   }
   
@@ -206,7 +206,7 @@ export const initializeChatSocket = async (roomId) => {
     const token = await getTokens();
     
     if (!token) {
-      console.error('No auth token available for chat socket connection');
+      console.log('No auth token available for chat socket connection');
       return null;
     }
     
@@ -239,7 +239,7 @@ export const initializeChatSocket = async (roomId) => {
     };
     
     socket.onerror = (error) => {
-      console.error('Chat WebSocket error:', error);
+      console.log('Chat WebSocket error:', error);
     };
     
     // Set up message handlers for this specific chat room
@@ -278,13 +278,13 @@ export const initializeChatSocket = async (roomId) => {
           }
         }
       } catch (e) {
-        console.error('Error processing chat WebSocket message:', e, 'Raw message:', event.data);
+        console.log('Error processing chat WebSocket message:', e, 'Raw message:', event.data);
       }
     };
     
     return socket;
   } catch (error) {
-    console.error('Error initializing chat socket:', error);
+    console.log('Error initializing chat socket:', error);
     return null;
   }
 };

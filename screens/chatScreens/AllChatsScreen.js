@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   Text as RNText,
+  ActivityIndicator,
 } from "react-native";
 import { Avatar, Text, Badge, IconButton } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,11 +17,13 @@ import {getUserChatRooms} from "../../api/chat";
 import { useSelector } from "react-redux";
 import { registerSocketMessageHandler, isSocketConnected } from "../../api/socket";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { deleteChatRoom } from "../../api/chat";
 import ModalApartmentDisplayer from "../../components/apartmentsComp/ModalApartmentDisplayer";
 
 
 const AllChatsScreen = () => {
   const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedApartment, setSelectedApartment] = useState(null);
   const [apartmentModalVisible, setApartmentModalVisible] = useState(false);
   const currentUser = useSelector(state => state.user.currentUser);
@@ -41,8 +44,10 @@ const AllChatsScreen = () => {
         }
         return prevMessages; // No update needed
       });
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching chat rooms:", error);
+      setIsLoading(false);
     }
   }, []);
   useEffect(() => {
@@ -52,6 +57,7 @@ const AllChatsScreen = () => {
   useFocusEffect(
     useCallback(() => {
       console.log('AllChatsScreen focused - refreshing chat list');
+      setIsLoading(true);
       fetchChatRooms();
       
       return () => {
@@ -157,10 +163,15 @@ const AllChatsScreen = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleDelete = (id) => {
-    setMessages((prevMessages) =>
-      prevMessages.filter((message) => message.id !== id)
-    );
+  const handleDelete = async (id) => {
+    try {
+      await deleteChatRoom(id);
+      // Fetch updated chat rooms after successful deletion
+      fetchChatRooms();
+    } catch (error) {
+      console.log('Error deleting chat room:', error);
+      Alert.alert('Error', 'Failed to delete chat room. Please try again.');
+    }
   };
 
   const onLongPressChat = (id, name) => {
@@ -232,7 +243,16 @@ const AllChatsScreen = () => {
                 </Text>
                 </Badge>
               </View>
-            {messages.length === 0 ? (
+            {isLoading ? (
+              <View style={styles.emptyStateContainer}>
+                  <ActivityIndicator 
+                    size="large" 
+                    color="#8B4513" 
+                    style={styles.loadingSpinner}
+                  />
+                <Text style={styles.emptyTitle}>Loading chats...</Text>
+              </View>
+            ) : messages.length === 0 ? (
               <View style={styles.emptyStateContainer}>
                 <LinearGradient
                   colors={['rgba(255, 223, 110, 0.9)', 'rgba(255, 193, 50, 0.8)']}
@@ -649,4 +669,8 @@ const styles = StyleSheet.create({
     padding: 0,
     backgroundColor: 'transparent',
   },
+  loadingSpinner: {
+    transform: [{ scale: 1.5 }],
+    marginBottom: 7
+  }
 });
