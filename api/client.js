@@ -7,7 +7,7 @@ const API_BASE_URL = "http://10.0.0.3:8000/";
 const API_BASE_URL_Production =
   "https://appartners-backend-production.up.railway.app";
 
-const api_base_tom_comp ="https://b6af-84-229-216-70.ngrok-free.app";
+const api_base_tom_comp ="https://a9aa-2a06-c701-97c3-dc00-25f5-7733-7de6-146b.ngrok-free.app";
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -15,7 +15,7 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: API_BASE_URL_Production,
+  baseURL: api_base_tom_comp,
   timeout: 30000, // 30 seconds timeout
   headers: {
     "Content-Type": "application/json",

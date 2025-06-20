@@ -17,6 +17,7 @@ import { fetchUserPreferences } from "../store/redux/userThunks";
 import SwipeScreen from "./SwipeScreen";
 import { LinearGradient } from "expo-linear-gradient";
 import { getApartments } from "../api/apartments/index";
+import FetchApartmentsAnimation from "../components/animations/FetchApartmentsAnimation";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -233,6 +234,7 @@ const SwipeScreenWrapper = () => {
 
   // Helper function to format apartment data for SwipeScreen
   const formatApartmentForSwipe = (apartment) => {
+    console.log("this is the apartment",apartment)
     return {
       id: apartment.id,
       address: apartment.street + (apartment.area ? ", " + apartment.area : ""),
@@ -243,6 +245,7 @@ const SwipeScreenWrapper = () => {
       price: parseFloat(apartment.total_price) || 0,
       rooms: apartment.number_of_rooms || 0,
       availableRooms: apartment.number_of_available_rooms || 0,
+      compatibilityScore: apartment.compatibility_score,
     };
   };
 
@@ -291,12 +294,7 @@ const SwipeScreenWrapper = () => {
 
           {/* Main Content */}
           {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#ffffff" />
-              <Text style={styles.loadingText}>
-                Finding perfect apartments for you...
-              </Text>
-            </View>
+            <FetchApartmentsAnimation />
           ) : apartments.length === 0 ? (
             <View style={styles.messageContainer}>
               <Text style={styles.noApartmentsText}>
@@ -438,24 +436,6 @@ const styles = StyleSheet.create({
   },
   filterIconText: {
     fontSize: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    margin: 20,
-    borderRadius: 15,
-  },
-  loadingText: {
-    fontSize: 18,
-    color: "white",
-    marginTop: 15,
-    marginBottom: 20,
-  },
-  loadingEmoji: {
-    fontSize: 80,
-    marginTop: 20,
   },
   messageContainer: {
     flex: 1,

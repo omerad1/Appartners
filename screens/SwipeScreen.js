@@ -31,7 +31,6 @@ const defaultUserImage = require("../assets/placeholders/default-user-image.jpg"
 
 const SwipeScreen = (props) => {
   const { onSwipe, apartment } = props; // Prop to notify the parent of swipe action
-
   const {
     address,
     images,
@@ -41,13 +40,13 @@ const SwipeScreen = (props) => {
     rooms,
     availableRooms,
     entryDate,
+    compatibilityScore,
   } = apartment;
   const [loadingOwner, setLoadingOwner] = useState(false);
   // Inside your component
   const currentUser = useSelector((state) => state.user.currentUser);
   const position = useRef(new Animated.ValueXY()).current;
   const [currentSwipe, setCurrentSwipe] = useState(null); // 'like' or 'dislike' or null
-
   // Animation values for overlay effects
   const likeOpacity = useRef(new Animated.Value(0)).current;
   const dislikeOpacity = useRef(new Animated.Value(0)).current;
@@ -59,7 +58,6 @@ const SwipeScreen = (props) => {
   const [ownerLoaded, setOwnerLoaded] = useState(false);
   const [ownerData, setOwnerData] = useState(null);
   const [questionDrawerVisible, setQuestionDrawerVisible] = useState(false);
-  const compatibilityScore = Math.floor(Math.random() * 40) + 60; // Random score between 60-99%
 
 
   useEffect(() => {
@@ -103,7 +101,6 @@ const SwipeScreen = (props) => {
 
   // Reset animations when apartment changes
   useEffect(() => {
-    //console.log("🏠 Apartment changed:", apartment);
     likeOpacity.setValue(0);
     dislikeOpacity.setValue(0);
     scale.setValue(1);
