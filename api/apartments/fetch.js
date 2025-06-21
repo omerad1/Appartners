@@ -22,7 +22,8 @@ export const getApartments = async (filters = {}) => {
         ? await api.get(endpoints.apartments.getSwipes, { params: filters })
         : await api.get(endpoints.apartments.getSwipes);
       
-        console.log("this is the apps", res.data)
+      const apartmentIds = res.data.apartments.map((apt) => apt.id);
+      console.log("IDS: " ,apartmentIds);
       return res.data;
     } catch (err) {
       const message = err.response?.data?.detail || err.message;

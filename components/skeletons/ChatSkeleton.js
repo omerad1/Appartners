@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
   chatItem: {
     marginHorizontal: 12,
     marginVertical: 3,
+    paddingVertical:5,
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#8B4513',

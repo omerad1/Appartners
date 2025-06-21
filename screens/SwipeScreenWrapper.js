@@ -41,6 +41,7 @@ const SwipeScreenWrapper = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [allApartmentsLoaded, setAllApartmentsLoaded] = useState(false);
   const [filterPreferences, setFilterPreferences] = useState({});
+  const [swipedApartmentIds, setSwipedApartmentIds] = useState(new Set()); // Track swiped apartments
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -100,13 +101,14 @@ const SwipeScreenWrapper = () => {
     }
   }, [swipeAction]);
 
-  // Watch for when the index reaches 10 to load more apartments
+  // Watch for when we're running low on apartments to load more
   useEffect(() => {
-    if (currentIndex === 10 && !isLoadingMore && !allApartmentsLoaded) {
-      console.log("Loading more apartments at index 10");
+    const remainingApartments = apartments.length - currentIndex;
+    if (remainingApartments <= 3 && !isLoadingMore && !allApartmentsLoaded) {
+      console.log(`Only ${remainingApartments} apartments remaining, loading more...`);
       loadMoreApartments();
     }
-  }, [currentIndex]);
+  }, [currentIndex, apartments.length]);
 
   const fetchApartments = async (filters = {}) => {
     setLoading(true);
@@ -120,15 +122,22 @@ const SwipeScreenWrapper = () => {
       const data = await getApartments(preferencesToUse);
       // Check if we received apartments or an empty array
       if (data && data.apartments && data.apartments.length > 0) {
-        setApartments(data.apartments);
-        setAllApartmentsLoaded(false);
+        // Filter out apartments that have already been swiped
+        const filteredApartments = data.apartments.filter(
+          apartment => !swipedApartmentIds.has(apartment.id)
+        );
+        
+        setApartments(filteredApartments);
+        setAllApartmentsLoaded(filteredApartments.length === 0);
+        setCurrentIndex(0); // Reset to the first apartment
       } else {
+        setApartments([]);
         setAllApartmentsLoaded(true);
+        setCurrentIndex(0);
       }
-
-      setCurrentIndex(0); // Reset to the first apartment
     } catch (error) {
       console.error("Failed to fetch apartments:", error);
+      setApartments([]);
     } finally {
       setLoading(false);
     }
@@ -137,20 +146,34 @@ const SwipeScreenWrapper = () => {
   const loadMoreApartments = async () => {
     if (isLoadingMore || allApartmentsLoaded) return;
 
+    console.log("Loading more apartments...");
     setIsLoadingMore(true);
     try {
       // Use user preferences from Redux if available, otherwise use local state
       const preferencesToUse = userPreferences || filterPreferences || {};
       const data = await getApartments(preferencesToUse);
-      console.log("🔄 Loading more apartments at index:", currentIndex);
-      setCurrentIndex(0);
+      
       if (data && data.apartments && data.apartments.length > 0) {
-        setApartments((prevApartments) => [
-          ...prevApartments,
-          ...data.apartments,
-        ]);
-        setAllApartmentsLoaded(false);
+        // Filter out apartments that have already been swiped AND apartments already in our current list
+        const currentApartmentIds = new Set(apartments.map(apt => apt.id));
+        const newApartments = data.apartments.filter(
+          apartment => !swipedApartmentIds.has(apartment.id) && !currentApartmentIds.has(apartment.id)
+        );
+        
+        console.log(`Fetched ${data.apartments.length} apartments, ${newApartments.length} are new and unviewed`);
+        
+        if (newApartments.length > 0) {
+          setApartments((prevApartments) => [
+            ...prevApartments,
+            ...newApartments,
+          ]);
+          setAllApartmentsLoaded(false);
+        } else {
+          console.log("No new apartments found, marking as all loaded");
+          setAllApartmentsLoaded(true);
+        }
       } else {
+        console.log("No apartments returned from API, marking as all loaded");
         setAllApartmentsLoaded(true);
       }
     } catch (error) {
@@ -182,17 +205,36 @@ const SwipeScreenWrapper = () => {
       initialPreferences: userPreferences || filterPreferences || {},
       onApply: (newPreferences) => {
         setFilterPreferences(newPreferences);
+        // Reset swiped apartments when applying new filters
+        setSwipedApartmentIds(new Set());
         fetchApartments(newPreferences);
       },
     });
   };
 
   const handleSwipe = (direction) => {
-    console.log(direction === "like" ? "Liked" : "Disliked");
-
+    // Get the current apartment being swiped
+    const currentApartment = apartments[currentIndex];
+    
+    if (!currentApartment) {
+      console.log("No apartment to swipe");
+      return;
+    }
+  
+    // Add the apartment ID to the swiped set
+    setSwipedApartmentIds((prev) => {
+      const newSet = new Set([...prev, currentApartment.id]);
+      console.log(
+        `${direction === "like" ? "Liked" : "Disliked"} apartment ${
+          currentApartment.id
+        }. Total swiped: ${newSet.size}`
+      );
+      return newSet;
+    });
+  
     // Set swipe action for animation
     setSwipeAction(direction);
-
+  
     // Animate background color flash
     Animated.sequence([
       Animated.timing(backgroundColorAnim, {
@@ -206,35 +248,37 @@ const SwipeScreenWrapper = () => {
         useNativeDriver: false,
       }),
     ]).start();
-
+  
     // Fade out current apartment
     Animated.timing(fadeAnim, {
       toValue: 0,
-      duration: 150,
+      duration: 200,
       useNativeDriver: true,
     }).start(() => {
-      // Move to next apartment
-      if (currentIndex < apartments.length - 1) {
-        setCurrentIndex((prevIndex) => prevIndex + 1);
-      } else {
-        console.log("No more apartments to display.");
-        setCurrentIndex(apartments.length); // Trigger fallback UI
-      }
-
-      // Fade in next apartment
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      // Move to next apartment - use functional update to ensure we get the latest state
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = prevIndex + 1;
+        console.log(`Moving from index ${prevIndex} to ${nextIndex}. Total apartments: ${apartments.length}`);
+        
+        // Immediately start fade in animation after state update
+        requestAnimationFrame(() => {
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }).start();
+        });
+        
+        return nextIndex;
+      });
     });
   };
+
   // Replace with your specified icons
   const logoSource = require("../assets/icons/logo-close.png");
 
   // Helper function to format apartment data for SwipeScreen
   const formatApartmentForSwipe = (apartment) => {
-    console.log("this is the apartment",apartment)
     return {
       id: apartment.id,
       address: apartment.street + (apartment.area ? ", " + apartment.area : ""),
@@ -302,7 +346,10 @@ const SwipeScreenWrapper = () => {
               </Text>
               <TouchableOpacity
                 style={styles.refreshButton}
-                onPress={() => fetchApartments()}
+                onPress={() => {
+                  setSwipedApartmentIds(new Set());
+                  fetchApartments();
+                }}
               >
                 <Text style={styles.refreshButtonText}>Refresh</Text>
               </TouchableOpacity>
@@ -314,7 +361,7 @@ const SwipeScreenWrapper = () => {
               {currentIndex < apartments.length ? (
                 <View style={styles.cardWrapper}>
                   <SwipeScreen
-                    key={currentIndex}
+                    key={`apartment-${apartments[currentIndex].id}-${currentIndex}`}
                     apartment={formatApartmentForSwipe(
                       apartments[currentIndex]
                     )}
@@ -341,7 +388,11 @@ const SwipeScreenWrapper = () => {
                   </Text>
                   <TouchableOpacity
                     style={styles.refreshButton}
-                    onPress={() => fetchApartments()}
+                    onPress={() => {
+                      setSwipedApartmentIds(new Set());
+                      setCurrentIndex(0);
+                      fetchApartments();
+                    }}
                   >
                     <Text style={styles.refreshButtonText}>Start Over</Text>
                   </TouchableOpacity>
