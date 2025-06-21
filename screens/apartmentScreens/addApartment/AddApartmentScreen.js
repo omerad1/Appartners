@@ -16,6 +16,7 @@ import AddApartmentLayout from "../../../components/layouts/AddApartmentLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import BackgroundImage from "../../../components/layouts/BackgroundImage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { format } from "date-fns";
 
 import { Card } from "react-native-paper";
 import CitySearchInput from "../../../components/apartmentsComp/CitySearchInput";
@@ -143,7 +144,7 @@ const AddApartmentScreen = () => {
   const handleCityChange = (city) => {
     console.log("City selection changed:", city);
     setSelectedCity(city);
-  
+
     if (city) {
       setFormData((prev) => ({ ...prev, city: city.id }));
       // Reset area when city changes
@@ -181,7 +182,7 @@ const AddApartmentScreen = () => {
       const dataToSave = {
         ...formData,
         cityObject: selectedCity, // Save the full city object
-        entryDayStr: entryDay.format("YYYY-MM-DD"), // Save as string
+        entryDayStr: format(entryDay, "yyyy-MM-dd"),
       };
 
       await AsyncStorage.setItem(
@@ -197,7 +198,7 @@ const AddApartmentScreen = () => {
     // Store the form data in global state or pass it as a parameter
     navigation.navigate("PropertyTagsScreen", {
       formData,
-      entryDay: entryDay.format("YYYY-MM-DD"),
+      entryDay: format(entryDay, "yyyy-MM-dd"),
       isEditing,
       apartmentId: isEditing ? editingApartment.id : null,
       apartment: editingApartment,
@@ -211,9 +212,10 @@ const AddApartmentScreen = () => {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}
-                showsVerticalScrollIndicator={false}
->
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
           <AddApartmentLayout
             title={isEditing ? "Edit Apartment" : "Post An Apartment"}
             direction="PropertyTagsScreen"
