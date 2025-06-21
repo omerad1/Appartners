@@ -55,7 +55,7 @@ export const login = async (email, password) => {
     return res.data;
   } catch (err) {
     // Log the full error object for debugging
-    console.error("Login error - full error:", err);
+    console.log("Login error - full error:", err);
 
     // Extract detailed error information
     const errorDetails = {
@@ -66,7 +66,7 @@ export const login = async (email, password) => {
       headers: err.response?.headers,
     };
 
-    console.error(
+    console.log(
       "Login error - details:",
       JSON.stringify(errorDetails, null, 2)
     );

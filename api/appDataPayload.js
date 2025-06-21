@@ -11,7 +11,7 @@ export const getPreferencesPayload = async () => {
     return res.data;
   } catch (err) {
     const message = err.response?.data?.detail || err.message;
-    console.error("❌ Failed to fetch preferences payload", message);
+    console.log("❌ Failed to fetch preferences payload", message);
     throw new Error(message);
   }
 };
@@ -23,7 +23,7 @@ export const getQuestions = async () => {
     return res.data;
   } catch (err) {
     const message = err.response?.data?.detail || err.message;
-    console.error("❌ Failed to fetch preferences payload", message);
+    console.log("❌ Failed to fetch preferences payload", message);
     throw new Error(message);
   }
 }

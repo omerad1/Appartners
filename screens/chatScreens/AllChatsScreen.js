@@ -16,11 +16,13 @@ import {getUserChatRooms} from "../../api/chat";
 import { useSelector } from "react-redux";
 import { registerSocketMessageHandler, isSocketConnected } from "../../api/socket";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { deleteChatRoom } from "../../api/chat";
 import ModalApartmentDisplayer from "../../components/apartmentsComp/ModalApartmentDisplayer";
-
+import { ChatSkeletonList } from "../../components/skeletons/ChatSkeleton";
 
 const AllChatsScreen = () => {
   const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedApartment, setSelectedApartment] = useState(null);
   const [apartmentModalVisible, setApartmentModalVisible] = useState(false);
   const currentUser = useSelector(state => state.user.currentUser);
@@ -41,8 +43,10 @@ const AllChatsScreen = () => {
         }
         return prevMessages; // No update needed
       });
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching chat rooms:", error);
+      setIsLoading(false);
     }
   }, []);
   useEffect(() => {
@@ -52,6 +56,7 @@ const AllChatsScreen = () => {
   useFocusEffect(
     useCallback(() => {
       console.log('AllChatsScreen focused - refreshing chat list');
+      setIsLoading(true);
       fetchChatRooms();
       
       return () => {
@@ -157,10 +162,15 @@ const AllChatsScreen = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleDelete = (id) => {
-    setMessages((prevMessages) =>
-      prevMessages.filter((message) => message.id !== id)
-    );
+  const handleDelete = async (id) => {
+    try {
+      await deleteChatRoom(id);
+      // Fetch updated chat rooms after successful deletion
+      fetchChatRooms();
+    } catch (error) {
+      console.log('Error deleting chat room:', error);
+      Alert.alert('Error', 'Failed to delete chat room. Please try again.');
+    }
   };
 
   const onLongPressChat = (id, name) => {
@@ -232,7 +242,15 @@ const AllChatsScreen = () => {
                 </Text>
                 </Badge>
               </View>
-            {messages.length === 0 ? (
+            {isLoading ? (
+              <ScrollView 
+                style={styles.scrollView}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+              >
+                <ChatSkeletonList count={4} />
+              </ScrollView>
+            ) : messages.length === 0 ? (
               <View style={styles.emptyStateContainer}>
                 <LinearGradient
                   colors={['rgba(255, 223, 110, 0.9)', 'rgba(255, 193, 50, 0.8)']}
@@ -520,11 +538,11 @@ const styles = StyleSheet.create({
     marginVertical: 3,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#D4AF37',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#8B4513',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   lastChatItem: {
     marginBottom: 8,

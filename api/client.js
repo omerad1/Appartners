@@ -8,7 +8,7 @@ const API_BASE_URL_Production =
   "https://appartners-backend-production.up.railway.app";
 
 const api_base_tom_comp =
-  "https://a9aa-2a06-c701-97c3-dc00-25f5-7733-7de6-146b.ngrok-free.app/";
+  "https://a9aa-2a06-c701-97c3-dc00-25f5-7733-7de6-146b.ngrok-free.app";
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -16,6 +16,7 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 
 // Create an axios instance with default config
 const api = axios.create({
+  baseURL: api_base_tom_comp,
   baseURL: api_base_tom_comp,
   timeout: 30000, // 30 seconds timeout
   headers: {
@@ -157,7 +158,6 @@ api.interceptors.response.use(
 
         // You might want to trigger a navigation to login screen here
         // For now, we'll just log the error and reject the promise
-        console.error("Token refresh failed:", refreshError);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

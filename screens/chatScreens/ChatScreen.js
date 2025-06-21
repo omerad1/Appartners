@@ -33,7 +33,6 @@ const ChatScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { roomId, otherParticipant: initialOtherParticipant, roomDetails: initialRoomDetails, match: compatibility_score  } = route.params || {};
-  // Debug log to check what's being passed in route params
   const currentUser = useSelector((state) => state.user.currentUser);
   // State for UserDisplayerModal
   const [userModalVisible, setUserModalVisible] = useState(false);
@@ -176,34 +175,66 @@ const ChatScreen = () => {
         socket.registerMessageHandler('chat_message', (data) => {
           const messagePayload = data.message || data;
           const messageId = messagePayload.id;
+          const clientMessageId = messagePayload._clientMessageId;
+          
+          // Safety check: ensure we have valid message data
+          if (!messagePayload || !messageId) {
+            console.warn('Received invalid message data:', messagePayload);
+            return;
+          }
+
           setMessages((prevMessages) => {
-            // Find any temporary message that matches this confirmed message
+            // First, try to find a temporary message with matching client ID
+            if (clientMessageId) {
+              const tempMessageIndex = prevMessages.findIndex(
+                (m) => m._clientMessageId === clientMessageId && m.isLocalSending
+              );
+              
+              if (tempMessageIndex >= 0) {
+                const originalMessage = prevMessages[tempMessageIndex];
+                const updatedMessages = [...prevMessages];
+                const updatedMessage = {
+                  ...originalMessage, // Keep original properties
+                  ...messagePayload,  // Override with server data
+                  id: messagePayload.id, // Use server ID
+                  isLocalSending: false, // No longer sending
+                  _clientMessageId: clientMessageId,
+                };
+                
+                updatedMessages[tempMessageIndex] = updatedMessage;
+                return updatedMessages;
+              }
+            }
+            
+            // Check if this message already exists (avoid duplicates)
+            const existingMessage = prevMessages.find((m) => m.id === messageId);
+            if (existingMessage) {
+              return prevMessages;
+            }
+            
+            // Try to match by content and sender for messages without client ID
             const tempMessage = prevMessages.find(
-              (m) => m.isLocalSending && m.content === messagePayload.content
+              (m) => m.isLocalSending && 
+                     m.content === messagePayload.content && 
+                     m.sender?.id === currentUser?.id
             );
 
             if (tempMessage) {
-              console.log('Updating temp message with confirmed message');
               return prevMessages.map((m) =>
                 m.id === tempMessage.id
                   ? {
-                      ...m, // Keep existing message properties
-                      ...messagePayload, // Add server properties
+                      ...m, // Keep original properties
+                      ...messagePayload, // Override with server data
                       id: messagePayload.id, // Use server ID
-                      isLocalSending: false,
-                      error: undefined,
-                      sender: messagePayload.sender || m.sender,
+                      isLocalSending: false, // No longer sending
+                      _clientMessageId: tempMessage._clientMessageId,
                     }
                   : m
               );
             }
-
-            if (!prevMessages.find((m) => m.id === messageId)) {
-              console.log('Adding new message from socket');
-              return [...prevMessages, messagePayload];
-            }
-
-            return prevMessages;
+            
+            // If no temp message found, add as new message
+            return [...prevMessages, messagePayload];
           });
         });
 
@@ -248,7 +279,7 @@ const ChatScreen = () => {
         disconnectChatSocket(roomId);
       }
     };
-  }, [roomId, currentUser?.id, messages, markMessagesAsReadViaSocket]);
+  }, [roomId, currentUser?.id, markMessagesAsReadViaSocket]);
   
 
   // --- Fetching and Socket Logic ---
@@ -294,21 +325,19 @@ const ChatScreen = () => {
       setIsLoading(false);
     };
     loadInitial();
-  }, [fetchMessages, messages.length]);
+  }, [fetchMessages]);
   
 
   // Scroll to bottom when messages change or when loading completes
   useEffect(() => {
-    if (flatListRef.current) {
-      // Always scroll to bottom without animation when messages change
+    if (flatListRef.current && messages.length > 0) {
       flatListRef.current.scrollToEnd({ animated: false });
     }
-  }, [messages]);
+  }, [messages.length]); // Only depend on message count, not the entire messages array
   
   // Also scroll to bottom when loading completes
   useEffect(() => {
     if (!isLoading && messages.length > 0 && flatListRef.current) {
-      // Add a small delay to ensure rendering is complete
       setTimeout(() => {
         flatListRef.current.scrollToEnd({ animated: false });
       }, 0);
@@ -336,8 +365,8 @@ const ChatScreen = () => {
         
         if (unreadMessageIds.length > 0) {
           try {
-            // First try the API method
-            await markMessagesAsRead(roomId, unreadMessageIds);
+            // TODO: Fix the API endpoint - currently returns 404
+            // await markMessagesAsRead(roomId, unreadMessageIds);
             
             // Update local state to reflect read status
             setMessages(prevMessages => 
@@ -348,7 +377,7 @@ const ChatScreen = () => {
               )
             );
             
-            // Also notify via WebSocket if available
+            // Notify via WebSocket
             markMessagesAsReadViaSocket(unreadMessageIds);
           } catch (error) {
             console.error('Error marking messages as read:', error);
@@ -369,7 +398,6 @@ const ChatScreen = () => {
             user_id: currentUser?.id,
             room_id: roomId
           }));
-          console.log('Sent user.entered notification');
         }
       };
       
@@ -384,141 +412,112 @@ const ChatScreen = () => {
       }
       
       return () => {};
-    }, [fetchMessages, roomId, currentUser?.id, messages, markMessagesAsReadViaSocket])
+    }, [fetchMessages, roomId, currentUser?.id, markMessagesAsReadViaSocket])
   );
 
   const handleSendMessage = async () => {
     if (inputText.trim() === '' || !currentUser?.id) return;
 
-    const tempId = `temp-${Date.now()}`;
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
     const messageToSend = inputText;
     
     const optimisticMessage = {
       id: tempId,
       content: messageToSend,
-      sender: {
+      sender: { 
         id: currentUser.id,
-        user_id: currentUser.id, 
-        first_name: currentUser.first_name,
-        last_name: currentUser.last_name,
-        photo_url: currentUser.photo_url,
-        email: currentUser.email,
-        phone_number: currentUser.phone_number
+        first_name: currentUser.first_name || 'You',
+        photo_url: currentUser.photo_url
       },
-      is_sender: true, // Add is_sender flag to match server format
-      room: roomId,
+      is_sender: true, // Mark as sent by current user
       timestamp: new Date().toISOString(),
-      isLocalSending: true, // Changed from is_sending to avoid collision with server properties
-      _clientMessageId: tempId, // Add a client-side ID to help with matching later
+      isLocalSending: true,
+      _clientMessageId: tempId,
     };
 
-    // Add new message to the end of the array (for chronological order)
-    setMessages(prevMessages => [...prevMessages, optimisticMessage]);
+    setMessages(prevMessages => {
+      const newMessages = [...prevMessages, optimisticMessage];
+      return newMessages;
+    });
     setInputText('');
 
     // Try to send via WebSocket first
     const socket = getChatSocket(roomId);
-    let messageSentSuccessfully = false;
+    let messageSentViaWebSocket = false;
+    
     if (socket && socket.readyState === WebSocket.OPEN) {
       try {
         socket.send(JSON.stringify({
           type: 'chat_message',
           content: messageToSend,
+          _clientMessageId: tempId, // Send client ID to server for matching
         }));
-        console.log('Message sent via WebSocket');
-        messageSentSuccessfully = true;
-      
-        // Set a timeout to check if we received a WebSocket confirmation
-        setTimeout(async () => {
-          setMessages(prevMessages => {
-            const messageStillSending = prevMessages.some(m => m.id === tempId && m.isLocalSending);
-            
-            if (messageStillSending) {
-              console.log('No WebSocket confirmation received, using API fallback');
-              (async () => {
-                try {
-                  const sentMessageFromServer = await sendApiMessage(otherParticipant?.id, messageToSend);
-                  
-                  // Update the message without causing a flicker
-                  setMessages(prev => {
-                    return prev.map(m =>
-                      m.id === tempId ? { 
-                        ...m, // Keep existing message properties
-                        ...sentMessageFromServer, // Add server properties
-                        id: sentMessageFromServer.id, // Use server ID
-                        isLocalSending: false, 
-                        error: undefined,
-                        _clientMessageId: tempId // Keep the client ID for reference
-                      } : m
-                    );
-                  });
-                } catch (fallbackError) {
-                  console.error('Error sending message via API fallback:', fallbackError);
-                  setMessages(prev =>
-                    prev.map(m =>
-                      m.id === tempId ? { ...m, isLocalSending: false, error: true } : m
-                    )
-                  );
-                }
-              })();
-            }
-            
-            return prevMessages;
-          });
-        }, 5000); // Reduced timeout for faster fallback
+        messageSentViaWebSocket = true;
       } catch (socketError) {
-        console.error('Error sending via WebSocket:', socketError);
-        messageSentSuccessfully = false;
-      
-        // Attempt to reconnect the socket
-        try {
-          console.log('Attempting to reconnect socket...');
-          await disconnectChatSocket(roomId); // ensure clean reconnect
-          const newSocket = await initializeChatSocket(roomId);
-      
-          if (newSocket && newSocket.readyState === WebSocket.OPEN) {
-            console.log('Socket reconnected successfully');
-          } else {
-            console.warn('Socket reconnect failed or is not open');
-          }
-        } catch (reconnectError) {
-          console.error('Failed to reconnect socket:', reconnectError);
-        }
+        messageSentViaWebSocket = false;
       }
-
     }
 
     // If WebSocket failed or isn't available, use API immediately
-    if (!messageSentSuccessfully) {
+    if (!messageSentViaWebSocket) {
       try {
         const sentMessageFromServer = await sendApiMessage(otherParticipant?.id, messageToSend);
         
-        setMessages(prev => {
-          const messageExists = prev.some(m => m.id === tempId);
-          
-          if (messageExists) {
-            return prev.map(m =>
-              m.id === tempId ? { 
-                ...m, // Keep existing message properties
-                ...sentMessageFromServer, // Add server properties
-                id: sentMessageFromServer.id, // Use server ID
-                isLocalSending: false, 
-                error: undefined,
-                _clientMessageId: tempId // Keep the client ID for reference
-              } : m
-            );
-          }
-          
-          return prev;
-        });
+        // Update the optimistic message with server response
+        setMessages(prev => 
+          prev.map(m =>
+            m.id === tempId ? { 
+              ...m, // Keep original properties
+              ...sentMessageFromServer, // Override with server data
+              id: sentMessageFromServer.id, // Use server ID
+              isLocalSending: false, // No longer sending
+              _clientMessageId: tempId // Keep client ID for reference
+            } : m
+          )
+        );
       } catch (error) {
-        console.error('Error sending message via API:', error);
+        // Mark message as failed
         setMessages(prev =>
           prev.map(m =>
             m.id === tempId ? { ...m, isLocalSending: false, error: true } : m
           )
         );
       }
+    } else {
+      // Set a timeout for WebSocket confirmation fallback
+      setTimeout(() => {
+        setMessages(prevMessages => {
+          const messageStillSending = prevMessages.find(m => m.id === tempId && m.isLocalSending);
+          
+          if (messageStillSending) {
+            // Use API as fallback
+            sendApiMessage(otherParticipant?.id, messageToSend)
+              .then(sentMessageFromServer => {
+                setMessages(prev => 
+                  prev.map(m =>
+                    m.id === tempId && m.isLocalSending ? { 
+                      ...m, // Keep original properties
+                      ...sentMessageFromServer, // Override with server data
+                      id: sentMessageFromServer.id, // Use server ID
+                      isLocalSending: false, // No longer sending
+                      _clientMessageId: tempId,
+                    } : m
+                  )
+                );
+              })
+              .catch(fallbackError => {
+                console.error('API fallback failed:', fallbackError);
+                setMessages(prev =>
+                  prev.map(m =>
+                    m.id === tempId ? { ...m, isLocalSending: false, error: true } : m
+                  )
+                );
+              });
+          }
+          
+          return prevMessages;
+        });
+      }, 3000);
     }
   };
   const handleUnmatch = async () => {
@@ -529,7 +528,7 @@ const ChatScreen = () => {
       console.error('Error deleting chat room:', error);
     }
   }
-  const renderMessageItem = ({ item }) => {
+  const renderMessageItem = useCallback(({ item }) => {
     // Check both is_sender property and sender.id to determine if message is from current user
     const isCurrentUser = item.is_sender || item.sender?.id === currentUser?.id || item.sender?.user_id === currentUser?.id;
     
@@ -579,7 +578,7 @@ const ChatScreen = () => {
         </View>
       </View>
     );
-  };
+  }, [currentUser]);
 
   if (isLoading && messages.length === 0) {
     return (
@@ -626,7 +625,7 @@ const ChatScreen = () => {
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) => item.id ? item.id.toString() : item._clientMessageId || `temp-${index}`}
           renderItem={renderMessageItem}
           contentContainerStyle={[styles.flatlistContentContainer, { flexGrow: 1, justifyContent: 'flex-end' }]}
           ListEmptyComponent={

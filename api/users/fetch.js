@@ -34,11 +34,6 @@ export const fetchUserData = async (forceRefresh = false) => {
     // Make the API call to get user profile
     const response = await api.get(endpoints.users.getMe);
 
-    // Log the complete user data from the response
-    console.log(
-      "User data from /users/me endpoint:",
-      JSON.stringify(response.data, null, 2)
-    );
 
     // Check if the response contains user data before saving
     if (response.data) {

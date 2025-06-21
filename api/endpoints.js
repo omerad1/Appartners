@@ -14,6 +14,9 @@ const endpoints = {
     validateUnique: "validate-unique/",
     refreshToken: "token/refresh/",
     logout: "logout/",
+    sendOTP: "otp/send/",
+    verifyOTP: "otp/verify/",
+    forgotPassword: "reset-password/"
   }),
 
   //apartments related endpoints

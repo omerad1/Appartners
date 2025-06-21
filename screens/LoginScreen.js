@@ -75,7 +75,7 @@ const LoginScreen = () => {
 
       }
     } catch (error) {
-      console.error("Login failed:", error);
+      console.log("Login failed:", error);
       Alert.alert(
         "Login Failed",
         error.response?.data?.error ||
@@ -134,7 +134,7 @@ const LoginScreen = () => {
           </TouchableOpacity>
 
           {/* Forgot Password */}
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
             <Text style={styles.forgotPasswordText}>Forgot password?</Text>
           </TouchableOpacity>
 
