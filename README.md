@@ -82,21 +82,25 @@ appartners/
 └── store/                # Redux store configuration
 ```
 
-## 🔒 Environment Variables
+## 🚀 Production
 
-Create a `.env` file in the root directory with the following variables:
+The backend of Appartners is currently deployed on [Railway](https://railway.app), providing a reliable and scalable cloud infrastructure for API services, authentication, and real-time communication.
 
-```
-API_URL=your_api_url_here
-```
+This setup allows users to interact with the app seamlessly, including account management, swiping, messaging, and apartment listings—all backed by live production APIs.
 
-## 👥 Contributing
+We chose Railway for its ease of deployment, CI/CD support, and excellent developer experience, enabling us to focus more on building features and less on infrastructure.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+
+## 👥 Our Work
+
+This project was developed by a team of four students as part of our final year capstone project in Software and Information Systems Engineering at Ben-Gurion University.
+
+We aimed to solve the real-world challenge of finding compatible roommates and apartments in a user-friendly, modern way. The entire system—from UI/UX design to backend integration and real-time communication—was built from scratch using industry-standard tools and best practices.
+
+Throughout the project, we applied agile development methodologies, conducted user testing, and iteratively improved the platform to deliver a smooth and intuitive user experience.
+
+This app showcases our full-stack capabilities, teamwork, and passion for building impactful digital solutions.
+
 
 ## 📄 License
 

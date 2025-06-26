@@ -3,12 +3,11 @@ import * as SecureStore from "expo-secure-store";
 import endpoints from "./endpoints";
 // Base URL for the backend
 // Change this to match your backend URL and port
-const API_BASE_URL = "http://10.0.0.3:8000/";
+
 const API_BASE_URL_Production =
   "https://appartners-backend-production.up.railway.app";
 
-const api_base_tom_comp =
-  "https://b3c4-2a06-c701-97c3-dc00-9997-43dd-32e7-f528.ngrok-free.app";
+
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = "accessToken";
