@@ -1,6 +1,6 @@
 # Appartners
 
-![Appartners Logo](./assets/logo.png)
+![Appartners Logo](./assets/icons/logo.png)
 
 ## 🏠 About
 
@@ -31,10 +31,10 @@ Appartners is a modern mobile application designed to revolutionize the apartmen
 ## 📱 Screenshots
 
 <div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; justify-content: center;">
-  <img src="./assets/screenshots/login.jpeg" width="200" alt="Login Screen">
-  <img src="./assets/screenshots/swipeScreen.jpeg" width="200" alt="Swipe Screen">
-  <img src="./assets/screenshots/about.jpeg" width="200" alt="Profile Screen">
-  <img src="./assets/screenshots/chat.jpeg" width="200" alt="Chat Screen">
+  <img src="./assets/screenshots/login.jpg" width="200" alt="Login Screen">
+  <img src="./assets/screenshots/swipeScreen.jpg" width="200" alt="Swipe Screen">
+  <img src="./assets/screenshots/about.jpg" width="200" alt="Profile Screen">
+  <img src="./assets/screenshots/chat.jpg" width="200" alt="Chat Screen">
 </div>
 
 ## 🚀 Getting Started
